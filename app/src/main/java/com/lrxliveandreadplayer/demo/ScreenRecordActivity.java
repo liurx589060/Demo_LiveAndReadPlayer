@@ -150,8 +150,8 @@ public class ScreenRecordActivity extends Activity implements View.OnClickListen
         RecorderBean bean = new RecorderBean();
         bean.setRtmpAddr(rtmpAddr);
         bean.setBitrate(5000000);
-        bean.setWidth(1920);
-        bean.setHeight(1080);
+        bean.setWidth(1080);
+        bean.setHeight(1920);
 
         ScreenRecordOpt.getInstance().startScreenRecord(bean, mediaProjection, new RtmpStreamingSender.IRtmpSendCallBack() {
             @Override

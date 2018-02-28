@@ -43,9 +43,11 @@ public class IjkLivePlayer extends Activity {
         player = new PlayerView(this, rootView)
                 .setTitle("收看直播")
                 .setScaleType(PlayStateParams.fitparent)
+//                .forbidTouch(false)
+//                .hideSteam(true)
+//                .hideCenterPlayer(true)
                 .forbidTouch(false)
-                .hideSteam(true)
-                .hideCenterPlayer(true)
+                .hideMenu(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {
@@ -57,7 +59,7 @@ public class IjkLivePlayer extends Activity {
                     }
                 });
 
-        String sourceUrl = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        String sourceUrl = "rtmp://10.10.15.19/live/stream";
         player.setPlaySource(sourceUrl)
                 .setPlayerBackListener(new OnPlayerBackListener() {
                     @Override

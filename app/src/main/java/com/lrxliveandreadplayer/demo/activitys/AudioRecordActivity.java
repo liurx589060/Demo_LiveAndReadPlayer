@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lrxliveandreadplayer.demo;
+package com.lrxliveandreadplayer.demo.activitys;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.lrxliveandreadplayer.demo.R;
 
 import net.yrom.screenrecorder.operate.AudioRecordOpt;
 import net.yrom.screenrecorder.operate.RecorderBean;

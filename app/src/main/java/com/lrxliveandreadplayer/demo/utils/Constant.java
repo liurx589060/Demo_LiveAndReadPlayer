@@ -1,4 +1,4 @@
-package com.lrxliveandreadplayer.demo;
+package com.lrxliveandreadplayer.demo.utils;
 
 /**
  * Created by daven.liu on 2018/2/28 0028.
@@ -6,4 +6,5 @@ package com.lrxliveandreadplayer.demo;
 
 public class Constant {
     public static String thumbUrl = "http://p.nanrenwo.net/uploads/allimg/161104/8450-161104134439-50.jpg";
+    public static String SP_NAME = "livePlayer";
 }

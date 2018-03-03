@@ -1,4 +1,4 @@
-package com.lrxliveandreadplayer.demo;
+package com.lrxliveandreadplayer.demo.activitys;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,6 +15,8 @@ import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
+import com.lrxliveandreadplayer.demo.utils.Constant;
+import com.lrxliveandreadplayer.demo.R;
 
 /**
  * Created by daven.liu on 2018/2/28 0028.

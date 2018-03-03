@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+    
+    <android.support.v7.widget.CardView
+        android:id="@+id/factory_background_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/sy_p_10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/factory_title_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/sy_p_120"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/dialog_factory_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="标题"
+                        android:textColor="#333333"
+                        android:textSize="@dimen/sy_p_50"
+                        android:textStyle="bold"
+                        />
+
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/sy_p_5"
+                    android:background="#32b7b9"/>
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/factory_content_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/factory_btn_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_120"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/dialog_factory_position"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="确定"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/sy_p_35"
+                    android:textStyle="bold"/>
+
+                <Button
+                    android:id="@+id/dialog_factory_negative"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="取消"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/sy_p_35"
+                    android:textStyle="bold"/>
+
+                <Button
+                    android:id="@+id/dialog_factory_other1"
+                    android:tag="0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="other1"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/sy_p_35"
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/dialog_factory_other2"
+                    android:tag="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="other2"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/sy_p_35"
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

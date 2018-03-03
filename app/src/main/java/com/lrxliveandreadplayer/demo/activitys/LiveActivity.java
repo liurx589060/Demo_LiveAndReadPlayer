@@ -1,4 +1,4 @@
-package com.lrxliveandreadplayer.demo;
+package com.lrxliveandreadplayer.demo.activitys;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,11 +8,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.lrxliveandreadplayer.demo.R;
+
 import net.yrom.screenrecorder.operate.AudioRecordOpt;
 import net.yrom.screenrecorder.operate.CameraRecordOpt;
 import net.yrom.screenrecorder.operate.ICameraCallBack;
 import net.yrom.screenrecorder.operate.RecorderBean;
-import net.yrom.screenrecorder.task.RtmpStreamingSender;
 import net.yrom.screenrecorder.ui.CameraRecordActivity;
 import net.yrom.screenrecorder.ui.CameraUIHelper;
 

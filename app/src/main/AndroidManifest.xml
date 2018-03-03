@@ -11,10 +11,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_sample_mjmz"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".MyApplication"
         android:theme="@style/AppTheme2">
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -24,10 +25,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".IjkLivePlayer"></activity>
-        <activity android:name=".LiveActivity"></activity>
-        <activity android:name=".ScreenRecordActivity"></activity>
-        <activity android:name=".AudioRecordActivity"></activity>
+        <activity android:name=".activitys.IjkLivePlayer"></activity>
+        <activity android:name=".activitys.LiveActivity"></activity>
+        <activity android:name=".activitys.ScreenRecordActivity"></activity>
+        <activity android:name=".activitys.AudioRecordActivity"></activity>
     </application>
 
 </manifest>

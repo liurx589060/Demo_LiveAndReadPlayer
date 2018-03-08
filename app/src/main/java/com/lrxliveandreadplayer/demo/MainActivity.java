@@ -14,10 +14,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity;
 import com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer;
 import com.lrxliveandreadplayer.demo.activitys.LiveActivity;
 import com.lrxliveandreadplayer.demo.factory.DialogFactory;
 import com.lrxliveandreadplayer.demo.utils.Constant;
+
+import java.util.List;
 
 import cn.jiguang.api.JCoreInterface;
 import cn.jpush.im.android.api.JMessageClient;
@@ -26,6 +29,7 @@ import cn.jpush.im.api.BasicCallback;
 public class MainActivity extends Activity {
     private Button mBtnIjk;
     private Button mBtnLive;
+    private Button mBtnMatch;
 
     private Dialog loadingDialog;
 
@@ -42,6 +46,7 @@ public class MainActivity extends Activity {
     private void init() {
         mBtnIjk = findViewById(R.id.btn_ijkPlayer);
         mBtnLive = findViewById(R.id.btn_live);
+        mBtnMatch = findViewById(R.id.btn_match);
         mBtnIjk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,6 +59,14 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,LiveActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mBtnMatch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,ChartGroupActivity.class);
                 startActivity(intent);
             }
         });
@@ -145,6 +158,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void gotResult(int i, String s) {
                         loadingDialog.dismiss();
+                        List list = JMessageClient.getConversationList();
                         if(i != 0) {
                             Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
                             saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());

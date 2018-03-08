@@ -29,6 +29,7 @@
         <activity android:name=".activitys.LiveActivity"></activity>
         <activity android:name=".activitys.ScreenRecordActivity"></activity>
         <activity android:name=".activitys.AudioRecordActivity"></activity>
+        <activity android:name=".activitys.ChartGroupActivity"></activity>
     </application>
 
 </manifest>

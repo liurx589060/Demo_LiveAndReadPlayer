@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_layout"
+        >
+
+        <RelativeLayout
+            android:id="@+id/relayout_1"
+            android:layout_width="@dimen/sy_p_300"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_alignParentLeft="true"
+            android:background="#55b4c512">
+            
+            <ImageView
+                android:id="@+id/chart_group_image1"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_alignParentTop="true"/>
+
+            <ImageView
+                android:id="@+id/chart_group_image2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_centerInParent="true"/>
+
+            <ImageView
+                android:id="@+id/chart_group_image3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/chart_group_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="TextView"
+            android:layout_toRightOf="@+id/relayout_1"
+            android:layout_toLeftOf="@+id/relayout_2"
+            android:textSize="@dimen/sy_p_50"
+            android:scrollbars="vertical"/>
+
+        <RelativeLayout
+            android:id="@+id/relayout_2"
+            android:layout_width="@dimen/sy_p_300"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_alignParentRight="true"
+            android:background="#5532b7b9">
+
+            <ImageView
+                android:id="@+id/chart_group_image4"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_alignParentTop="true"/>
+
+            <ImageView
+                android:id="@+id/chart_group_image5"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_centerInParent="true"/>
+
+            <ImageView
+                android:id="@+id/chart_group_image6"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sy_p_300"
+                android:scaleType="fitCenter"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sy_p_150"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <EditText
+            android:id="@+id/chart_group_edit"
+            android:layout_width="@dimen/sy_p_950"
+            android:layout_height="@dimen/sy_p_150"
+            android:hint="请输入内容"
+            />
+
+        <Button
+            android:id="@+id/chart_group_send"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="发送"/>
+
+    </LinearLayout>
+</RelativeLayout>

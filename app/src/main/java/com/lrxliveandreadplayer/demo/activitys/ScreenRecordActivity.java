@@ -37,7 +37,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.lrxliveandreadplayer.demo.R;
+import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 
 import net.yrom.screenrecorder.operate.RecorderBean;
 import net.yrom.screenrecorder.operate.ScreenRecordOpt;
@@ -230,6 +231,7 @@ public class ScreenRecordActivity extends Activity implements View.OnClickListen
                     stopScreenRecord();
                 } else {
                     createScreenCapture();
+                    JMsgSender.sendMessage(this,1001,mRtmpAddET.getText().toString(),null);
                 }
                 break;
             case R.id.pause:

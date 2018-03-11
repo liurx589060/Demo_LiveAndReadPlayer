@@ -8,7 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.lrxliveandreadplayer.demo.R;
+import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 
 import net.yrom.screenrecorder.operate.AudioRecordOpt;
 import net.yrom.screenrecorder.operate.CameraRecordOpt;
@@ -41,7 +42,7 @@ public class LiveActivity extends Activity {
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnAudio = findViewById(R.id.btn_audio);
 
-        mEditAddress.setText("rtmp://10.10.15.19/live/stream");
+        mEditAddress.setText("rtmp://192.168.1.102/live/stream");
         mBtnScreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,6 +104,7 @@ public class LiveActivity extends Activity {
                     }
                 });
                 CameraRecordOpt.getInstance().startCameraRecordWithActivity(LiveActivity.this,recorderBean,CameraRecordActivity.class);
+                JMsgSender.sendMessage(LiveActivity.this,1001,mEditAddress.getText().toString(),null);
             }
         });
     }

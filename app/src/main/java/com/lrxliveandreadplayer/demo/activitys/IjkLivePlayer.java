@@ -13,10 +13,11 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
+import com.dou361.ijkplayer.utils.ResourceUtils;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
+import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.utils.Constant;
-import com.lrxliveandreadplayer.demo.R;
 
 /**
  * Created by daven.liu on 2018/2/28 0028.
@@ -30,7 +31,7 @@ public class IjkLivePlayer extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        rootView = LayoutInflater.from(this).inflate(R.layout.simple_player_view_player,null);
+        rootView = getLayoutInflater().from(this).inflate(R.layout.simple_player_view_player,null);
         setContentView(rootView);
 
         init();
@@ -62,6 +63,10 @@ public class IjkLivePlayer extends Activity {
                 });
 
         String sourceUrl = "rtmp://10.10.15.19/live/stream";
+        if(getIntent() != null) {
+            sourceUrl = getIntent().getStringExtra("livePath")==null?"rtmp://192.168.1.102/live/stream"
+                    :getIntent().getStringExtra("livePath");
+        }
         player.setPlaySource(sourceUrl)
                 .setPlayerBackListener(new OnPlayerBackListener() {
                     @Override

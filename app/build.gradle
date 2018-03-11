@@ -43,4 +43,5 @@ dependencies {
     // 此处以JMessage 2.5.0 版本为例。
     compile 'cn.jiguang.sdk:jcore:1.1.9'
     // 此处以JCore 1.1.9 版本为例。
+    compile 'com.google.code.gson:gson:2.2.4'
 }

@@ -14,7 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.lrxliveandreadplayer.demo.R;
+import com.lrx.live.player.R;
 
 /**
  * Created by Administrator on 2018/3/3.

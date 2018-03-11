@@ -25,7 +25,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.lrxliveandreadplayer.demo.R;
+import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 
 import net.yrom.screenrecorder.operate.AudioRecordOpt;
 import net.yrom.screenrecorder.operate.RecorderBean;
@@ -90,6 +91,7 @@ public class AudioRecordActivity extends Activity implements View.OnClickListene
                     stopAudioRecord();
                 } else {
                     startAudioRecord();
+                    JMsgSender.sendMessage(this,1001,mRtmpAddET.getText().toString(),null);
                 }
                 break;
             case R.id.pause:

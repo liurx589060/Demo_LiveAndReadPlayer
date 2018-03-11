@@ -77,6 +77,16 @@
                 android:layout_height="@dimen/sy_p_300"
                 android:scaleType="fitCenter"
                 android:layout_alignParentBottom="true"/>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:textStyle="bold"
+                android:textColor="#222222"
+                android:text="邀请" />
         </RelativeLayout>
 
     </RelativeLayout>

@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity;
 import com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer;
 import com.lrxliveandreadplayer.demo.activitys.LiveActivity;
@@ -24,12 +25,14 @@ import java.util.List;
 
 import cn.jiguang.api.JCoreInterface;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
 
 public class MainActivity extends Activity {
     private Button mBtnIjk;
     private Button mBtnLive;
     private Button mBtnMatch;
+    private TextView mTvxUserName;
 
     private Dialog loadingDialog;
 
@@ -47,6 +50,7 @@ public class MainActivity extends Activity {
         mBtnIjk = findViewById(R.id.btn_ijkPlayer);
         mBtnLive = findViewById(R.id.btn_live);
         mBtnMatch = findViewById(R.id.btn_match);
+        mTvxUserName = findViewById(R.id.txv_userName);
         mBtnIjk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,6 +77,7 @@ public class MainActivity extends Activity {
 
         loadingDialog = DialogFactory.createLoadingDialog(this);
 
+        mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
     }
 
     private void showLoginDialog(final Activity activity) {
@@ -101,7 +106,7 @@ public class MainActivity extends Activity {
 
                     }
                 });
-        dialog1.setCanceledOnTouchOutside(false);
+        dialog1.setCanceledOnTouchOutside(true);
         dialog1.show();
     }
 
@@ -130,7 +135,7 @@ public class MainActivity extends Activity {
 
                     }
                 });
-        dialog1.setCanceledOnTouchOutside(false);
+        dialog1.setCanceledOnTouchOutside(true);
         dialog1.show();
     }
 
@@ -161,9 +166,10 @@ public class MainActivity extends Activity {
                         List list = JMessageClient.getConversationList();
                         if(i != 0) {
                             Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
-                            saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());
                         }else {
                             Toast.makeText(MainActivity.this,"登录成功",Toast.LENGTH_LONG).show();
+                            saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());
+                            mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
                             dialog.dismiss();
                         }
                     }
@@ -171,6 +177,8 @@ public class MainActivity extends Activity {
     }
 
     private void saveUser(String userName,String appKey) {
+        UserInfo userInfo = JMessageClient.getMyInfo();
+        Log.e("yy","avatar=" + userInfo.getAvatar());
         SharedPreferences sp = getSharedPreferences(Constant.SP_NAME, Context.MODE_PRIVATE);
         sp.edit().putString("userName",userName)
                 .putString("appKey",appKey)

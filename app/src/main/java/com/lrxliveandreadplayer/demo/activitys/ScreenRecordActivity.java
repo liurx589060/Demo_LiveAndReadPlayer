@@ -152,7 +152,7 @@ public class ScreenRecordActivity extends Activity implements View.OnClickListen
         getWindowManager().getDefaultDisplay().getMetrics(metric);
         RecorderBean bean = new RecorderBean();
         bean.setRtmpAddr(rtmpAddr);
-        bean.setBitrate(5000000);
+        bean.setBitrate(2000000);
         bean.setWidth(1080);
         bean.setHeight(1920);
 

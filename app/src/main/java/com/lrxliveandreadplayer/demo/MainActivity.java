@@ -77,7 +77,9 @@ public class MainActivity extends Activity {
 
         loadingDialog = DialogFactory.createLoadingDialog(this);
 
-        mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
+        if(JMessageClient.getMyInfo() != null) {
+            mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
+        }
     }
 
     private void showLoginDialog(final Activity activity) {

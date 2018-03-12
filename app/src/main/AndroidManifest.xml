@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:name="com.lrxliveandreadplayer.demo.MyApplication"
         android:theme="@style/AppTheme2">
-        <activity android:name="com.lrxliveandreadplayer.demo.MainActivity">
+        <activity android:name="com.lrxliveandreadplayer.demo.MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,11 +26,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer"></activity>
-        <activity android:name="com.lrxliveandreadplayer.demo.activitys.LiveActivity"></activity>
-        <activity android:name="com.lrxliveandreadplayer.demo.activitys.ScreenRecordActivity"></activity>
-        <activity android:name="com.lrxliveandreadplayer.demo.activitys.AudioRecordActivity"></activity>
-        <activity android:name="com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.LiveActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.ScreenRecordActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.AudioRecordActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
     </application>
 
 </manifest>

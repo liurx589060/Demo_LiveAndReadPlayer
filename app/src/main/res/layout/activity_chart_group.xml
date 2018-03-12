@@ -100,7 +100,7 @@
 
         <EditText
             android:id="@+id/chart_group_edit"
-            android:layout_width="@dimen/sy_p_950"
+            android:layout_width="@dimen/sy_p_900"
             android:layout_height="@dimen/sy_p_150"
             android:hint="请输入内容"
             />

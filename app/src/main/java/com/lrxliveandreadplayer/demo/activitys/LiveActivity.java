@@ -42,7 +42,7 @@ public class LiveActivity extends Activity {
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnAudio = findViewById(R.id.btn_audio);
 
-        mEditAddress.setText("rtmp://10.10.15.19/live/stream");
+        mEditAddress.setText("rtmp://192.168.1.102/live/stream");
         mBtnScreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

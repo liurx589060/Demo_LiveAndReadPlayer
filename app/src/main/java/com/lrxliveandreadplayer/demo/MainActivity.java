@@ -5,12 +5,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +20,10 @@ import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity;
 import com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer;
 import com.lrxliveandreadplayer.demo.activitys.LiveActivity;
+import com.lrxliveandreadplayer.demo.beans.jmessage.JMMemeberBean;
 import com.lrxliveandreadplayer.demo.factory.DialogFactory;
+import com.lrxliveandreadplayer.demo.network.NetWorkMg;
+import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
 import java.util.List;
@@ -27,12 +32,21 @@ import cn.jiguang.api.JCoreInterface;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 public class MainActivity extends Activity {
     private Button mBtnIjk;
     private Button mBtnLive;
     private Button mBtnMatch;
     private TextView mTvxUserName;
+    private EditText mEditIpAdress;
+    private RadioButton mRadioMan;
+    private RadioButton mRadioLady;
+    private Button mBtnIpAdressSave;
+    private RadioGroup mRadioGroup;
 
     private Dialog loadingDialog;
 
@@ -51,6 +65,11 @@ public class MainActivity extends Activity {
         mBtnLive = findViewById(R.id.btn_live);
         mBtnMatch = findViewById(R.id.btn_match);
         mTvxUserName = findViewById(R.id.txv_userName);
+        mEditIpAdress = findViewById(R.id.edit_ipAddress);
+        mRadioMan = findViewById(R.id.radio_man);
+        mRadioLady = findViewById(R.id.radio_lady);
+        mBtnIpAdressSave = findViewById(R.id.btn_ipAdress);
+        mRadioGroup = findViewById(R.id.radio_group);
         mBtnIjk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,6 +99,35 @@ public class MainActivity extends Activity {
         if(JMessageClient.getMyInfo() != null) {
             mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
         }
+
+        mEditIpAdress.setText(getSpIpAddress());
+        NetWorkMg.IP_ADDRESS = mEditIpAdress.getText().toString();
+        mBtnIpAdressSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setSpIpAddress(mEditIpAdress.getText().toString());
+                NetWorkMg.IP_ADDRESS = mEditIpAdress.getText().toString();
+            }
+        });
+
+        mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.radio_man:
+                        NetWorkMg.GENDER = "男";
+                        break;
+
+                    case R.id.radio_lady:
+                        NetWorkMg.GENDER = "女";
+                        break;
+                }
+            }
+        });
+
+
+
+        getMemberList();
     }
 
     private void showLoginDialog(final Activity activity) {
@@ -197,5 +245,30 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         JCoreInterface.onPause(this);
+    }
+
+    private void setSpIpAddress(String ipAddress) {
+        SharedPreferences sp = getSharedPreferences("mySp",Activity.MODE_PRIVATE);
+        sp.edit().putString("ipAddress",ipAddress).commit();
+    }
+
+    private String getSpIpAddress() {
+        SharedPreferences sp = getSharedPreferences("mySp",Activity.MODE_PRIVATE);
+        return sp.getString("ipAddress","192.168.1.103");
+    }
+
+    private void getMemberList() {
+        Retrofit retrofit = NetWorkMg.newRetrofit();
+        RequestApi requestApi = retrofit.create(RequestApi.class);
+
+        requestApi.getChartRoomMemeberList(12536521)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<JMMemeberBean>() {
+                    @Override
+                    public void accept(JMMemeberBean jmMemeberBean) throws Exception {
+                        Log.e("yy",jmMemeberBean.toString());
+                    }
+                });
     }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/sy_p_20"
+    >
+    <TextView
+        android:id="@+id/text_event_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sy_p_40"
+        android:textColor="#32b9a5"
+        android:text="2018/02/27"/>
+
+    <TextView
+        android:id="@+id/text_event"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/sy_p_20"
+        android:textSize="@dimen/sy_p_30"
+        android:text="是地方客人看看看的看法空荡荡的"
+        />
+
+</LinearLayout>

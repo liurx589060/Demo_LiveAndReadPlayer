@@ -14,26 +14,34 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity;
 import com.lrxliveandreadplayer.demo.activitys.IjkLivePlayer;
 import com.lrxliveandreadplayer.demo.activitys.LiveActivity;
-import com.lrxliveandreadplayer.demo.beans.jmessage.JMMemeberBean;
+import com.lrxliveandreadplayer.demo.activitys.UserInfoActivity;
+import com.lrxliveandreadplayer.demo.activitys.XqMainActivity;
+import com.lrxliveandreadplayer.demo.beans.user.UserResp;
 import com.lrxliveandreadplayer.demo.factory.DialogFactory;
+import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.utils.Constant;
-
-import java.util.List;
+import com.lrxliveandreadplayer.demo.utils.Tools;
+import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
 import cn.jiguang.api.JCoreInterface;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.api.BasicCallback;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 
@@ -47,14 +55,18 @@ public class MainActivity extends Activity {
     private RadioButton mRadioLady;
     private Button mBtnIpAdressSave;
     private RadioGroup mRadioGroup;
+    private Button mBtnImageSelector;
+    private Button mBtnXq;
 
     private Dialog loadingDialog;
+    private RequestApi mApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mApi = NetWorkMg.newRetrofit().create(RequestApi.class);
         init();
 
         showLoginDialog(this);
@@ -70,6 +82,8 @@ public class MainActivity extends Activity {
         mRadioLady = findViewById(R.id.radio_lady);
         mBtnIpAdressSave = findViewById(R.id.btn_ipAdress);
         mRadioGroup = findViewById(R.id.radio_group);
+        mBtnImageSelector = findViewById(R.id.btn_imageSelector);
+        mBtnXq = findViewById(R.id.btn_xq);
         mBtnIjk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,9 +139,28 @@ public class MainActivity extends Activity {
             }
         });
 
+        mTvxUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //跳转到填写详情页面
+                Intent intent = new Intent(MainActivity.this,UserInfoActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("userInfo",DataManager.getInstance().getUserInfo());
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+
+        mBtnXq.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, XqMainActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
-        getMemberList();
+//        getMemberList();
     }
 
     private void showLoginDialog(final Activity activity) {
@@ -190,40 +223,11 @@ public class MainActivity extends Activity {
     }
 
     private void jMessageRegister(final Dialog dialog, String userId, String password) {
-        loadingDialog.show();
-        JMessageClient.register(userId, password
-                , new BasicCallback() {
-            @Override
-            public void gotResult(int i, String s) {
-                loadingDialog.dismiss();
-                if (i == 0) {
-                    Toast.makeText(MainActivity.this,"注册成功",Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                } else {
-                    Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        regist(dialog,userId,password);
     }
 
     private void jMessageLogin(final Dialog dialog, String userId, String password) {
-        loadingDialog.show();
-        JMessageClient.login(userId, password
-                , new BasicCallback() {
-                    @Override
-                    public void gotResult(int i, String s) {
-                        loadingDialog.dismiss();
-                        List list = JMessageClient.getConversationList();
-                        if(i != 0) {
-                            Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
-                        }else {
-                            Toast.makeText(MainActivity.this,"登录成功",Toast.LENGTH_LONG).show();
-                            saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());
-                            mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
-                            dialog.dismiss();
-                        }
-                    }
-                });
+        login(dialog,userId,password);
     }
 
     private void saveUser(String userName,String appKey) {
@@ -247,6 +251,115 @@ public class MainActivity extends Activity {
         JCoreInterface.onPause(this);
     }
 
+    private void regist(final Dialog dialog, final String userName, final String password) {
+        loadingDialog.show();
+        Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(final ObservableEmitter<Integer> observableEmitter) throws Exception {
+                JMessageClient.register(userName, password
+                        , new BasicCallback() {
+                            @Override
+                            public void gotResult(int i, String s) {
+                                if (i == 0 || i == 898001) {//成功或者已注册过
+                                    observableEmitter.onNext(i);
+                                } else {
+                                    observableEmitter.onError(new Throwable("JMessage regist error"));
+                                }
+                            }
+                        });
+            }
+        }).observeOn(Schedulers.io()).flatMap(new Function<Integer, ObservableSource<UserResp>>() {
+            @Override
+            public ObservableSource<UserResp> apply(Integer integer) throws Exception {
+                try {
+                    return mApi.regist(userName,password);
+                }catch (Exception e) {
+                    return Observable.error(e);
+                }
+            }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<UserResp>() {
+            @Override
+            public void accept(UserResp userResp) throws Exception {
+                loadingDialog.dismiss();
+                if(userResp.getStatus() == XqErrorCode.SUCCESS) {//注册成功
+                    dialog.dismiss();
+                    Tools.toast(getApplicationContext(),"注册成功",false);
+                    DataManager.getInstance().setUserInfo(userResp.getData());
+                    //跳转到填写详情页面
+                    Intent intent = new Intent(MainActivity.this,UserInfoActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("userInfo",DataManager.getInstance().getUserInfo());
+                    bundle.putBoolean("isRegist",true);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else if (userResp.getStatus() == XqErrorCode.ERROR_USER_REGIST_EXIST) {
+                    Tools.toast(getApplicationContext(),"已存在该账号",true);
+                }
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                loadingDialog.dismiss();
+                Tools.toast(getApplicationContext(),"注册失败--" + throwable.toString(),true);
+            }
+        });
+    }
+
+    private void login(final Dialog dialog, final String userName, final String password) {
+        loadingDialog.show();
+        Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(final ObservableEmitter<Integer> observableEmitter) throws Exception {
+                JMessageClient.login(userName, password
+                        , new BasicCallback() {
+                            @Override
+                            public void gotResult(int i, String s) {
+                                if(i != 0) {
+                                    observableEmitter.onError(new Throwable("JMessage login fail--" + s + ">>>" + i));
+                                }else {
+                                    observableEmitter.onNext(i);
+                                }
+                            }
+                        });
+            }
+        }).observeOn(Schedulers.io())
+        .flatMap(new Function<Integer, ObservableSource<UserResp>>() {
+            @Override
+            public ObservableSource<UserResp> apply(Integer integer) throws Exception {
+                try {
+                    return mApi.login(userName,password);
+                }catch (Exception e) {
+                    return Observable.error(e);
+                }
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<UserResp>() {
+            @Override
+            public void accept(UserResp userResp) throws Exception {
+                loadingDialog.dismiss();
+                if(userResp.getStatus() == XqErrorCode.SUCCESS) {
+                    DataManager.getInstance().setUserInfo(userResp.getData());
+                    dialog.dismiss();
+                    saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());
+                    mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
+                    Tools.toast(getApplicationContext(),"登录成功",false);
+                }else if(userResp.getStatus() == XqErrorCode.ERROR_USER_PASSWORD_WRONG) {
+                    Tools.toast(getApplicationContext(),"密码错误",true);
+                }else if(userResp.getStatus() == XqErrorCode.ERROR_USER_REGIST_UNEXIST) {
+                    Tools.toast(getApplicationContext(),"用户不存在",true);
+                }
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                loadingDialog.dismiss();
+                Tools.toast(getApplicationContext(),throwable.toString(),true);
+            }
+        });
+    }
+
     private void setSpIpAddress(String ipAddress) {
         SharedPreferences sp = getSharedPreferences("mySp",Activity.MODE_PRIVATE);
         sp.edit().putString("ipAddress",ipAddress).commit();
@@ -255,20 +368,5 @@ public class MainActivity extends Activity {
     private String getSpIpAddress() {
         SharedPreferences sp = getSharedPreferences("mySp",Activity.MODE_PRIVATE);
         return sp.getString("ipAddress","192.168.1.103");
-    }
-
-    private void getMemberList() {
-        Retrofit retrofit = NetWorkMg.newRetrofit();
-        RequestApi requestApi = retrofit.create(RequestApi.class);
-
-        requestApi.getChartRoomMemeberList(12536521)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<JMMemeberBean>() {
-                    @Override
-                    public void accept(JMMemeberBean jmMemeberBean) throws Exception {
-                        Log.e("yy",jmMemeberBean.toString());
-                    }
-                });
     }
 }

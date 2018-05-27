@@ -1,34 +1,56 @@
 package com.lrxliveandreadplayer.demo.network;
 
-import com.lrxliveandreadplayer.demo.beans.jmessage.JMMemeberBean;
+import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartResp;
+import com.lrxliveandreadplayer.demo.beans.user.UserResp;
 
-import io.reactivex.Flowable;
+import java.util.Map;
+
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 /**
  * Created by Administrator on 2018/4/28.
  */
 
 public interface RequestApi {
+    @GET("User/regist")
+    Observable<UserResp> regist(@Query("userName")  String userName,@Query("password") String password);
+
+    @GET("User/login")
+    Observable<UserResp> login(@Query("userName") String userName,@Query("password") String password);
+
+    @GET("User/updateUserInfo")
+    Observable<UserResp> updateUserInfo(@QueryMap Map<String,Object> map);
+
+    @GET("User/checkUserExist")
+    Observable<UserResp> checkUserExist(@Query("userName") String userName);
+
     @GET("JMessage/getChartRoomMemeberList")
-    Observable<JMMemeberBean> getChartRoomMemeberList(@Query("roomId") long roomId);
+    Observable<JMChartResp> getChartRoomMemeberList(@Query("roomId") long roomId);
 
     @GET("JMessage/createChartRoom")
-    Observable<JMMemeberBean> createChartRoom(@Query("userName") String userName, @Query("gender") String gender
-            , @Query("level") int level);
+    Observable<JMChartResp> createChartRoom(@QueryMap Map<String,Object> map);
 
     @GET("JMessage/exitChartRoom")
-    Observable<JMMemeberBean> exitChartRoom(@Query("userName") String userName,@Query("index") int index
-            ,@Query("roomId") long roomId);
+    Observable<JMChartResp> exitChartRoom(@QueryMap Map<String,Object> map);
 
     @GET("JMessage/deleteChartRoom")
-    Observable<JMMemeberBean> deleteChartRoom(@Query("roomId") long roomId);
+    Observable<JMChartResp> deleteChartRoom(@Query("roomId") long roomId);
 
     @GET("JMessage/joinChartRoom")
-    Observable<JMMemeberBean> joinChartRoom(@Query("userName") String userName,@Query("gender") String gender
-            ,@Query("level") int level);
+    Observable<JMChartResp> joinChartRoom(@QueryMap Map<String,Object> map);
 
+    @Multipart
+    @POST("User/uploadHeadImage")
+    Call<UserResp> uploadFile(@PartMap Map<String, RequestBody> map, @Part MultipartBody.Part file);
 
 }

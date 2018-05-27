@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sy_p_400"
+        android:background="#c54213"
+        >
+
+        <Button
+            android:id="@+id/btn_chart_exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="离开"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"/>
+
+        <TextView
+            android:id="@+id/text_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/sy_p_20"
+            android:textSize="@dimen/sy_p_60"
+            android:textColor="#222222"
+            android:text="请男嘉宾自我介绍" />
+
+        <TextView
+            android:id="@+id/text_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_tip"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/sy_p_40"
+            android:textSize="@dimen/sy_p_70"
+            android:textColor="#c5a3b5"
+            android:textStyle="bold"
+            android:text="180s" />
+
+        <include android:id="@+id/include_head_angel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_chart_ui_head"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"/>
+
+        <include android:id="@+id/include_head_man"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_chart_ui_head"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycle_chart_members"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sy_p_1000"
+        android:background="#cc2345">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#dd5c8b">
+
+        <Button
+            android:id="@+id/btn_chart_gift"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="礼物"/>
+
+        <Button
+            android:id="@+id/btn_chart_report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="举报"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycle_chart_system"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/btn_chart_gift"
+            >
+
+        </android.support.v7.widget.RecyclerView>
+
+    </RelativeLayout>
+</LinearLayout>

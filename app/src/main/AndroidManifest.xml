@@ -36,6 +36,25 @@
             android:configChanges="orientation|screenSize|keyboardHidden"></activity>
         <activity android:name="com.lrxliveandreadplayer.demo.activitys.ChartGroupActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.UserInfoActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.XqMainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+        <activity android:name="com.lrxliveandreadplayer.demo.activitys.XqChartActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"></activity>
+
+        <!--图片选择器-->
+        <activity
+            android:name="cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:theme="@style/Theme_Light.Default"
+            />
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme_Light.Default"
+            />
     </application>
 
 </manifest>

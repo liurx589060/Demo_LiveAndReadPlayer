@@ -7,4 +7,7 @@ package com.lrxliveandreadplayer.demo.utils;
 public class Constant {
     public static String thumbUrl = "http://p.nanrenwo.net/uploads/allimg/161104/8450-161104134439-50.jpg";
     public static String SP_NAME = "livePlayer";
+
+    public static String ROLRTYPE_ANGEL = "angel";
+    public static String ROLETYPE_GUEST = "guest";
 }

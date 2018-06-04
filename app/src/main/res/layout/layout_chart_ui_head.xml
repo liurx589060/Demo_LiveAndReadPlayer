@@ -1,33 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#32b7b5">
 
-    <TextView
-        android:id="@+id/text_num"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1"
-        android:textStyle="bold"
-        android:textSize="@dimen/sy_p_60"
-        android:textColor="#a84561"
-        app:layout_constrainedWidth="true"
-        app:layout_constrainedHeight="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="@dimen/sy_p_10"
-        android:layout_marginLeft="@dimen/sy_p_10"/>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true">
 
-    <ImageView
-        android:id="@+id/img_head"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/sy_p_260"
-        android:src="@drawable/ic_launcher"
-        app:layout_constraintLeft_toRightOf="@id/text_num"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintDimensionRatio="1:1"
-        android:scaleType="centerCrop"
-        android:layout_marginLeft="@dimen/sy_p_10"/>
-</android.support.constraint.ConstraintLayout>
+        <LinearLayout
+            android:id="@+id/line1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:id="@+id/text_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textStyle="bold"
+                android:textSize="@dimen/sy_p_60"
+                android:textColor="#a84561"
+                android:layout_marginLeft="@dimen/sy_p_10"/>
+
+            <TextView
+                android:id="@+id/text_nickName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="古月"
+                android:textSize="@dimen/sy_p_50"
+                android:textColor="#a84561"
+                android:layout_marginLeft="@dimen/sy_p_8"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/img_head"
+            android:layout_width="@dimen/sy_p_200"
+            android:layout_height="@dimen/sy_p_200"
+            android:src="@drawable/ic_launcher"
+            android:scaleType="centerCrop"
+            android:layout_below="@+id/line1"
+            android:layout_alignParentLeft="true"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true">
+
+        <LinearLayout
+            android:id="@+id/line2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:id="@+id/text_num_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textStyle="bold"
+                android:textSize="@dimen/sy_p_60"
+                android:textColor="#a84561"
+                android:layout_marginRight="@dimen/sy_p_10"/>
+
+            <TextView
+                android:id="@+id/text_nickName_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="古月"
+                android:textSize="@dimen/sy_p_50"
+                android:textColor="#a84561"
+                android:layout_marginRight="@dimen/sy_p_8"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/img_head_2"
+            android:layout_width="@dimen/sy_p_200"
+            android:layout_height="@dimen/sy_p_200"
+            android:src="@drawable/ic_launcher"
+            android:scaleType="centerCrop"
+            android:layout_below="@+id/line2"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+</RelativeLayout>

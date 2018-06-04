@@ -10,4 +10,7 @@ public class Constant {
 
     public static String ROLRTYPE_ANGEL = "angel";
     public static String ROLETYPE_GUEST = "guest";
+
+    public static String GENDER_MAN = "男";
+    public static String GENDER_LADY = "女";
 }

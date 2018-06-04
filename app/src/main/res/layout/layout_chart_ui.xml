@@ -5,7 +5,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/sy_p_400"
+        android:layout_height="@dimen/sy_p_420"
         android:background="#c54213"
         >
 
@@ -40,19 +40,13 @@
             android:textStyle="bold"
             android:text="180s" />
 
-        <include android:id="@+id/include_head_angel"
+        <include android:id="@+id/include_head_angel_man"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             layout="@layout/layout_chart_ui_head"
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"/>
 
-        <include android:id="@+id/include_head_man"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            layout="@layout/layout_chart_ui_head"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"/>
     </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView

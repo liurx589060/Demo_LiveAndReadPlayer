@@ -1,10 +1,8 @@
 package com.lrxliveandreadplayer.demo.manager;
 
+import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Member;
 import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Administrator on 2018/5/15.
@@ -13,7 +11,7 @@ import java.util.List;
 public class DataManager {
     private static DataManager instance = new DataManager();
     private UserInfoBean userInfo;
-    private List<Member> membersList;
+    private Data chartData;
 
     private DataManager(){}
 
@@ -32,20 +30,23 @@ public class DataManager {
         this.userInfo = userInfo;
     }
 
-    public List<Member> getMembersList() {
-        if(membersList == null) {
-            membersList = new ArrayList<>();
+    public Data getChartData() {
+        if(chartData == null) {
+            chartData = new Data();
         }
-        return membersList;
+        return chartData;
     }
 
-    public void setMembersList(List<Member> membersList) {
-        if(this.membersList != null) {
-            this.membersList.clear();
-            if(membersList != null) {
-                this.membersList.addAll(membersList);
+    public void setChartData(Data chartData) {
+        this.chartData = chartData;
+    }
+
+    public Member getSelfMember() {
+        for(Member member:getChartData().getMembers()) {
+            if(member.getUserInfo().getUser_name().equals(getUserInfo().getUser_name())) {
+                return member;
             }
         }
-        this.membersList = membersList;
+        return new Member();
     }
 }

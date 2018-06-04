@@ -22,6 +22,7 @@ import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.utils.Tools;
+import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
 import java.io.File;
 import java.util.HashMap;
@@ -282,6 +283,15 @@ public class UserInfoActivity extends Activity {
         mApi.uploadFile(params,body).enqueue(new Callback<UserResp>() {
             @Override
             public void onResponse(Call<UserResp> call, Response<UserResp> response) {
+                if(response == null || response.body() == null) {
+                    Tools.toast(UserInfoActivity.this,"设置头像失败",true);
+                    return;
+                }
+                if(response.body().getStatus() != XqErrorCode.SUCCESS) {
+                    Log.e("yy",response.body().getMsg());
+                    Tools.toast(UserInfoActivity.this,response.body().getMsg(),true);
+                    return;
+                }
                 Tools.toast(UserInfoActivity.this,"设置头像成功",false);
                 DataManager.getInstance().setUserInfo(response.body().getData());
 

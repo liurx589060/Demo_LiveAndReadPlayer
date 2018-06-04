@@ -14,13 +14,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.google.gson.Gson;
 import com.lrx.live.player.R;
-import com.lrxliveandreadplayer.demo.beans.JMsgBean;
+import com.lrxliveandreadplayer.demo.beans.JMNormalSendBean;
 import com.lrxliveandreadplayer.demo.factory.DialogFactory;
 import com.lrxliveandreadplayer.demo.glide.GlideCircleTransform;
 import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
@@ -31,9 +30,6 @@ import java.util.ArrayList;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.event.MessageEvent;
-import cn.jpush.im.android.api.model.Message;
-import cn.jpush.im.android.api.options.MessageSendingOptions;
-import cn.jpush.im.api.BasicCallback;
 
 /**
  * Created by Administrator on 2018/3/8.
@@ -158,7 +154,7 @@ public class ChartGroupActivity extends Activity {
         }catch (Exception e) {
             Log.e("yy",e.toString());
         }
-        JMsgBean bean = new Gson().fromJson(text,JMsgBean.class);
+        JMNormalSendBean bean = new Gson().fromJson(text,JMNormalSendBean.class);
         if(bean.getCode() == 1000) {//邀请
             Intent intent = new Intent(this,LiveActivity.class);
             startActivity(intent);
@@ -166,12 +162,12 @@ public class ChartGroupActivity extends Activity {
             if(getInviteDialog().isShowing()) {
                 getInviteDialog().dismiss();
                 Intent intent = new Intent(this,IjkLivePlayer.class);
-                intent.putExtra("livePath",bean.getText());
+                intent.putExtra("livePath",bean.getMsg());
                 startActivity(intent);
             }
         }
         else {
-            stringBuilder.append(event.getMessage().getFromUser().getUserName() + ":" + bean.getText() + "\n");
+            stringBuilder.append(event.getMessage().getFromUser().getUserName() + ":" + bean.getMsg() + "\n");
             mTxvChart.setText(stringBuilder.toString());
         }
     }

@@ -13,5 +13,5 @@
         android:id="@+id/btn_guest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="加入" />
 </LinearLayout>

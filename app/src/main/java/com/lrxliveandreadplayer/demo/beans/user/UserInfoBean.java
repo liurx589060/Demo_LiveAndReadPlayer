@@ -31,6 +31,10 @@ public class UserInfoBean implements Serializable{
     private int marrige = 0;
     private String job_address = "";
     private String phone = "";
+    private int limitLevel = -1;
+    private int limitLady = 0;
+    private int limitMan = 0;
+    private int limitAngel = 0;
 
 
 
@@ -192,5 +196,37 @@ public class UserInfoBean implements Serializable{
 
     public void setRole_type(String role_type) {
         this.role_type = role_type;
+    }
+
+    public int getLimitLevel() {
+        return limitLevel;
+    }
+
+    public void setLimitLevel(int limitLevel) {
+        this.limitLevel = limitLevel;
+    }
+
+    public int getLimitLady() {
+        return limitLady;
+    }
+
+    public void setLimitLady(int limitLady) {
+        this.limitLady = limitLady;
+    }
+
+    public int getLimitMan() {
+        return limitMan;
+    }
+
+    public void setLimitMan(int limitMan) {
+        this.limitMan = limitMan;
+    }
+
+    public int getLimitAngel() {
+        return limitAngel;
+    }
+
+    public void setLimitAngel(int limitAngel) {
+        this.limitAngel = limitAngel;
     }
 }

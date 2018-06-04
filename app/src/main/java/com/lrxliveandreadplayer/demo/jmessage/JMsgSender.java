@@ -1,12 +1,15 @@
 package com.lrxliveandreadplayer.demo.jmessage;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.lrxliveandreadplayer.demo.beans.JMsgBean;
+import com.lrxliveandreadplayer.demo.beans.JMNormalSendBean;
+import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
 
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
@@ -27,10 +30,9 @@ public class JMsgSender {
             Toast.makeText(context.getApplicationContext(),"userName is null",Toast.LENGTH_SHORT).show();
             return;
         }
-        JMsgBean bean = new JMsgBean();
-        bean.setText(str);
+        JMNormalSendBean bean = new JMNormalSendBean();
+        bean.setMsg(str);
         bean.setCode(code);
-        bean.setExinfo(exinfo);
         Message message = JMessageClient.createSingleTextMessage(userName,new Gson().toJson(bean));
         message.setOnSendCompleteCallback(new BasicCallback() {
             @Override
@@ -45,5 +47,51 @@ public class JMsgSender {
         MessageSendingOptions options = new MessageSendingOptions();
         options.setShowNotification(false);
         JMessageClient.sendMessage(message,options);
+    }
+
+    /**
+     * 发送普通的消息
+     * @param sendBean
+     */
+    public static void sendNomalMessage(JMNormalSendBean sendBean) {
+        Message message = JMessageClient.createSingleTextMessage(sendBean.getTargetUserName(),new Gson().toJson(sendBean));
+        message.setOnSendCompleteCallback(new BasicCallback() {
+            @Override
+            public void gotResult(int i, String s) {
+                if (0 == i) {
+                    Log.i("yy","sendNormalMessage success --");
+                } else {
+                    Log.e("yy","sendRoomMessage failed --");
+                }
+            }
+        });
+        MessageSendingOptions options = new MessageSendingOptions();
+        options.setShowNotification(false);
+        JMessageClient.sendMessage(message,options);
+    }
+
+
+    /**
+     * 发送聊天室信息
+     * @param chartRoomSendBean
+     */
+    public static void sendRoomMessage(final JMChartRoomSendBean chartRoomSendBean) {
+        if(chartRoomSendBean == null) return;
+        Conversation conv = JMessageClient.getChatRoomConversation(chartRoomSendBean.getRoomId());
+        if (null == conv) {
+            conv = Conversation.createChatRoomConversation(chartRoomSendBean.getRoomId());
+        }
+        final Message msg = conv.createSendTextMessage(new Gson().toJson(chartRoomSendBean));
+        msg.setOnSendCompleteCallback(new BasicCallback() {
+            @Override
+            public void gotResult(int responseCode, String responseMessage) {
+                if (0 == responseCode) {
+                    Log.i("yy","sendRoomMessage success --" + chartRoomSendBean.getUserName());
+                } else {
+                    Log.e("yy","sendRoomMessage failed --" + chartRoomSendBean.getUserName());
+                }
+            }
+        });
+        JMessageClient.sendMessage(msg);
     }
 }

@@ -23,4 +23,10 @@ public class XqChartActivity extends Activity {
     public XqChartUIViewMg getmXqChartUIViewMg() {
         return mXqChartUIViewMg;
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mXqChartUIViewMg.onDestroy();
+    }
 }

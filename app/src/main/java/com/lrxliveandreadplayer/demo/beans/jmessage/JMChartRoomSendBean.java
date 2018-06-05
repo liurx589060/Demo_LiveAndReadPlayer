@@ -9,9 +9,9 @@ public class JMChartRoomSendBean {
     public static final int CHART_STATUS_INTRO_MAN = 0x002;         //男生自我介绍
     public static final int CHART_STATUS_LADY_SELECT_FIRST = 0x003; //女生第一次选择
     public static final int CHART_STATUS_INTRO_LADY = 0x004;        //女生聊天第一轮
-    public static final int CHART_STATUS_CHAT_PERFORMANCE = 0x005;  //男生才艺表演
-    public static final int CHART_STATUS_CHAT_SECOND = 0x006;       //女生聊天第二轮
-    public static final int CHART_STATUS_LADY_SELECT_SECOND = 0x007; //女生第二次选择
+    public static final int CHART_STATUS_CHAT_MAN_PERFORMANCE = 0x005;  //男生才艺表演
+    public static final int CHART_STATUS_LADY_SELECT_SECOND = 0x006; //女生第二次选择
+    public static final int CHART_STATUS_LADY_CHAT_SECOND = 0x007;       //女生聊天第二轮
     public static final int CHART_STATUS_CHAT_QUESTION = 0x008;     //问答环节
     public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x009;  //男生第一次选择
 

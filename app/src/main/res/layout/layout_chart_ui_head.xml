@@ -49,7 +49,7 @@
             android:layout_alignParentLeft="true"
             />
 
-        <View
+        <RelativeLayout
             android:id="@+id/view_select"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -58,7 +58,16 @@
             android:layout_alignTop="@id/img_head"
             android:layout_alignBottom="@id/img_head"
             android:background="#88aaaaaa"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:id="@+id/image_select"
+                android:layout_width="@dimen/sy_p_80"
+                android:layout_height="@dimen/sy_p_80"
+                android:layout_centerInParent="true"
+                android:src="@drawable/head_select"/>
+        </RelativeLayout>
     </RelativeLayout>
 
     <RelativeLayout
@@ -106,7 +115,7 @@
             android:layout_alignParentRight="true"
             />
 
-        <View
+        <RelativeLayout
             android:id="@+id/view_select_2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -115,6 +124,15 @@
             android:layout_alignTop="@id/img_head_2"
             android:layout_alignBottom="@id/img_head_2"
             android:background="#88aaaaaa"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:id="@+id/image_select_2"
+                android:layout_width="@dimen/sy_p_80"
+                android:layout_height="@dimen/sy_p_80"
+                android:layout_centerInParent="true"
+                android:src="@drawable/head_select"/>
+        </RelativeLayout>
     </RelativeLayout>
 </RelativeLayout>

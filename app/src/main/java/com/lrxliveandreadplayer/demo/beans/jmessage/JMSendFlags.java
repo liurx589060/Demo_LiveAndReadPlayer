@@ -37,6 +37,14 @@ public class JMSendFlags {
         isLast = last;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public enum MessageType {
         TYPE_SEND,
         TYPE_RESPONSE
@@ -46,4 +54,5 @@ public class JMSendFlags {
     private String roleType = "";
     private String gender = "";
     private boolean isLast;
+    private String userName = "";
 }

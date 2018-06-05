@@ -5,6 +5,7 @@
     android:background="#32b7b5">
 
     <RelativeLayout
+        android:id="@+id/view_root"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -47,9 +48,21 @@
             android:layout_below="@+id/line1"
             android:layout_alignParentLeft="true"
             />
+
+        <View
+            android:id="@+id/view_select"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignLeft="@id/img_head"
+            android:layout_alignRight="@id/img_head"
+            android:layout_alignTop="@id/img_head"
+            android:layout_alignBottom="@id/img_head"
+            android:background="#88aaaaaa"
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/view_root_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -92,5 +105,16 @@
             android:layout_below="@+id/line2"
             android:layout_alignParentRight="true"
             />
+
+        <View
+            android:id="@+id/view_select_2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignLeft="@id/img_head_2"
+            android:layout_alignRight="@id/img_head_2"
+            android:layout_alignTop="@id/img_head_2"
+            android:layout_alignBottom="@id/img_head_2"
+            android:background="#88aaaaaa"
+            android:visibility="gone"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -5,14 +5,18 @@ package com.lrxliveandreadplayer.demo.beans.jmessage;
  */
 
 public class JMChartRoomSendBean {
-    public static final int CHART_STATUS_MATCHING = 0x001;
-    public static final int CHART_STATUS_INTRO_MAN = 0x003;
-    public static final int CHART_STATUS_CHAT_FIRST = 0x004;
-    public static final int CHART_STATUS_CHAT_PERFORMANCE = 0x005;
-    public static final int CHART_STATUS_CHAT_SECOND = 0x006;
-    public static final int CHART_STATUS_CHAT_QUESTION = 0x007;
-    public static final int CHART_STATUS_ANGEL_DISTURB = 0x008;
-    public static final int CHART_STATUS_CHART_DOUBLE = 0x009;       //连麦
+    public static final int CHART_STATUS_MATCHING = 0x001;          //匹配
+    public static final int CHART_STATUS_INTRO_MAN = 0x002;         //男生自我介绍
+    public static final int CHART_STATUS_LADY_SELECT_FIRST = 0x003; //女生第一次选择
+    public static final int CHART_STATUS_INTRO_LADY = 0x004;        //女生聊天第一轮
+    public static final int CHART_STATUS_CHAT_PERFORMANCE = 0x005;  //男生才艺表演
+    public static final int CHART_STATUS_CHAT_SECOND = 0x006;       //女生聊天第二轮
+    public static final int CHART_STATUS_LADY_SELECT_SECOND = 0x007; //女生第二次选择
+    public static final int CHART_STATUS_CHAT_QUESTION = 0x008;     //问答环节
+    public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x009;  //男生第一次选择
+
+    public static final int CHART_STATUS_ANGEL_DISTURB = 0x020;     //爱心大使插话
+    public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0021;       //多人连麦
 
     public static final int LIVE_CAMERA = 0x101;
     public static final int LIVE_MIC = 0x102;

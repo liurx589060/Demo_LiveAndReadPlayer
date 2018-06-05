@@ -10,6 +10,7 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Administrator on 2018/5/31.
@@ -19,50 +20,130 @@ public class JMChartRoomController extends AbsRoomController{
     private IHanderRoomMessage listener;
     private int mCurrentStatus;
     private int mCompleteCount;
-    private int mCurrentIndex = -1;
+    private ArrayList<Integer> mRecievedIndexList = new ArrayList<>();
 
     public JMChartRoomController(IHanderRoomMessage iHanderRoomMessage) {
         this.listener = iHanderRoomMessage;
     }
 
-    public void handleRoomMessage(JMChartRoomSendBean chartRoomSendBean) {
-        if(listener == null) return;
+    /**
+     * 处理回复形式的消息
+     * @param chartRoomSendBean
+     */
+    private void handleResponse(JMChartRoomSendBean chartRoomSendBean) {
         Data data = DataManager.getInstance().getChartData();
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         Member selfMember = DataManager.getInstance().getSelfMember();
         JMSendFlags flags = new JMSendFlags();
         boolean isLast = false;
-        if(chartRoomSendBean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {
-            flags.setMessageType(chartRoomSendBean.getMessageType());
-            listener.onMessageHandler(chartRoomSendBean,flags);
-            return;
+
+        switch (chartRoomSendBean.getProcessStatus()) {
+            case JMChartRoomSendBean.CHART_STATUS_MATCHING:
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
+                //重复消息，不处理
+                if(mRecievedIndexList.contains(chartRoomSendBean.getIndexSelf())) {
+                    //假如重复的消息则不处理
+                    return;
+                }
+                mRecievedIndexList.add(chartRoomSendBean.getIndexSelf());
+                mCompleteCount++;
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
+                listener.onMessageHandler(chartRoomSendBean,flags);
         }
+
+    }
+
+    /**
+     * 处理发送形式的消息
+     * @param chartRoomSendBean
+     */
+    private void handleSend(JMChartRoomSendBean chartRoomSendBean) {
+        Data data = DataManager.getInstance().getChartData();
+        UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+        Member selfMember = DataManager.getInstance().getSelfMember();
+        JMSendFlags flags = new JMSendFlags();
+        boolean isLast = false;
 
         switch (chartRoomSendBean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_MATCHING:  //匹配阶段
-                mCurrentStatus = JMChartRoomSendBean.CHART_STATUS_MATCHING;
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                flags.setLast(checkIsLast(chartRoomSendBean));
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍环节
+                //重复消息，不处理
+                if(checkIsRepeat(chartRoomSendBean)) return;
+                mCompleteCount++;
+                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
-            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
-                if(chartRoomSendBean.getIndexNext() != mCurrentIndex) {
-                    mCompleteCount++;
-                    mCurrentIndex = chartRoomSendBean.getIndexNext();
-                }
-                mCurrentStatus = JMChartRoomSendBean.CHART_STATUS_INTRO_MAN;
-
-                int nextIndex = (chartRoomSendBean.getIndexNext())%data.getLimitMan();
-                chartRoomSendBean.setIndexNext(nextIndex);
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                flags.setLast(checkIsLast(chartRoomSendBean));
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
                 flags.setRoleType(Constant.ROLETYPE_GUEST);
                 flags.setGender(Constant.GENDER_MAN);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                flags.setGender(Constant.GENDER_LADY);
+                flags.setRoleType(Constant.ROLETYPE_GUEST);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
+                //重复消息，不处理
+                if(checkIsRepeat(chartRoomSendBean)) return;
+                mCompleteCount++;
+                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
+                flags.setGender(Constant.GENDER_LADY);
+                flags.setRoleType(Constant.ROLETYPE_GUEST);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                flags.setGender(Constant.GENDER_MAN);
+                flags.setRoleType(Constant.ROLETYPE_GUEST);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
         }
+    }
+
+    public void handleRoomMessage(JMChartRoomSendBean chartRoomSendBean) {
+        if(listener == null) return;
+        if(chartRoomSendBean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {
+            handleResponse(chartRoomSendBean);
+        }else if(chartRoomSendBean.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {
+            handleSend(chartRoomSendBean);
+        }
+    }
+
+    /**
+     * 检测是否重复
+     * @return
+     */
+    private boolean checkIsRepeat(JMChartRoomSendBean chartRoomSendBean) {
+        if(mRecievedIndexList.contains(chartRoomSendBean.getIndexNext())) {
+            //假如重复的消息则不处理
+            return true;
+        }
+        return false;
     }
 
     private boolean checkIsLast(JMChartRoomSendBean bean) {
@@ -76,13 +157,18 @@ public class JMChartRoomController extends AbsRoomController{
                 allCount = data.getLimitAngel() + data.getLimitMan() + data.getLimitLady();
                 isLast = data.getMembers().size()>=allCount?true:false;
                 break;
-
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
                 allCount = data.getLimitMan();
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+                allCount = data.getLimitLady();
+                isLast = mCompleteCount>=allCount?true:false;
+                break;
         }
         if(isLast) {
+            mRecievedIndexList.clear();
             mCompleteCount = 0;
         }
         return isLast;
@@ -114,5 +200,13 @@ public class JMChartRoomController extends AbsRoomController{
 
     public int getmCurrentStatus() {
         return mCurrentStatus;
+    }
+
+    public int getCurrentIndex() {
+        //返回最后一个
+        if(mRecievedIndexList.size() > 0) {
+            return mRecievedIndexList.get(mRecievedIndexList.size() - 1);
+        }
+        return -1;
     }
 }

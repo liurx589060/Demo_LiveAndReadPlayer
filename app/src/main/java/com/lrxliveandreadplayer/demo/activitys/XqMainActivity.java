@@ -181,7 +181,7 @@ public class XqMainActivity extends Activity {
         bean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_MATCHING);
         bean.setRoomId(data.getRoomId());
         bean.setTime(Tools.getCurrentDateTime());
-        bean.setMsg(selfInfo.getUser_name() + "进入房间");
+        bean.setMsg(selfInfo.getNick_name() + "进入房间");
         bean.setUserName(selfInfo.getUser_name());
         bean.setUpdateMembers(isUpdateMembers);
         bean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);

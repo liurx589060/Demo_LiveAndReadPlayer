@@ -95,7 +95,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private int mStartOrderIndex_intro_man = 0;
     private int mProgressStatus = -1;
     private AlertDialog mLadySelectDialog;
-    private boolean mLadySelecteResult;
+    private boolean mLadySelecteResult = true; //默认为都接受
     private ArrayList<String> mManSelectedResultList = new ArrayList<>();
 
     @Override
@@ -548,6 +548,8 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
                 case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
+                case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                     if(bean.getProcessStatus() != mProgressStatus) {
                         Tools.toast(mXqActivity,bean.getMsg(),false);
                         addSystemEventAndRefresh(bean);
@@ -564,6 +566,8 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                     addSystemEventAndRefresh(bean);
                     break;
             }
@@ -594,42 +598,34 @@ public class XqChartUIViewMg implements IXqChartView {
                         JMsgSender.sendRoomMessage(sendBean);
                     }
                     break;
-                case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男方自我介绍
-                    operate_IntroMan(bean,flags);
-                    break;
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                     operate_SelectLady(bean,flags);
                     break;
-                case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍环节
-                    operate_IntroLady(bean,flags);
-                    break;
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择环节
                     operate_SelectMan(bean,flags);
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
-                    operate_PerformanceMan(bean,flags);
-                    break;
-                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
-                    operate_SelectLady_Second(bean,flags);
-                    break;
                 case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
-                    operate_ChatLady_Second(bean,flags);
-                    break;
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
-                    operate_ChartAngel(bean,flags);
+                case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍环节
+                case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男方自我介绍
+                    operate_Timing(bean,flags);
                     break;
             }
 
         }else if (flags.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {//回复形式
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                     operate_SelectLady_Response(bean,flags);
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择环节
                     operate_SelectMan_Response(bean,flags);
-                    break;
-                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
-                    operate_SelectLady_Second_Response(bean,flags);
                     break;
             }
         }
@@ -641,110 +637,20 @@ public class XqChartUIViewMg implements IXqChartView {
      * @param flags
      */
     private void onOperateEnd(JMChartRoomSendBean bean,JMSendFlags flags) {
-        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-        UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
-
         switch (bean.getProcessStatus()) {
-            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
-                if(flags.isLast()) {
-                    //发送下一轮，女生第一次选择
-                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST);
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setMsg("进入第二环节，女生第一次选择");
-                    JMsgSender.sendRoomMessage(sendBean);
-                }else {
-                    sendBean.setProcessStatus(bean.getProcessStatus());
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
-                    JMsgSender.sendRoomMessage(sendBean);
-                }
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
+                operate_Order_End(bean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
-                //时间到，默认为接收
-                mLadySelecteResult = true;
-                mLadySelectDialog.dismiss();
-                //发送回应
-                sendBean.setProcessStatus(bean.getProcessStatus());
-                sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-                sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");
-                JMsgSender.sendRoomMessage(sendBean);
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
-                if(flags.isLast()) {
-                    //发送下一轮，男生第一次选择
-                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST);
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setMsg("进入第三轮，男生第一次选择");
-                    JMsgSender.sendRoomMessage(sendBean);
-                }else {
-                    sendBean.setProcessStatus(bean.getProcessStatus());
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
-                    JMsgSender.sendRoomMessage(sendBean);
-                }
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
-                //默认选择第一个
-                mManSelectedResultList.add(String.valueOf(0));
-                mMemberAdapter.changeNormalStatus();
-                //发送回应
-                sendBean.setProcessStatus(bean.getProcessStatus());
-                sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-                sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");
-                JMsgSender.sendRoomMessage(sendBean);
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
-                if(flags.isLast()) {
-                    //发送下一轮，女生第二次选择
-                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND);
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setMsg("进入第四环节，女生第二次选择");
-                    JMsgSender.sendRoomMessage(sendBean);
-                }else {
-                    sendBean.setProcessStatus(bean.getProcessStatus());
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
-                    JMsgSender.sendRoomMessage(sendBean);
-                }
-                break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
-                //时间到，默认为接收
-                mLadySelecteResult = true;
-                mLadySelectDialog.dismiss();
-                //发送回应
-                sendBean.setProcessStatus(bean.getProcessStatus());
-                sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-                sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");
-                JMsgSender.sendRoomMessage(sendBean);
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
-                if(flags.isLast()) {
-                    //发送下一轮，爱心大使有话说
-                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT);
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(0);
-                    sendBean.setMsg("进入第六轮，爱心大使有话说");
-                    JMsgSender.sendRoomMessage(sendBean);
-                }else {
-                    sendBean.setProcessStatus(bean.getProcessStatus());
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
-                    JMsgSender.sendRoomMessage(sendBean);
-                }
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
-                if(flags.isLast()) {
-                    //发送下一轮，请双方做出最终选择
-                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_SELECT_FINAL);
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setMsg("进入第七轮，最终选择");
-                    JMsgSender.sendRoomMessage(sendBean);
-                }else {
-                    sendBean.setProcessStatus(bean.getProcessStatus());
-                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
-                    JMsgSender.sendRoomMessage(sendBean);
-                }
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
+                operate_Response_End(bean,flags);
                 break;
         }
 
@@ -754,48 +660,11 @@ public class XqChartUIViewMg implements IXqChartView {
 
     /***********************************各个环节的操作**************************************/
     /**
-     * 男生自我介绍
-     * @param bean
-     * @param flags
-     */
-    private void operate_IntroMan(JMChartRoomSendBean bean,JMSendFlags flags) {
-        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
-        //先匹配是否为自己
-        if(checkIsSelf(bean,flags)) {
-            //发送回应
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(bean.getProcessStatus());
-            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
-            sendBean.setMsg(userInfo.getNick_name() + "--开始自我介绍");
-            JMsgSender.sendRoomMessage(sendBean);
-            //倒计时
-            startTiming(bean,flags);
-            //进行自我介绍
-            Tools.toast(mXqActivity,"自我介绍中",true);
-        }
-    }
-
-    /**
-     * 女生第一次选择
+     * 女生选择
      * @param bean
      * @param flags
      */
     private void operate_SelectLady(JMChartRoomSendBean bean,JMSendFlags flags) {
-        //先匹配是否为自己
-        if(checkIsSelf(bean,flags)) {
-            mLadySelectDialog = createLadySelectDialog(bean,flags);
-            mLadySelectDialog.show();
-            startTiming(bean,flags);
-        }
-    }
-
-    /**
-     * 女生第二次选择
-     * @param bean
-     * @param flags
-     */
-    private void operate_SelectLady_Second(JMChartRoomSendBean bean,JMSendFlags flags) {
         UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
 
         //先匹配是否为自己
@@ -813,6 +682,11 @@ public class XqChartUIViewMg implements IXqChartView {
         }
     }
 
+    /**
+     * 男生选择
+     * @param bean
+     * @param flags
+     */
     private void operate_SelectMan(JMChartRoomSendBean bean,JMSendFlags flags) {
         //先匹配是否为自己
         if(checkIsSelf(bean,flags)) {
@@ -823,151 +697,202 @@ public class XqChartUIViewMg implements IXqChartView {
     }
 
     /**
-     * 女生第一次选择回复
+     * 女生选择回复
      * @param bean
      * @param flags
      */
     private void operate_SelectLady_Response(JMChartRoomSendBean bean,JMSendFlags flags) {
+        int nextProgress = -1;
+        int nextIndex = mStartOrderIndex_intro_lady;
+        String msg = "";
+        switch (bean.getProcessStatus()){
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_INTRO_LADY;
+                msg = "进入第三个环节，女生自我介绍";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
+                msg = "爱心大使有话说";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION;
+                msg = "问答环节";
+                break;
+        }
         //已经最后一个有回复了
         if(flags.isLast()) {
             //进入下一个环节,女生自我介绍
             JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_INTRO_LADY);
+            sendBean.setProcessStatus(nextProgress);
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-            sendBean.setIndexNext(mStartOrderIndex_intro_lady);
-            sendBean.setMsg("进入第三个环节，女生自我介绍");
+            sendBean.setIndexNext(nextIndex);
+            sendBean.setMsg(msg);
             JMsgSender.sendRoomMessage(sendBean);
         }
     }
 
     /**
-     * 女生第二次选择回复
-     * @param bean
-     * @param flags
-     */
-    private void operate_SelectLady_Second_Response(JMChartRoomSendBean bean,JMSendFlags flags) {
-        //已经最后一个有回复了
-        if(flags.isLast()) {
-            //进入下一个环节,女生第二轮发言
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND);
-            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-            sendBean.setIndexNext(mStartOrderIndex_intro_lady);
-            sendBean.setMsg("进入第五个环节，女生第二轮发言");
-            JMsgSender.sendRoomMessage(sendBean);
-        }
-    }
-
-    /**
-     * 男生第一次选择回复
+     * 男生选择回复
      * @param bean
      * @param flags
      */
     private void operate_SelectMan_Response(JMChartRoomSendBean bean,JMSendFlags flags) {
+        int nextProgress = -1;
+        int nextIndex = mStartOrderIndex_intro_man;
+        String msg = "";
+        switch (bean.getProcessStatus()){
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE;
+                msg = "进入第四个环节，男生才艺表演";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL;
+                msg = "女生最终选择";
+                break;
+        }
         //已经最后一个有回复了
         if(flags.isLast()) {
             //进入下一个环节,男生才艺表演
             JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE);
+            sendBean.setProcessStatus(nextProgress);
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-            sendBean.setIndexNext(mStartOrderIndex_intro_man);
-            sendBean.setMsg("进入第四个环节，男生才艺表演");
+            sendBean.setIndexNext(nextIndex);
+            sendBean.setMsg(msg);
             JMsgSender.sendRoomMessage(sendBean);
         }
     }
 
     /**
-     * 女生自我介绍
+     * 倒计时操作
      * @param bean
      * @param flags
      */
-    private void operate_IntroLady(JMChartRoomSendBean bean,JMSendFlags flags) {
+    private void operate_Timing(JMChartRoomSendBean bean,JMSendFlags flags) {
         UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
+        String msg = "";
+        switch (bean.getProcessStatus()) {
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+                msg = userInfo.getNick_name() + "--开始自我介绍";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
+                msg = userInfo.getNick_name() + "--说话";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
+                msg = userInfo.getNick_name() + "--开始才艺表演";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+                msg = userInfo.getNick_name() + "--爱心大使说话";
+                break;
+        }
+
         //先匹配是否为自己
         if(checkIsSelf(bean,flags)) {
             //发送回应
             JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
             sendBean.setProcessStatus(bean.getProcessStatus());
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
-            sendBean.setMsg(userInfo.getNick_name() + "--开始自我介绍");
+            sendBean.setLiveType(JMChartRoomSendBean.LIVE_MIC);//默认语音
+            sendBean.setMsg(msg);
             JMsgSender.sendRoomMessage(sendBean);
             //倒计时
             startTiming(bean,flags);
             //进行自我介绍
-            Tools.toast(mXqActivity,"自我介绍中",true);
+            Tools.toast(mXqActivity,msg,true);
         }
     }
 
     /**
-     * 女生第二次谈话
+     * 倒计时结束轮流的操作
      * @param bean
      * @param flags
      */
-    private void operate_ChatLady_Second(JMChartRoomSendBean bean,JMSendFlags flags) {
-        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
-        //先匹配是否为自己
-        if(checkIsSelf(bean,flags)) {
-            //发送回应
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(bean.getProcessStatus());
-            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
-            sendBean.setMsg(userInfo.getNick_name() + "--说话");
+    private void operate_Order_End(JMChartRoomSendBean bean,JMSendFlags flags) {
+        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+
+        int startIndex = 0;
+        int nextProgress = -1;
+        String msg = "";
+        switch (bean.getProcessStatus()) {
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST;
+                startIndex = mStartOrderIndex_intro_lady;
+                msg = "进入第一环节，女生自我介绍";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST;
+                msg = "进入第三轮，男生第一次选择";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND;
+                msg = "进入第四环节，女生第二次选择";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
+                msg = "进入第六轮，爱心大使有话说";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+                nextProgress = JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND;
+                msg = "请男生选择心动女生";
+                break;
+        }
+
+        if(flags.isLast()) {
+            //发送下一轮，请男生选择心动女生
+            sendBean.setProcessStatus(nextProgress);
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+            sendBean.setMsg(msg);
+            sendBean.setIndexNext(startIndex);
             JMsgSender.sendRoomMessage(sendBean);
-            //倒计时
-            startTiming(bean,flags);
-            //进行自我介绍
-            Tools.toast(mXqActivity,"女生第二次谈话",true);
+        }else {
+            sendBean.setProcessStatus(bean.getProcessStatus());
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+            sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
+            JMsgSender.sendRoomMessage(sendBean);
         }
     }
 
     /**
-     * 男生才艺表演
+     * 时间结束做出回应
      * @param bean
      * @param flags
      */
-    private void operate_PerformanceMan(JMChartRoomSendBean bean,JMSendFlags flags) {
-        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
-        //先匹配是否为自己
-        if(checkIsSelf(bean,flags)) {
-            //发送回应
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(bean.getProcessStatus());
-            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
-            sendBean.setMsg(userInfo.getNick_name() + "--开始才艺表演");
-            JMsgSender.sendRoomMessage(sendBean);
-            //倒计时
-            startTiming(bean,flags);
-            //进行自我介绍
-            Tools.toast(mXqActivity,"才艺表演",true);
-        }
-    }
+    private void operate_Response_End(JMChartRoomSendBean bean,JMSendFlags flags) {
+        UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
 
-    /**
-     * 爱心大使有话说
-     * @param bean
-     * @param flags
-     */
-    private void operate_ChartAngel(JMChartRoomSendBean bean,JMSendFlags flags) {
-        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
-        //先匹配是否为自己
-        if(checkIsSelf(bean,flags)) {
-            //发送回应
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-            sendBean.setProcessStatus(bean.getProcessStatus());
-            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
-            sendBean.setMsg(userInfo.getNick_name() + "--爱心大使说话");
-            JMsgSender.sendRoomMessage(sendBean);
-            //倒计时
-            startTiming(bean,flags);
-            //进行自我介绍
-            Tools.toast(mXqActivity,"说话中",true);
+        switch (bean.getProcessStatus()) {
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
+                //时间到，默认为接收
+                if(!mLadySelecteResult) {
+                    mLadySelecteResult = true;
+                }
+                mLadySelectDialog.dismiss();
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
+                //默认选择第一个
+                mManSelectedResultList.add(String.valueOf(0));
+                mMemberAdapter.changeNormalStatus();
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
+                //默认选择第一个
+                for(int i = 0 ; i < mManMembersMap.size();i++) {
+                    if(!mManSelectedResultList.contains(i)) {
+                        mManSelectedResultList.add(String.valueOf(i));
+                        break;
+                    }
+                }
+                mMemberAdapter.changeNormalStatus();
+                break;
         }
+        //发送回应
+        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+        sendBean.setProcessStatus(bean.getProcessStatus());
+        sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
+        sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");
+        JMsgSender.sendRoomMessage(sendBean);
     }
-
     /***********************************各个环节的操作**************************************/
 
     private AlertDialog createLadySelectDialog(final JMChartRoomSendBean bean, final JMSendFlags flags) {
@@ -1049,13 +974,14 @@ public class XqChartUIViewMg implements IXqChartView {
                 @Override
                 public void run() {
                     timeCount++;
-                    mHandler.postDelayed(this,1000);
                     int time = 0;
                     switch (bean.getProcessStatus()) {
                         case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
                             time = mCountDownTime_intro_man - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
+                        case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND:
+                        case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL:
                             time = mCountDownTime_ladySelect_first - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
@@ -1063,6 +989,7 @@ public class XqChartUIViewMg implements IXqChartView {
                             time = mCountDownTime_intro_lady - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
+                        case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
                             time = mCountDownTime_ManSelect_first - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
@@ -1076,10 +1003,12 @@ public class XqChartUIViewMg implements IXqChartView {
                     if(time > 0) {
                         mTextCountDown.setText(String.valueOf(time));
                         mTextCountDown.setVisibility(View.VISIBLE);
+                        mHandler.postDelayed(this,1000);//下一次循环
                     }else {
                         //自行操作结束
                         onOperateEnd(bean,flags);
                         mTextCountDown.setVisibility(View.INVISIBLE);
+                        stopTiming();//停止循环
                     }
                 }
             };

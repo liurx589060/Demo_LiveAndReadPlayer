@@ -48,6 +48,8 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 //重复消息，不处理
                 if(mRecievedIndexList.contains(chartRoomSendBean.getIndexSelf())) {
                     //假如重复的消息则不处理
@@ -106,6 +108,7 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
                 //重复消息，不处理
                 if(checkIsRepeat(chartRoomSendBean)) return;
                 mCompleteCount++;
@@ -120,6 +123,7 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -142,23 +146,10 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                flags.setGender(Constant.GENDER_LADY);
-                flags.setRoleType(Constant.ROLETYPE_GUEST);
-                listener.onMessageHandler(chartRoomSendBean,flags);
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
-                //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
-                mCurrentStatus = chartRoomSendBean.getProcessStatus();
-
-                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                isLast = checkIsLast(chartRoomSendBean);
-                flags.setLast(isLast);
                 flags.setGender(Constant.GENDER_LADY);
                 flags.setRoleType(Constant.ROLETYPE_GUEST);
                 listener.onMessageHandler(chartRoomSendBean,flags);

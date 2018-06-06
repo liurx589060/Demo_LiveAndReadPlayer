@@ -61,6 +61,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private final int mCountDownTime_ladySelect_first = 10;
     private final int mCountDownTime_intro_lady = 120;
     private final int mCountDownTime_peformance_man = 180;
+    private final int mCountDownTime_chart_angel = 180;
     private final int mCountDownTime_ManSelect_first = 20;
     private final int mPrepareTime = 5;
     private final int mCountManSelect = 1;
@@ -545,6 +546,8 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
+                case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
                     if(bean.getProcessStatus() != mProgressStatus) {
                         Tools.toast(mXqActivity,bean.getMsg(),false);
                         addSystemEventAndRefresh(bean);
@@ -560,6 +563,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次选择环节
                     addSystemEventAndRefresh(bean);
                     break;
             }
@@ -607,6 +611,12 @@ public class XqChartUIViewMg implements IXqChartView {
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
                     operate_SelectLady_Second(bean,flags);
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
+                    operate_ChatLady_Second(bean,flags);
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
+                    operate_ChartAngel(bean,flags);
                     break;
             }
 
@@ -706,6 +716,35 @@ public class XqChartUIViewMg implements IXqChartView {
                 sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
                 sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");
                 JMsgSender.sendRoomMessage(sendBean);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
+                if(flags.isLast()) {
+                    //发送下一轮，爱心大使有话说
+                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT);
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setIndexNext(0);
+                    sendBean.setMsg("进入第六轮，爱心大使有话说");
+                    JMsgSender.sendRoomMessage(sendBean);
+                }else {
+                    sendBean.setProcessStatus(bean.getProcessStatus());
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
+                    JMsgSender.sendRoomMessage(sendBean);
+                }
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
+                if(flags.isLast()) {
+                    //发送下一轮，请双方做出最终选择
+                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_SELECT_FINAL);
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setMsg("进入第七轮，最终选择");
+                    JMsgSender.sendRoomMessage(sendBean);
+                }else {
+                    sendBean.setProcessStatus(bean.getProcessStatus());
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setIndexNext(sendBean.getIndexSelf() + 1);
+                    JMsgSender.sendRoomMessage(sendBean);
+                }
                 break;
         }
 
@@ -861,6 +900,29 @@ public class XqChartUIViewMg implements IXqChartView {
     }
 
     /**
+     * 女生第二次谈话
+     * @param bean
+     * @param flags
+     */
+    private void operate_ChatLady_Second(JMChartRoomSendBean bean,JMSendFlags flags) {
+        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
+        //先匹配是否为自己
+        if(checkIsSelf(bean,flags)) {
+            //发送回应
+            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+            sendBean.setProcessStatus(bean.getProcessStatus());
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
+            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
+            sendBean.setMsg(userInfo.getNick_name() + "--说话");
+            JMsgSender.sendRoomMessage(sendBean);
+            //倒计时
+            startTiming(bean,flags);
+            //进行自我介绍
+            Tools.toast(mXqActivity,"女生第二次谈话",true);
+        }
+    }
+
+    /**
      * 男生才艺表演
      * @param bean
      * @param flags
@@ -879,7 +941,30 @@ public class XqChartUIViewMg implements IXqChartView {
             //倒计时
             startTiming(bean,flags);
             //进行自我介绍
-            Tools.toast(mXqActivity,"自我介绍中",true);
+            Tools.toast(mXqActivity,"才艺表演",true);
+        }
+    }
+
+    /**
+     * 爱心大使有话说
+     * @param bean
+     * @param flags
+     */
+    private void operate_ChartAngel(JMChartRoomSendBean bean,JMSendFlags flags) {
+        UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
+        //先匹配是否为自己
+        if(checkIsSelf(bean,flags)) {
+            //发送回应
+            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+            sendBean.setProcessStatus(bean.getProcessStatus());
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
+            sendBean.setLiveType(JMChartRoomSendBean.LIVE_NONE);//无任何途径的直播
+            sendBean.setMsg(userInfo.getNick_name() + "--爱心大使说话");
+            JMsgSender.sendRoomMessage(sendBean);
+            //倒计时
+            startTiming(bean,flags);
+            //进行自我介绍
+            Tools.toast(mXqActivity,"说话中",true);
         }
     }
 
@@ -927,6 +1012,7 @@ public class XqChartUIViewMg implements IXqChartView {
         int nextIndex = -1;
         int selfIndex = DataManager.getInstance().getSelfMember().getIndex();
         Data data = DataManager.getInstance().getChartData();
+        UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_MATCHING:
                 break;
@@ -943,9 +1029,11 @@ public class XqChartUIViewMg implements IXqChartView {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
                 nextIndex = bean.getIndexNext()%data.getLimitLady();
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+                flags.setGender(userInfoBean.getGender());
+                break;
         }
 
-        UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         if(flags.getGender().equals(userInfoBean.getGender())
                 &&flags.getRoleType().equals(userInfoBean.getRole_type())
                 &&selfIndex == nextIndex) {
@@ -971,6 +1059,7 @@ public class XqChartUIViewMg implements IXqChartView {
                             time = mCountDownTime_ladySelect_first - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+                        case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
                             time = mCountDownTime_intro_lady - timeCount;
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
@@ -978,6 +1067,9 @@ public class XqChartUIViewMg implements IXqChartView {
                             break;
                         case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
                             time = mCountDownTime_peformance_man - timeCount;
+                            break;
+                        case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+                            time = mCountDownTime_chart_angel - timeCount;
                             break;
                     }
 

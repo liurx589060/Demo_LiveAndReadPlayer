@@ -40,6 +40,9 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_MATCHING:
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
+            case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
@@ -146,6 +149,33 @@ public class JMChartRoomController extends AbsRoomController{
                 flags.setRoleType(Constant.ROLETYPE_GUEST);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
+                //重复消息，不处理
+                if(checkIsRepeat(chartRoomSendBean)) return;
+                mCompleteCount++;
+                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
+                flags.setGender(Constant.GENDER_LADY);
+                flags.setRoleType(Constant.ROLETYPE_GUEST);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使说话
+                //重复消息，不处理
+                if(checkIsRepeat(chartRoomSendBean)) return;
+                mCompleteCount++;
+                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                isLast = checkIsLast(chartRoomSendBean);
+                flags.setLast(isLast);
+                flags.setRoleType(Constant.ROLRTYPE_ANGEL);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
         }
     }
 
@@ -190,7 +220,12 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND:
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
                 allCount = data.getLimitLady();
+                isLast = mCompleteCount>=allCount?true:false;
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+                allCount = data.getLimitAngel();
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
         }

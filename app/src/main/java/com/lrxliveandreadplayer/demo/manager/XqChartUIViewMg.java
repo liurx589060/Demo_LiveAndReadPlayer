@@ -37,7 +37,9 @@ import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +103,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private AlertDialog mLadySelectDialog;
     private boolean mLadySelecteResult = true; //默认为都接受
     private ArrayList<String> mManSelectedResultList = new ArrayList<>();
+    private ArrayList<String> mLadySelectedResultList = new ArrayList<>();
 
     @Override
     public View createView() {
@@ -557,6 +560,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
+                case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://结束
                     if(bean.getProcessStatus() != mProgressStatus) {
                         Tools.toast(mXqActivity,bean.getMsg(),false);
                         addSystemEventAndRefresh(bean);
@@ -624,6 +628,9 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                     operate_Timing(bean,flags);
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://结束
+                    operate_Final(bean,flags);
                     break;
             }
 
@@ -731,6 +738,12 @@ public class XqChartUIViewMg implements IXqChartView {
                 msg = "爱心大使有话说";
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL:
+                if(bean.isLadySelected()) {//收集其他女人的答案
+                    mLadySelectedResultList.add(String.valueOf(bean.getIndexSelf()));
+                }
+                if(mLadySelecteResult) {//收集自己的答案
+                    mLadySelectedResultList.add(String.valueOf(bean.getIndexSelf()));
+                }
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN;
                 msg = "问答环节，男生";
                 break;
@@ -784,7 +797,24 @@ public class XqChartUIViewMg implements IXqChartView {
      * @param flags
      */
     private void operate_SelectMan_Final_Response(JMChartRoomSendBean bean,JMSendFlags flags) {
-        89
+        //已经最后一个有回复了
+        if(flags.isLast()) {
+            String selectStr = "";
+            for(String index:mManSelectedResultList) {
+                selectStr += index;
+                selectStr += ",";
+            }
+            //进入下一个环节,男生才艺表演
+            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL);
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+            sendBean.setManSelects(selectStr);//男生的选择
+            sendBean.setMsg("流程结束，即将退出");
+            JMsgSender.sendRoomMessage(sendBean);
+
+            //响应最后
+            onOperateStart(sendBean,new JMSendFlags());
+        }
     }
 
     /**
@@ -794,6 +824,7 @@ public class XqChartUIViewMg implements IXqChartView {
      */
     private void operate_Timing(JMChartRoomSendBean bean,JMSendFlags flags) {
         UserInfoBean userInfo = DataManager.getInstance().getUserInfo();
+        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
         String msg = "";
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
@@ -814,6 +845,14 @@ public class XqChartUIViewMg implements IXqChartView {
                 }else if (mQuestionNum == 1) {
                     msg = userInfo.getNick_name() + "男生第二次提问";
                 }
+                String selectStr = "";
+                for(String index:mManSelectedResultList) {
+                    selectStr += index;
+                    selectStr += ",";
+                }
+                bean.setManSelects(selectStr);
+                //更新数据
+                mMemberAdapter.notifyDataSetChanged();
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY:
                 msg = userInfo.getNick_name() + "女生回答";
@@ -823,7 +862,6 @@ public class XqChartUIViewMg implements IXqChartView {
         //先匹配是否为自己
         if(checkIsSelf(bean,flags)) {
             //发送回应
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
             sendBean.setProcessStatus(bean.getProcessStatus());
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
             sendBean.setLiveType(JMChartRoomSendBean.LIVE_MIC);//默认语音
@@ -834,6 +872,19 @@ public class XqChartUIViewMg implements IXqChartView {
             //进行自我介绍
             Tools.toast(mXqActivity,msg,true);
         }
+    }
+
+    /**
+     * 流程结束
+     * @param bean
+     * @param flags
+     */
+    private void operate_Final(JMChartRoomSendBean bean,JMSendFlags flags) {
+        ArrayList<String> manSelectList = (ArrayList<String>) Arrays.asList(bean.getManSelects().split(","));
+        mManSelectedResultList.clear();
+        mManSelectedResultList.addAll(manSelectList);
+        //更新
+        mMemberAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -917,6 +968,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private void operate_Response_End(JMChartRoomSendBean bean,JMSendFlags flags) {
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
 
+        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
@@ -926,6 +978,9 @@ public class XqChartUIViewMg implements IXqChartView {
                     mLadySelecteResult = true;
                 }
                 mLadySelectDialog.dismiss();
+                if(bean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL) {
+                    sendBean.setLadySelected(mLadySelecteResult);
+                }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
                 //默认选择第一个
@@ -949,7 +1004,6 @@ public class XqChartUIViewMg implements IXqChartView {
                 break;
         }
         //发送回应
-        JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
         sendBean.setProcessStatus(bean.getProcessStatus());
         sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
         sendBean.setMsg(userInfoBean.getNick_name() + "--已做出选择");

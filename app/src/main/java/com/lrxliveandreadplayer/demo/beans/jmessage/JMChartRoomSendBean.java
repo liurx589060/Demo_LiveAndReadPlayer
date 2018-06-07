@@ -19,6 +19,7 @@ public class JMChartRoomSendBean {
     public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x012;  //男生第一次选择
     public static final int CHART_STATUS_MAN_SELECT_SECOND = 0x013;  //男生第二次选择
     public static final int CHART_STATUS_MAN_SELECT_FINAL = 0x014;  //男生最终选择
+    public static final int CHART_STATUS_CHAT_FINAL = 0x015;  //结束
 
     public static final int CHART_STATUS_ANGEL_DISTURB = 0x020;     //爱心大使插话
     public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0021;       //多人连麦
@@ -40,6 +41,8 @@ public class JMChartRoomSendBean {
     private boolean isUpdateMembers = false;
     private int liveType = LIVE_NONE;
     private JMSendFlags.MessageType messageType;
+    private boolean isLadySelected;
+    private String manSelects = "";
 
     public int getProcessStatus() {
         return processStatus;
@@ -143,5 +146,21 @@ public class JMChartRoomSendBean {
 
     public void setMessageType(JMSendFlags.MessageType messageType) {
         this.messageType = messageType;
+    }
+
+    public String getManSelects() {
+        return manSelects;
+    }
+
+    public void setManSelects(String manSelects) {
+        this.manSelects = manSelects;
+    }
+
+    public boolean isLadySelected() {
+        return isLadySelected;
+    }
+
+    public void setLadySelected(boolean ladySelected) {
+        isLadySelected = ladySelected;
     }
 }

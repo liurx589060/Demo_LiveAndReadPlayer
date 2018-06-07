@@ -158,6 +158,16 @@ public class JMChartRoomController extends AbsRoomController{
                 flags.setRoleType(Constant.ROLRTYPE_ANGEL);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://流程结束
+                //重复消息，不处理
+                if(checkIsRepeat(chartRoomSendBean)) return;
+                mCompleteCount++;
+                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
         }
     }
 

@@ -50,6 +50,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
                 //重复消息，不处理
                 if(mRecievedIndexList.contains(chartRoomSendBean.getIndexSelf())) {
                     //假如重复的消息则不处理
@@ -86,6 +87,8 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍环节
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 //重复消息，不处理
                 if(checkIsRepeat(chartRoomSendBean)) return;
                 mCompleteCount++;
@@ -109,6 +112,7 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 //重复消息，不处理
                 if(checkIsRepeat(chartRoomSendBean)) return;
                 mCompleteCount++;
@@ -124,25 +128,12 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
                 flags.setGender(Constant.GENDER_MAN);
                 flags.setRoleType(Constant.ROLETYPE_GUEST);
-                listener.onMessageHandler(chartRoomSendBean,flags);
-                break;
-            case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
-                //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
-                mCurrentStatus = chartRoomSendBean.getProcessStatus();
-
-                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-                isLast = checkIsLast(chartRoomSendBean);
-                flags.setLast(isLast);
-                flags.setRoleType(Constant.ROLETYPE_GUEST);
-                flags.setGender(Constant.GENDER_MAN);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
@@ -204,6 +195,8 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL:
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
                 allCount = data.getLimitMan();
                 isLast = mCompleteCount>=allCount?true:false;
@@ -217,6 +210,9 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
                 allCount = data.getLimitAngel();
+                isLast = mCompleteCount>=allCount?true:false;
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
+                allCount = 2;//最后剩下两位被选中的女生
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
         }

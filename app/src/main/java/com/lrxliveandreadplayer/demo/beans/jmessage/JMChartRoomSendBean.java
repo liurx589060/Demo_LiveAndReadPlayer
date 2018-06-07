@@ -14,9 +14,11 @@ public class JMChartRoomSendBean {
     public static final int CHART_STATUS_LADY_CHAT_SECOND = 0x007;       //女生聊天第二轮
     public static final int CHART_STATUS_ANGEL_CHAT = 0x008;     //爱心大使有话说
     public static final int CHART_STATUS_LADY_SELECT_FINAL = 0x009;     //最终选择
-    public static final int CHART_STATUS_CHAT_QUESTION = 0x010;     //问答环节
-    public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x011;  //男生第一次选择
-    public static final int CHART_STATUS_MAN_SELECT_SECOND = 0x012;  //男生第二次选择
+    public static final int CHART_STATUS_CHAT_QUESTION_MAN = 0x010;     //问答环节,男生
+    public static final int CHART_STATUS_CHAT_QUESTION_LADY = 0x011;     //问答环节,女生
+    public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x012;  //男生第一次选择
+    public static final int CHART_STATUS_MAN_SELECT_SECOND = 0x013;  //男生第二次选择
+    public static final int CHART_STATUS_MAN_SELECT_FINAL = 0x014;  //男生最终选择
 
     public static final int CHART_STATUS_ANGEL_DISTURB = 0x020;     //爱心大使插话
     public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0021;       //多人连麦

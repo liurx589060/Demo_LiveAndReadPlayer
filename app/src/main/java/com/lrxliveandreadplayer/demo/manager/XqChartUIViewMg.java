@@ -29,6 +29,7 @@ import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
 import com.lrxliveandreadplayer.demo.glide.GlideCircleTransform;
 import com.lrxliveandreadplayer.demo.interfaces.IHanderRoomMessage;
 import com.lrxliveandreadplayer.demo.interfaces.IPopupAngelListener;
+import com.lrxliveandreadplayer.demo.interfaces.IPopupGuestListener;
 import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
@@ -52,6 +53,10 @@ import cn.jpush.im.android.api.model.Message;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.lrxliveandreadplayer.demo.manager.PopupViewMg.LiveType.LIVE_MIC;
+import static com.lrxliveandreadplayer.demo.manager.PopupViewMg.LiveType.LIVE_NONE;
+import static com.lrxliveandreadplayer.demo.manager.PopupViewMg.LiveType.LIVE_VIDEO;
 
 /**
  * Created by Administrator on 2018/5/26.
@@ -92,6 +97,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private SystemRecyclerdapter mSystemAdapter;
 
     private AbsRoomController mChartRoomController;
+    private PopupViewMg mPopupViewMg;
     private Handler mHandler;
     private Runnable mTimeRunnable;
     private int timeCount = 0;
@@ -153,6 +159,8 @@ public class XqChartUIViewMg implements IXqChartView {
         mSystemEventList = new ArrayList<>();
         mHandler = new Handler();
         SPACE_TOP = Tools.dip2px(mXqActivity,10);
+        mChartRoomController = new JMChartRoomController(handerRoomMessageListener);
+        mPopupViewMg = new PopupViewMg();
 
         mRootView = LayoutInflater.from(mXqActivity).inflate(R.layout.layout_chart_ui,null);
         mRecyclerMembers = mRootView.findViewById(R.id.recycle_chart_members);
@@ -180,8 +188,6 @@ public class XqChartUIViewMg implements IXqChartView {
         initAngelManViewInstance();
         initMemberRecyclerView();
         initSystemRecyclerView();
-
-        mChartRoomController = new JMChartRoomController(handerRoomMessageListener);
 
         upDataMembers();
         JMessageClient.registerEventReceiver(this);
@@ -211,9 +217,9 @@ public class XqChartUIViewMg implements IXqChartView {
                 }
                 if(mProgressStatus == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
                         || mProgressStatus == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
-                    PopupViewMg.getInstance().showAngelPopupView(mXqActivity, mAngelViewInstance.mImgHead, new IPopupAngelListener() {
+                    mPopupViewMg.showAngelPopupView(mXqActivity, mAngelViewInstance.mImgHead, new IPopupAngelListener() {
                         @Override
-                        public void onDisturb(Button button) {
+                        public void onDisturb(View view1) {
                             //发送插话
                             JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
                             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -244,8 +250,45 @@ public class XqChartUIViewMg implements IXqChartView {
                             || mProgressStatus != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN) {
                         return;
                     }
-                    5699
+                    showGuestPopWindow(view);
                 }
+            }
+        });
+    }
+
+    /**
+     * 显示嘉宾的弹窗
+     * @param showView
+     */
+    private void showGuestPopWindow(View showView) {
+        final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+        mPopupViewMg.showGuestPopupView(mXqActivity, showView, PopupViewMg.Position.RIGHT, new IPopupGuestListener() {
+            @Override
+            public void onType(View view, PopupViewMg.LiveType liveType) {
+                //发送直播方式更改
+                JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+                sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE);
+                int type = JMChartRoomSendBean.LIVE_NONE;
+                String liveStr = "";
+                switch (liveType) {
+                    case LIVE_VIDEO:
+                        type = JMChartRoomSendBean.LIVE_CAMERA;
+                        liveStr = "相机";
+                        break;
+                    case LIVE_MIC:
+                        type = JMChartRoomSendBean.LIVE_MIC;
+                        liveStr = "音频";
+                        break;
+                    case LIVE_NONE:
+                        type = JMChartRoomSendBean.LIVE_NONE;
+                        liveStr = "不使用";
+                        break;
+                }
+                sendBean.setLiveType(type);
+                sendBean.setMsg(userInfoBean.getNick_name() + "更改直播方式--" + liveStr);
+                JMsgSender.sendRoomMessage(sendBean);
+                Tools.toast(mXqActivity,"您更改直播方式为--" + liveStr,false);
             }
         });
     }
@@ -466,6 +509,10 @@ public class XqChartUIViewMg implements IXqChartView {
                         //停止计时
                         stopTiming();
                         changeNormalStatus();
+                    }else if (userInfoBean.getRole_type().equals(Constant.ROLETYPE_GUEST)
+                            && userInfoBean.getGender().equals(Constant.GENDER_LADY)
+                            && index == DataManager.getInstance().getSelfMember().getIndex()) {//女生并且是自己
+                        showGuestPopWindow(view);
                     }
                 }
             });
@@ -631,6 +678,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
+                case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://更改直播方式
                     //更新系统事件
                     addSystemEventAndRefresh(bean);
                     break;
@@ -655,7 +703,8 @@ public class XqChartUIViewMg implements IXqChartView {
             }
 
             if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
-                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING) {
+                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING
+                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE) {
                 mCurrentRoomSendBean = bean;
             }
 
@@ -734,6 +783,9 @@ public class XqChartUIViewMg implements IXqChartView {
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
                     mAngelIsDistub = true;
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://爱心大使插话
+                    operate_LiveType(bean,flags);
                     break;
             }
 
@@ -992,6 +1044,15 @@ public class XqChartUIViewMg implements IXqChartView {
         mManSelectedResultList.addAll(manSelectList);
         //更新
         mMemberAdapter.changeSelectStatus();
+    }
+
+    /**
+     * 直播方式更改
+     * @param bean
+     * @param flags
+     */
+    private void operate_LiveType(JMChartRoomSendBean bean,JMSendFlags flags) {
+        Tools.toast(mXqActivity,bean.getMsg(),false);
     }
 
     /**

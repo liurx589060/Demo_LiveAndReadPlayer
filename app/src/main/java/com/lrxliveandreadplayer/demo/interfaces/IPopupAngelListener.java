@@ -1,7 +1,7 @@
 package com.lrxliveandreadplayer.demo.interfaces;
 
-import android.widget.Button;
+import android.view.View;
 
 public interface IPopupAngelListener {
-    void onDisturb(Button button);
+    void onDisturb(View view);
 }

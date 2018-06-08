@@ -21,8 +21,9 @@ public class JMChartRoomSendBean {
     public static final int CHART_STATUS_MAN_SELECT_FINAL = 0x014;  //男生最终选择
     public static final int CHART_STATUS_CHAT_FINAL = 0x015;  //结束
 
-    public static final int CHART_STATUS_ANGEL_DISTURB = 0x020;     //爱心大使插话
-    public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0021;       //多人连麦
+    public static final int CHART_STATUS_ANGEL_QUEST_DISTURB = 0x020;             //爱心要求大使插话
+    public static final int CHART_STATUS_ANGEL_DISTURBING = 0x021;             //爱心大使插话
+    public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0022;       //多人连麦
 
     public static final int LIVE_CAMERA = 0x101;
     public static final int LIVE_MIC = 0x102;

@@ -43,6 +43,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
@@ -146,6 +147,7 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使说话
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                 //重复消息，不处理
                 if(checkIsRepeat(chartRoomSendBean)) return;
                 mCompleteCount++;
@@ -163,6 +165,12 @@ public class JMChartRoomController extends AbsRoomController{
                 if(checkIsRepeat(chartRoomSendBean)) return;
                 mCompleteCount++;
                 mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使要插话
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -219,6 +227,7 @@ public class JMChartRoomController extends AbsRoomController{
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
                 allCount = data.getLimitAngel();
                 isLast = mCompleteCount>=allCount?true:false;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生

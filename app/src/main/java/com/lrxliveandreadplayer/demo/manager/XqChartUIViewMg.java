@@ -28,6 +28,7 @@ import com.lrxliveandreadplayer.demo.beans.jmessage.UserInfo;
 import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
 import com.lrxliveandreadplayer.demo.glide.GlideCircleTransform;
 import com.lrxliveandreadplayer.demo.interfaces.IHanderRoomMessage;
+import com.lrxliveandreadplayer.demo.interfaces.IPopupAngelListener;
 import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
@@ -59,6 +60,7 @@ import io.reactivex.schedulers.Schedulers;
 public class XqChartUIViewMg implements IXqChartView {
     private View mRootView;
     private int SPACE_TOP = 0;
+    private int ANGEL_DISTURB_COUNT = 3;
     private final int QUESTION_COUNT = 2;//两轮问答
     private final int mCountDownTime_intro_man = 180;
     private final int mCountDownTime_ladySelect_first = 10;
@@ -68,8 +70,6 @@ public class XqChartUIViewMg implements IXqChartView {
     private final int mCountDownTime_ManSelect_first = 20;
     private final int mCountDownTime_Question_man = 60;
     private final int mCountDownTime_Question_lady = 120;
-    private final int mPrepareTime = 5;
-    private final int mCountManSelect = 1;
     private RequestApi mApi;
 
     private ViewInstance mAngelViewInstance = new ViewInstance();
@@ -104,6 +104,9 @@ public class XqChartUIViewMg implements IXqChartView {
     private boolean mLadySelecteResult = true; //默认为都接受
     private ArrayList<String> mManSelectedResultList = new ArrayList<>();
     private ArrayList<String> mLadySelectedResultList = new ArrayList<>();
+    private int mAngelDisturbNum = 0;
+    private boolean mAngelIsDistub;
+    private JMChartRoomSendBean mCurrentRoomSendBean;
 
     @Override
     public View createView() {
@@ -197,10 +200,54 @@ public class XqChartUIViewMg implements IXqChartView {
         mAngelViewInstance.mImgHead = view.findViewById(R.id.img_head);
         mAngelViewInstance.mTxvNickName = view.findViewById(R.id.text_nickName);
         mAngelViewInstance.mTxvNum = view.findViewById(R.id.text_num);
+        mAngelViewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+                if(!userInfoBean.getRole_type().equals(Constant.ROLRTYPE_ANGEL)) return;
+                if(mAngelDisturbNum >= ANGEL_DISTURB_COUNT) {
+                    Tools.toast(mXqActivity,"您已经插话3次，不能插话了",true);
+                    return;
+                }
+                if(mProgressStatus == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
+                        || mProgressStatus == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
+                    PopupViewMg.getInstance().showAngelPopupView(mXqActivity, mAngelViewInstance.mImgHead, new IPopupAngelListener() {
+                        @Override
+                        public void onDisturb(Button button) {
+                            //发送插话
+                            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+                            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB);
+                            sendBean.setLiveType(JMChartRoomSendBean.LIVE_MIC);
+                            sendBean.setMsg("爱心大使 " + userInfoBean.getNick_name() + " 要求插话");
+                            JMsgSender.sendRoomMessage(sendBean);
+                            mAngelDisturbNum++;
+                            Tools.toast(mXqActivity,"您要求插话",false);
+                        }
+                    });
+                }
+            }
+        });
 
         mManViewInstance.mImgHead = view.findViewById(R.id.img_head_2);
         mManViewInstance.mTxvNickName = view.findViewById(R.id.text_nickName_2);
         mManViewInstance.mTxvNum = view.findViewById(R.id.text_num_2);
+
+        mManViewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+                if(userInfoBean.getRole_type().equals(Constant.ROLETYPE_GUEST)
+                        && userInfoBean.getGender().equals(Constant.GENDER_MAN)) {
+                    if(mProgressStatus != JMChartRoomSendBean.CHART_STATUS_INTRO_MAN
+                            || mProgressStatus != JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE
+                            || mProgressStatus != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN) {
+                        return;
+                    }
+                    5699
+                }
+            }
+        });
     }
 
     private void upDataMembers() {
@@ -366,9 +413,25 @@ public class XqChartUIViewMg implements IXqChartView {
                     .into(viewInstance.mImgHead);
 
             if(mIsSelect) {
-                if(mProgressStatus == JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST) {//当为第一次选择时
-                    viewInstance.mViewSelect.setVisibility(View.VISIBLE);
-                    viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
+                switch (mProgressStatus) {
+                    case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://当为第一次选择时
+                    case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://当为第二次选择时
+                    case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节
+                    case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节
+                    case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://问答环节
+                        viewInstance.mViewSelect.setVisibility(View.VISIBLE);
+                        if(mManSelectedResultList.contains(String.valueOf(index))) {
+                            viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
+                        }else {
+                            viewInstance.mImgSelect.setImageResource(R.drawable.head_select);
+                        }
+                        break;
+                    case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
+                        if(mManSelectedResultList.contains(String.valueOf(index))) {
+                            viewInstance.mViewSelect.setVisibility(View.VISIBLE);
+                            viewInstance.mImgSelect.setImageResource(R.drawable.head_select);
+                        }
+                        break;
                 }
             }else {
                 viewInstance.mViewSelect.setVisibility(View.INVISIBLE);
@@ -378,11 +441,32 @@ public class XqChartUIViewMg implements IXqChartView {
             viewInstance.mViewSelect.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mManSelectedResultList.add(String.valueOf(index));
-                    viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
-                    //停止计时
-                    stopTiming();
-                    changeNormalStatus();
+                    UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+                    if(userInfoBean.getGender().equals(Constant.GENDER_MAN)
+                            &&userInfoBean.getRole_type().equals(Constant.ROLETYPE_GUEST)) {//只为男嘉宾
+                        switch (mProgressStatus) {
+                            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://当为第一次选择时
+                            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://当为第二次选择时
+                                if(mManSelectedResultList.contains(String.valueOf(index))) {
+                                    Tools.toast(mXqActivity,"您已选择了该位嘉宾",false);
+                                    return;
+                                }
+                                break;
+                            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节
+                            case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://问答环节
+                                //不可选择
+                                return;
+                            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
+                                //清空选择
+                                mManSelectedResultList.clear();
+                                break;
+                        }
+                        mManSelectedResultList.add(String.valueOf(index));
+                        viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
+                        //停止计时
+                        stopTiming();
+                        changeNormalStatus();
+                    }
                 }
             });
         }
@@ -546,6 +630,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
                     //更新系统事件
                     addSystemEventAndRefresh(bean);
                     break;
@@ -560,12 +645,18 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://结束
                     if(bean.getProcessStatus() != mProgressStatus) {
                         Tools.toast(mXqActivity,bean.getMsg(),false);
                         addSystemEventAndRefresh(bean);
                     }
                     break;
+            }
+
+            if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
+                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING) {
+                mCurrentRoomSendBean = bean;
             }
 
         }else if (flags.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {//回复形式
@@ -582,10 +673,18 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://女生最终选择
                     addSystemEventAndRefresh(bean);
                     break;
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
+                    addSystemEventAndRefresh(bean);
+                    //收到爱心大使插话的回复后，插话标识置位false
+                    mAngelIsDistub = false;
+                    break;
             }
         }
 
-        mProgressStatus = bean.getProcessStatus();
+        if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
+                && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING) {
+            mProgressStatus = bean.getProcessStatus();
+        }
         //移交到进行中的处理
         onOperating(bean,flags);
     }
@@ -627,10 +726,14 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男方自我介绍
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                     operate_Timing(bean,flags);
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://结束
                     operate_Final(bean,flags);
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
+                    mAngelIsDistub = true;
                     break;
             }
 
@@ -665,6 +768,7 @@ public class XqChartUIViewMg implements IXqChartView {
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使说话
                 operate_Order_End(bean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
@@ -852,10 +956,13 @@ public class XqChartUIViewMg implements IXqChartView {
                 }
                 bean.setManSelects(selectStr);
                 //更新数据
-                mMemberAdapter.notifyDataSetChanged();
+                mMemberAdapter.changeSelectStatus();
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY:
                 msg = userInfo.getNick_name() + "女生回答";
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
+                msg = userInfo.getNick_name() + "爱心大使说话";
                 break;
         }
 
@@ -884,7 +991,7 @@ public class XqChartUIViewMg implements IXqChartView {
         mManSelectedResultList.clear();
         mManSelectedResultList.addAll(manSelectList);
         //更新
-        mMemberAdapter.notifyDataSetChanged();
+        mMemberAdapter.changeSelectStatus();
     }
 
     /**
@@ -904,10 +1011,22 @@ public class XqChartUIViewMg implements IXqChartView {
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST;
                 startIndex = mStartOrderIndex_intro_lady;
                 msg = "进入第一环节，女生自我介绍";
+                if(flags.isLast()) {
+                    mAngelDisturbNum = 0;
+                }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
-                nextProgress = JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST;
-                msg = "进入第三轮，男生第一次选择";
+                if(mAngelIsDistub) {
+                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING);
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setIndexNext(0);
+                    sendBean.setMsg("爱心大使插话");
+                    JMsgSender.sendRoomMessage(sendBean);
+                    return;
+                }else {
+                    nextProgress = JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST;
+                    msg = "进入第三轮，男生第一次选择";
+                }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND;
@@ -917,6 +1036,9 @@ public class XqChartUIViewMg implements IXqChartView {
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND;
                 startIndex = mStartOrderIndex_intro_lady;
                 msg = "进入第五环节，女生第二次谈话";
+                if(flags.isLast()) {
+                    mAngelDisturbNum = 0;
+                }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
@@ -933,7 +1055,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 msg = "问答环节，女生";
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY:
-                if(mQuestionNum < 2) {
+                if(mQuestionNum < QUESTION_COUNT) {
                     nextProgress = JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY;
                     msg = "问答环节";
                 }else {
@@ -942,6 +1064,9 @@ public class XqChartUIViewMg implements IXqChartView {
                 }
                 startIndex = mStartOrderIndex_intro_man;
                 nextIndex = Integer.valueOf(mManSelectedResultList.get(1)).intValue();
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
+                JMsgSender.sendRoomMessage(mCurrentRoomSendBean);
                 break;
         }
 
@@ -1074,6 +1199,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 nextIndex = bean.getIndexNext()%data.getLimitLady();
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
+            case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
                 flags.setGender(userInfoBean.getGender());
                 break;
         }

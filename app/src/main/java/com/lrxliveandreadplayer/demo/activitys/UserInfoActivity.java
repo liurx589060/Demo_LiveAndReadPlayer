@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -35,6 +36,8 @@ import cn.finalteam.rxgalleryfinal.RxGalleryFinal;
 import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
+import cn.finalteam.rxgalleryfinal.ui.RxGalleryListener;
+import cn.finalteam.rxgalleryfinal.ui.base.IRadioImageCheckedListener;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
@@ -252,6 +255,34 @@ public class UserInfoActivity extends Activity {
     }
 
     private void openImageSelector() {
+        new IRadioImageCheckedListener() {
+            @Override
+            public void cropAfter(Object t) {
+
+            }
+
+            @Override
+            public boolean isActivityFinish() {
+                return false;
+            }
+        };
+        //裁剪图片的回调
+        RxGalleryListener
+                .getInstance()
+                .setRadioImageCheckedListener(new IRadioImageCheckedListener() {
+                    @Override
+                    public void cropAfter(Object o) {
+                        //裁剪结果后，上传图片
+                        Log.e("yy","" + o.toString());
+                        upLoadHeadImage(o.toString(), mUserInfo.getUser_name());
+                    }
+
+                    @Override
+                    public boolean isActivityFinish() {
+                        return false;
+                    }
+                });
+
         RxGalleryFinal
                 .with(this)
                 .image()
@@ -263,13 +294,12 @@ public class UserInfoActivity extends Activity {
                     protected void onEvent(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
                         //图片选择结果
                         Log.e("yy",new Gson().toJson(imageRadioResultEvent));
-                        upLoadHeadImage(imageRadioResultEvent.getResult().getThumbnailSmallPath(),mUserInfo.getUser_name());
                     }
                 })
                 .openGallery();
     }
 
-    private void upLoadHeadImage(String imagePath,String userName) {
+    private void upLoadHeadImage(final String imagePath, String userName) {
         File file = new File(imagePath);
 
         Map<String, RequestBody> params = new HashMap<>();
@@ -300,12 +330,23 @@ public class UserInfoActivity extends Activity {
                         .centerCrop()
                         .bitmapTransform(new GlideCircleTransform(UserInfoActivity.this))
                         .into(mImageHead);
+
+                //删除裁剪的图片
+                File file1 = new File(imagePath);
+                if(file1.exists()) {
+                    file1.delete();
+                }
             }
 
             @Override
             public void onFailure(Call<UserResp> call, Throwable throwable) {
                 Log.e("yy",throwable.getMessage());
                 Tools.toast(UserInfoActivity.this,throwable.getMessage(),true);
+                //删除裁剪的图片
+                File file1 = new File(imagePath);
+                if(file1.exists()) {
+                    file1.delete();
+                }
             }
         });
     }

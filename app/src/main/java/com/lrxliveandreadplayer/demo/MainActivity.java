@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.lrx.live.player.R;
@@ -32,6 +33,14 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
+import java.io.File;
+
+import cn.finalteam.rxgalleryfinal.RxGalleryFinal;
+import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
+import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
+import cn.finalteam.rxgalleryfinal.ui.RxGalleryListener;
+import cn.finalteam.rxgalleryfinal.ui.base.IRadioImageCheckedListener;
 import cn.jiguang.api.JCoreInterface;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.UserInfo;
@@ -91,6 +100,13 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,IjkLivePlayer.class);
                 startActivity(intent);
+            }
+        });
+
+        mBtnImageSelector.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openImageSelector();
             }
         });
 
@@ -207,6 +223,44 @@ public class MainActivity extends Activity {
                 });
         dialog1.setCanceledOnTouchOutside(true);
         dialog1.show();
+    }
+
+    private void openImageSelector() {
+        //裁剪图片的回调
+        RxGalleryListener
+                .getInstance()
+                .setRadioImageCheckedListener(
+                        new IRadioImageCheckedListener() {
+                            @Override
+                            public void cropAfter(Object t) {
+                                Log.e("yy","" + t.toString());
+                                Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_SHORT).show();
+                                File file1 = new File(t.toString());
+                                if(file1.exists()) {
+                                    file1.delete();
+                                }
+                            }
+
+                            @Override
+                            public boolean isActivityFinish() {
+                                return true;
+                            }
+                        });
+
+        RxGalleryFinal
+                .with(this)
+                .image()
+                .radio()
+                .crop()
+                .imageLoader(ImageLoaderType.GLIDE)
+                .subscribe(new RxBusResultDisposable<ImageRadioResultEvent>() {
+                    @Override
+                    protected void onEvent(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
+                        //图片选择结果
+//                        Log.e("yy",new Gson().toJson(imageRadioResultEvent));
+                    }
+                })
+                .openGallery();
     }
 
     private void showRegisterDialog(Activity activity) {

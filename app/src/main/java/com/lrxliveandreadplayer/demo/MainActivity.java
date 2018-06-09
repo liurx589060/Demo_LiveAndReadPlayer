@@ -1,5 +1,6 @@
 package com.lrxliveandreadplayer.demo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -57,9 +58,11 @@ public class MainActivity extends Activity {
     private RadioGroup mRadioGroup;
     private Button mBtnImageSelector;
     private Button mBtnXq;
+    private Button mBtnSwitchUser;
 
     private Dialog loadingDialog;
     private RequestApi mApi;
+    private boolean mIsLoginSuccess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +71,6 @@ public class MainActivity extends Activity {
 
         mApi = NetWorkMg.newRetrofit().create(RequestApi.class);
         init();
-
-        showLoginDialog(this);
     }
 
     private void init() {
@@ -84,6 +85,7 @@ public class MainActivity extends Activity {
         mRadioGroup = findViewById(R.id.radio_group);
         mBtnImageSelector = findViewById(R.id.btn_imageSelector);
         mBtnXq = findViewById(R.id.btn_xq);
+        mBtnSwitchUser = findViewById(R.id.btn_switchUser);
         mBtnIjk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,10 +110,23 @@ public class MainActivity extends Activity {
             }
         });
 
+        mBtnSwitchUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //弹出登陆对话框
+                showLoginDialog(MainActivity.this);
+            }
+        });
+
         loadingDialog = DialogFactory.createLoadingDialog(this);
 
         if(JMessageClient.getMyInfo() != null) {
+            //自动登陆
+            autoLogin();
             mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
+        }else {
+            //弹出登陆
+            showLoginDialog(this);
         }
 
         mEditIpAdress.setText(getSpIpAddress());
@@ -142,6 +157,10 @@ public class MainActivity extends Activity {
         mTvxUserName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!mIsLoginSuccess) {
+                    Tools.toast(MainActivity.this,"您未登陆到服务器",false);
+                    return;
+                }
                 //跳转到填写详情页面
                 Intent intent = new Intent(MainActivity.this,UserInfoActivity.class);
                 Bundle bundle = new Bundle();
@@ -158,9 +177,6 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-
-
-//        getMemberList();
     }
 
     private void showLoginDialog(final Activity activity) {
@@ -230,11 +246,12 @@ public class MainActivity extends Activity {
         login(dialog,userId,password);
     }
 
-    private void saveUser(String userName,String appKey) {
+    private void saveUser(String userName,String password,String appKey) {
         UserInfo userInfo = JMessageClient.getMyInfo();
         Log.e("yy","avatar=" + userInfo.getAvatar());
         SharedPreferences sp = getSharedPreferences(Constant.SP_NAME, Context.MODE_PRIVATE);
         sp.edit().putString("userName",userName)
+                .putString("password",password)
                 .putString("appKey",appKey)
                 .apply();
     }
@@ -251,6 +268,7 @@ public class MainActivity extends Activity {
         JCoreInterface.onPause(this);
     }
 
+    @SuppressLint("CheckResult")
     private void regist(final Dialog dialog, final String userName, final String password) {
         loadingDialog.show();
         Observable.create(new ObservableOnSubscribe<Integer>() {
@@ -307,6 +325,7 @@ public class MainActivity extends Activity {
         });
     }
 
+    @SuppressLint("CheckResult")
     private void login(final Dialog dialog, final String userName, final String password) {
         loadingDialog.show();
         Observable.create(new ObservableOnSubscribe<Integer>() {
@@ -340,9 +359,10 @@ public class MainActivity extends Activity {
             public void accept(UserResp userResp) throws Exception {
                 loadingDialog.dismiss();
                 if(userResp.getStatus() == XqErrorCode.SUCCESS) {
+                    mIsLoginSuccess = true;
                     DataManager.getInstance().setUserInfo(userResp.getData());
                     dialog.dismiss();
-                    saveUser(JMessageClient.getMyInfo().getUserName(),JMessageClient.getMyInfo().getAppKey());
+                    saveUser(JMessageClient.getMyInfo().getUserName(),password,JMessageClient.getMyInfo().getAppKey());
                     mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
                     Tools.toast(getApplicationContext(),"登录成功",false);
                 }else if(userResp.getStatus() == XqErrorCode.ERROR_USER_PASSWORD_WRONG) {
@@ -354,10 +374,49 @@ public class MainActivity extends Activity {
         }, new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
+                mIsLoginSuccess = false;
                 loadingDialog.dismiss();
                 Tools.toast(getApplicationContext(),throwable.toString(),true);
             }
         });
+    }
+
+    /**
+     * 自动登陆自己的服务器
+     */
+    @SuppressLint("CheckResult")
+    private void autoLogin() {
+        loadingDialog.show();
+        SharedPreferences sp = getSharedPreferences(Constant.SP_NAME, Context.MODE_PRIVATE);
+        final String userName = sp.getString("userName","");
+        final String password = sp.getString("password","");
+        mApi.login(userName,password)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<UserResp>() {
+                    @Override
+                    public void accept(UserResp userResp) throws Exception {
+                        mIsLoginSuccess = true;
+                        loadingDialog.dismiss();
+                        if(userResp.getStatus() == XqErrorCode.SUCCESS) {
+                            DataManager.getInstance().setUserInfo(userResp.getData());
+                            saveUser(userName,password,JMessageClient.getMyInfo().getAppKey());
+                            mTvxUserName.setText("用户名：" + JMessageClient.getMyInfo().getUserName());
+                            Tools.toast(getApplicationContext(),"登录成功",false);
+                        }else if(userResp.getStatus() == XqErrorCode.ERROR_USER_PASSWORD_WRONG) {
+                            Tools.toast(getApplicationContext(),"密码错误",true);
+                        }else if(userResp.getStatus() == XqErrorCode.ERROR_USER_REGIST_UNEXIST) {
+                            Tools.toast(getApplicationContext(),"用户不存在",true);
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mIsLoginSuccess = false;
+                        loadingDialog.dismiss();
+                        Tools.toast(getApplicationContext(),throwable.toString(),true);
+                    }
+                });
     }
 
     private void setSpIpAddress(String ipAddress) {

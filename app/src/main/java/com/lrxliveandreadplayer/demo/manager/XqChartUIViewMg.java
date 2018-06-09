@@ -90,6 +90,7 @@ public class XqChartUIViewMg implements IXqChartView {
     private RecyclerView mRecyclerSystem;
     private Button mBtnExit;
     private Button mBtnGift;
+    private Button mBtnEnd;
     private TextView mTextTip;
     private TextView mTextCountDown;
 
@@ -113,6 +114,8 @@ public class XqChartUIViewMg implements IXqChartView {
     private int mAngelDisturbNum = 0;
     private boolean mAngelIsDistub;
     private JMChartRoomSendBean mCurrentRoomSendBean;
+    private JMChartRoomSendBean mStartTimeRoomSendBean;
+    private JMSendFlags mStartTimeSendFlags;
 
     @Override
     public View createView() {
@@ -167,6 +170,7 @@ public class XqChartUIViewMg implements IXqChartView {
         mRecyclerSystem = mRootView.findViewById(R.id.recycle_chart_system);
         mBtnExit = mRootView.findViewById(R.id.btn_chart_exit);
         mBtnGift = mRootView.findViewById(R.id.btn_chart_gift);
+        mBtnEnd = mRootView.findViewById(R.id.btn_chart_end);
         mTextCountDown = mRootView.findViewById(R.id.text_timer);
         mTextTip = mRootView.findViewById(R.id.text_tip);
         mTextTip.setVisibility(View.GONE);
@@ -182,6 +186,16 @@ public class XqChartUIViewMg implements IXqChartView {
             @Override
             public void onClick(View v) {
                 sendChartRoomMessage();
+            }
+        });
+
+        mBtnEnd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mStartTimeRoomSendBean != null && mStartTimeSendFlags != null) {
+                    //结束语音或视频
+                    onOperateEnd(mStartTimeRoomSendBean,mStartTimeSendFlags);
+                }
             }
         });
 
@@ -395,6 +409,11 @@ public class XqChartUIViewMg implements IXqChartView {
                         //通知聊天室的其他人,是创建者
                         if(DataManager.getInstance().getSelfMember().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
                             norifyRoomExit();
+                        }else {
+                            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+                            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
+                            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
+                            JMsgSender.sendRoomMessage(sendBean);
                         }
                     }
                 }, new Consumer<Throwable>() {
@@ -679,6 +698,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
                 case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://更改直播方式
+                case JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM://离开房间
                     //更新系统事件
                     addSystemEventAndRefresh(bean);
                     break;
@@ -756,6 +776,11 @@ public class XqChartUIViewMg implements IXqChartView {
                         sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
                         sendBean.setMsg("进入第一环节，男生自我介绍");
                         JMsgSender.sendRoomMessage(sendBean);
+                        //隐藏离开按钮
+                        mBtnExit.setVisibility(View.INVISIBLE);
+                    }else {
+                        //重新获取成员列表
+                        getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     }
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
@@ -832,6 +857,8 @@ public class XqChartUIViewMg implements IXqChartView {
                 operate_Response_End(bean,flags);
                 break;
         }
+        //隐藏结束按钮
+        mBtnEnd.setVisibility(View.INVISIBLE);
 
     }
     /************************Operate*******************************/
@@ -1044,6 +1071,8 @@ public class XqChartUIViewMg implements IXqChartView {
         mManSelectedResultList.addAll(manSelectList);
         //更新
         mMemberAdapter.changeSelectStatus();
+        //显示离开按钮
+        mBtnExit.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -1328,6 +1357,8 @@ public class XqChartUIViewMg implements IXqChartView {
         }
         stopTiming();
         mHandler.postDelayed(mTimeRunnable,1000);
+        //显示结束按钮
+        mBtnEnd.setVisibility(View.VISIBLE);
     }
 
     private void stopTiming() {

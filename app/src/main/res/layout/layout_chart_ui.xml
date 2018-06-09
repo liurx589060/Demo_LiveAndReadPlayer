@@ -71,6 +71,15 @@
             android:text="礼物"/>
 
         <Button
+            android:id="@+id/btn_chart_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:text="结束"
+            android:visibility="invisible"/>
+
+        <Button
             android:id="@+id/btn_chart_report"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

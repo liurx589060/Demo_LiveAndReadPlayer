@@ -25,6 +25,7 @@ public class JMChartRoomSendBean {
     public static final int CHART_STATUS_ANGEL_DISTURBING = 0x021;             //爱心大使插话
     public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0022;       //多人连麦
     public static final int CHART_STATUS_CHART_CHANGR_LIVETYPE = 0x0023;       //直播方式更改
+    public static final int CHART_STATUS_CHART_EXIT_ROOM = 0x0024;       //离开房间
 
     public static final int LIVE_CAMERA = 0x101;
     public static final int LIVE_MIC = 0x102;

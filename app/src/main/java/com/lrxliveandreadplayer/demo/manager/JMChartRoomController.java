@@ -176,7 +176,13 @@ public class JMChartRoomController extends AbsRoomController{
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
-            case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE:
+            case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://直播方式更改
+                mCurrentStatus = chartRoomSendBean.getProcessStatus();
+
+                flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                listener.onMessageHandler(chartRoomSendBean,flags);
+                break;
+            case JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM://离开房间
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);

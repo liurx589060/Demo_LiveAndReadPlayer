@@ -20,8 +20,10 @@ import java.util.Map;
 public class JMChartRoomController extends AbsRoomController{
     private IHanderRoomMessage listener;
     private int mCurrentStatus;
-    private ArrayList<Integer> mRecievedIndexList = new ArrayList<>();
-    private Map<Integer,Boolean> mRecievedLastMap = new HashMap<>();
+    private Map<Integer,ArrayList<Integer>> mSendRecievedIndexMap = new HashMap<>();
+    private Map<Integer,ArrayList<Integer>> mResponseRecievedIndexMap = new HashMap<>();
+    private Map<Integer,Boolean> mSendRecievedLastMap = new HashMap<>();
+    private Map<Integer,Boolean> mResponseRecievedLastMap = new HashMap<>();
     private Map<Integer,Integer> mSendCompleteCountMap = new HashMap<>();
     private Map<Integer,Integer> mResponseCompleteCountMap = new HashMap<>();
 
@@ -58,11 +60,11 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
                 //重复消息，不处理
-                if(mRecievedIndexList.contains(chartRoomSendBean.getIndexSelf())) {
+                if(checkIsResponseRepeat(chartRoomSendBean)) {
                     //假如重复的消息则不处理
                     return;
                 }
-                mRecievedIndexList.add(chartRoomSendBean.getIndexSelf());
+                addIndexCount(chartRoomSendBean);
                 addCompleteCount(chartRoomSendBean);
 
                 isLast = checkIsLast(chartRoomSendBean);
@@ -91,6 +93,27 @@ public class JMChartRoomController extends AbsRoomController{
         map.put(sendBean.getProcessStatus(),count);
     }
 
+    private void addIndexCount(JMChartRoomSendBean sendBean) {
+        Map<Integer,ArrayList<Integer>> map = null;
+        if(sendBean.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {
+            map = mSendRecievedIndexMap;
+        }else if(sendBean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE){
+            map = mResponseRecievedIndexMap;
+        }
+        if(map==null) return;
+        ArrayList<Integer> list;
+        if(map.get(sendBean.getProcessStatus()) == null) {
+            list = new ArrayList<>();
+        }else {
+            list = map.get(sendBean.getProcessStatus());
+        }
+        if(sendBean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {
+            list.add(sendBean.getIndexSelf());
+        }else {
+            list.add(sendBean.getIndexNext());
+        }
+    }
+
     /**
      * 处理发送形式的消息
      * @param chartRoomSendBean
@@ -115,11 +138,9 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)
-                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
-                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -141,11 +162,9 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)
-                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
-                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -177,11 +196,9 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使说话
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)
-                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
-                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -192,11 +209,9 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://流程结束
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)
-                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
-                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
-                mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -236,8 +251,24 @@ public class JMChartRoomController extends AbsRoomController{
      * 检测是否重复
      * @return
      */
-    private boolean checkIsRepeat(JMChartRoomSendBean chartRoomSendBean) {
-        if(mRecievedIndexList.contains(chartRoomSendBean.getIndexNext())) {
+    private boolean checkIsSendRepeat(JMChartRoomSendBean chartRoomSendBean) {
+        ArrayList<Integer> list = mSendRecievedIndexMap.get(chartRoomSendBean.getProcessStatus());
+        if(list == null) return false;
+        if(list.contains(chartRoomSendBean.getIndexNext())
+                ||(mSendRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                &&mSendRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) {
+            //假如重复的消息则不处理
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkIsResponseRepeat(JMChartRoomSendBean chartRoomSendBean) {
+        ArrayList<Integer> list = mResponseRecievedIndexMap.get(chartRoomSendBean.getProcessStatus());
+        if(list == null) return false;
+        if(list.contains(chartRoomSendBean.getIndexNext())
+                ||(mResponseRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                &&mResponseRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) {
             //假如重复的消息则不处理
             return true;
         }
@@ -293,8 +324,11 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
         }
         if(isLast) {
-            mRecievedIndexList.clear();
-            mRecievedLastMap.put(bean.getProcessStatus(),true);
+            if(bean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE) {
+                mResponseRecievedLastMap.put(bean.getProcessStatus(),true);
+            }else if (bean.getMessageType() == JMSendFlags.MessageType.TYPE_SEND){
+                mSendRecievedLastMap.put(bean.getProcessStatus(),true);
+            }
         }
         return isLast;
     }
@@ -321,17 +355,5 @@ public class JMChartRoomController extends AbsRoomController{
         bean.setTime(Tools.getCurrentDateTime());
         bean.setUserName(selfInfo.getUser_name());
         return bean;
-    }
-
-    public int getmCurrentStatus() {
-        return mCurrentStatus;
-    }
-
-    public int getCurrentIndex() {
-        //返回最后一个
-        if(mRecievedIndexList.size() > 0) {
-            return mRecievedIndexList.get(mRecievedIndexList.size() - 1);
-        }
-        return -1;
     }
 }

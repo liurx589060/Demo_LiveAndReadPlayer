@@ -5,27 +5,27 @@ package com.lrxliveandreadplayer.demo.beans.jmessage;
  */
 
 public class JMChartRoomSendBean {
-    public static final int CHART_STATUS_MATCHING = 0x001;          //匹配
-    public static final int CHART_STATUS_INTRO_MAN = 0x002;         //男生自我介绍
-    public static final int CHART_STATUS_LADY_SELECT_FIRST = 0x003; //女生第一次选择
-    public static final int CHART_STATUS_INTRO_LADY = 0x004;        //女生聊天第一轮
-    public static final int CHART_STATUS_CHAT_MAN_PERFORMANCE = 0x005;  //男生才艺表演
-    public static final int CHART_STATUS_LADY_SELECT_SECOND = 0x006; //女生第二次选择
-    public static final int CHART_STATUS_LADY_CHAT_SECOND = 0x007;       //女生聊天第二轮
-    public static final int CHART_STATUS_ANGEL_CHAT = 0x008;     //爱心大使有话说
-    public static final int CHART_STATUS_LADY_SELECT_FINAL = 0x009;     //最终选择
-    public static final int CHART_STATUS_CHAT_QUESTION_MAN = 0x010;     //问答环节,男生
-    public static final int CHART_STATUS_CHAT_QUESTION_LADY = 0x011;     //问答环节,女生
-    public static final int CHART_STATUS_MAN_SELECT_FIRST = 0x012;  //男生第一次选择
-    public static final int CHART_STATUS_MAN_SELECT_SECOND = 0x013;  //男生第二次选择
-    public static final int CHART_STATUS_MAN_SELECT_FINAL = 0x014;  //男生最终选择
-    public static final int CHART_STATUS_CHAT_FINAL = 0x015;  //结束
+    public static final int CHART_STATUS_MATCHING = 1;          //匹配
+    public static final int CHART_STATUS_INTRO_MAN = 2;         //男生自我介绍
+    public static final int CHART_STATUS_LADY_SELECT_FIRST = 3; //女生第一次选择
+    public static final int CHART_STATUS_INTRO_LADY = 4;        //女生聊天第一轮
+    public static final int CHART_STATUS_CHAT_MAN_PERFORMANCE = 5;  //男生才艺表演
+    public static final int CHART_STATUS_LADY_SELECT_SECOND = 6; //女生第二次选择
+    public static final int CHART_STATUS_LADY_CHAT_SECOND = 7;       //女生聊天第二轮
+    public static final int CHART_STATUS_ANGEL_CHAT = 8;     //爱心大使有话说
+    public static final int CHART_STATUS_LADY_SELECT_FINAL = 9;     //最终选择
+    public static final int CHART_STATUS_CHAT_QUESTION_MAN = 10;     //问答环节,男生
+    public static final int CHART_STATUS_CHAT_QUESTION_LADY = 11;     //问答环节,女生
+    public static final int CHART_STATUS_MAN_SELECT_FIRST = 12;  //男生第一次选择
+    public static final int CHART_STATUS_MAN_SELECT_SECOND = 13;  //男生第二次选择
+    public static final int CHART_STATUS_MAN_SELECT_FINAL = 14;  //男生最终选择
+    public static final int CHART_STATUS_CHAT_FINAL = 15;  //结束
 
-    public static final int CHART_STATUS_ANGEL_QUEST_DISTURB = 0x020;             //爱心要求大使插话
-    public static final int CHART_STATUS_ANGEL_DISTURBING = 0x021;             //爱心大使插话
-    public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 0x0022;       //多人连麦
-    public static final int CHART_STATUS_CHART_CHANGR_LIVETYPE = 0x0023;       //直播方式更改
-    public static final int CHART_STATUS_CHART_EXIT_ROOM = 0x0024;       //离开房间
+    public static final int CHART_STATUS_ANGEL_QUEST_DISTURB = 100;             //爱心要求大使插话
+    public static final int CHART_STATUS_ANGEL_DISTURBING = 101;             //爱心大使插话
+    public static final int CHART_STATUS_CHART_MUTIL_PEOPLE = 102;       //多人连麦
+    public static final int CHART_STATUS_CHART_CHANGR_LIVETYPE = 103;       //直播方式更改
+    public static final int CHART_STATUS_CHART_EXIT_ROOM = 104;       //离开房间
 
     public static final int LIVE_CAMERA = 0x101;
     public static final int LIVE_MIC = 0x102;

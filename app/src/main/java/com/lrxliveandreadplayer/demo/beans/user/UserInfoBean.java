@@ -32,9 +32,9 @@ public class UserInfoBean implements Serializable{
     private String job_address = "";
     private String phone = "";
     private int limitLevel = -1;
-    private int limitLady = 0;
-    private int limitMan = 0;
-    private int limitAngel = 0;
+    private int limitLady = 10;
+    private int limitMan = 1;
+    private int limitAngel = 1;
 
 
 

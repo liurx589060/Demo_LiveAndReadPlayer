@@ -10,6 +10,8 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2018/5/31.
@@ -18,8 +20,10 @@ import java.util.ArrayList;
 public class JMChartRoomController extends AbsRoomController{
     private IHanderRoomMessage listener;
     private int mCurrentStatus;
-    private int mCompleteCount;
     private ArrayList<Integer> mRecievedIndexList = new ArrayList<>();
+    private Map<Integer,Boolean> mRecievedLastMap = new HashMap<>();
+    private Map<Integer,Integer> mSendCompleteCountMap = new HashMap<>();
+    private Map<Integer,Integer> mResponseCompleteCountMap = new HashMap<>();
 
     public JMChartRoomController(IHanderRoomMessage iHanderRoomMessage) {
         this.listener = iHanderRoomMessage;
@@ -34,6 +38,7 @@ public class JMChartRoomController extends AbsRoomController{
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         Member selfMember = DataManager.getInstance().getSelfMember();
         JMSendFlags flags = new JMSendFlags();
+        flags.setMessageType(chartRoomSendBean.getMessageType());
         boolean isLast = false;
 
         switch (chartRoomSendBean.getProcessStatus()) {
@@ -58,13 +63,32 @@ public class JMChartRoomController extends AbsRoomController{
                     return;
                 }
                 mRecievedIndexList.add(chartRoomSendBean.getIndexSelf());
-                mCompleteCount++;
+                addCompleteCount(chartRoomSendBean);
+
                 isLast = checkIsLast(chartRoomSendBean);
                 flags.setLast(isLast);
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
         }
 
+    }
+
+    private void addCompleteCount(JMChartRoomSendBean sendBean) {
+        Map<Integer,Integer> map = null;
+        if(sendBean.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {
+            map = mSendCompleteCountMap;
+        }else if(sendBean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE){
+            map = mResponseCompleteCountMap;
+        }
+        if(map == null) return;
+        int count;
+        if(map.get(sendBean.getProcessStatus()) == null) {
+            count = 0;
+        }else {
+            count = map.get(sendBean.getProcessStatus());
+        }
+        count++;
+        map.put(sendBean.getProcessStatus(),count);
     }
 
     /**
@@ -91,8 +115,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
+                if(checkIsRepeat(chartRoomSendBean)
+                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                addCompleteCount(chartRoomSendBean);
                 mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
@@ -115,8 +141,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
+                if(checkIsRepeat(chartRoomSendBean)
+                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                addCompleteCount(chartRoomSendBean);
                 mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
@@ -149,8 +177,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使说话
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
+                if(checkIsRepeat(chartRoomSendBean)
+                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                addCompleteCount(chartRoomSendBean);
                 mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
@@ -162,8 +192,10 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://流程结束
                 //重复消息，不处理
-                if(checkIsRepeat(chartRoomSendBean)) return;
-                mCompleteCount++;
+                if(checkIsRepeat(chartRoomSendBean)
+                        ||(mRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
+                        &&mRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) return;
+                addCompleteCount(chartRoomSendBean);
                 mRecievedIndexList.add(chartRoomSendBean.getIndexNext());
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
@@ -216,12 +248,25 @@ public class JMChartRoomController extends AbsRoomController{
         Data data = DataManager.getInstance().getChartData();
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         Member selfMember = DataManager.getInstance().getSelfMember();
+        Map<Integer,Integer> map = null;
+        if(bean.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {
+            map = mSendCompleteCountMap;
+        }else if(bean.getMessageType() == JMSendFlags.MessageType.TYPE_RESPONSE){
+            map = mResponseCompleteCountMap;
+        }
+        if(map == null) return false;
         int allCount;
+        int mCompleteCount;
+        if(map.get(bean.getProcessStatus()) == null) {
+            mCompleteCount = 0;
+        }else {
+            mCompleteCount = map.get(bean.getProcessStatus());
+        }
         boolean isLast = false;
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_MATCHING:
                 allCount = data.getLimitAngel() + data.getLimitMan() + data.getLimitLady();
-                isLast = data.getMembers().size()>=allCount?true:false;
+                isLast = bean.getCurrentCount()>=allCount?true:false;
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
@@ -249,7 +294,7 @@ public class JMChartRoomController extends AbsRoomController{
         }
         if(isLast) {
             mRecievedIndexList.clear();
-            mCompleteCount = 0;
+            mRecievedLastMap.put(bean.getProcessStatus(),true);
         }
         return isLast;
     }

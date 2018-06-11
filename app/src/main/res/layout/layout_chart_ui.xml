@@ -6,7 +6,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/sy_p_420"
-        android:background="#c54213"
         >
 
         <Button
@@ -53,14 +52,14 @@
         android:id="@+id/recycle_chart_members"
         android:layout_width="match_parent"
         android:layout_height="@dimen/sy_p_1000"
-        android:background="#cc2345">
+        >
 
     </android.support.v7.widget.RecyclerView>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#dd5c8b">
+        >
 
         <Button
             android:id="@+id/btn_chart_gift"

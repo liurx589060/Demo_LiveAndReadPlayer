@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
@@ -41,6 +42,8 @@ import retrofit2.Retrofit;
 public class XqMainActivity extends Activity {
     @BindView(R.id.btn_angel) Button mBtnAngel;
     @BindView(R.id.btn_guest) Button mBtnGuest;
+    @BindView(R.id.edit_limitLady)
+    EditText mEditLimitLady;
 
     private RequestApi mApi;
 
@@ -64,9 +67,11 @@ public class XqMainActivity extends Activity {
                 bean.setRole_type(DataManager.getInstance().getUserInfo().getRole_type());
                 bean.setGender(DataManager.getInstance().getUserInfo().getGender());
                 bean.setLevel(DataManager.getInstance().getUserInfo().getLevel());
-                bean.setLimitAngel(1);
-                bean.setLimitLady(10);
-                bean.setLimitMan(1);
+                try {
+                    bean.setLimitLady(Integer.valueOf(mEditLimitLady.getText().toString()));
+                }catch (Exception e) {
+                    Log.e("yy",e.toString());
+                }
                 bean.setLimitLevel(-1);
                 createChartRoom(bean);
             }

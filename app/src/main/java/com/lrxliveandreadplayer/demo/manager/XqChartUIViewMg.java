@@ -1046,6 +1046,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
                 msg = userInfo.getNick_name() + "--爱心大使说话";
+                break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN:
                 if(mQuestionNum == 0) {
                     msg = userInfo.getNick_name() + "男生第一次提问";

@@ -49,6 +49,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
+            case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
                 listener.onMessageHandler(chartRoomSendBean,flags);
@@ -112,6 +113,7 @@ public class JMChartRoomController extends AbsRoomController{
         }else {
             list.add(sendBean.getIndexNext());
         }
+        map.put(sendBean.getProcessStatus(),list);
     }
 
     /**
@@ -266,7 +268,7 @@ public class JMChartRoomController extends AbsRoomController{
     private boolean checkIsResponseRepeat(JMChartRoomSendBean chartRoomSendBean) {
         ArrayList<Integer> list = mResponseRecievedIndexMap.get(chartRoomSendBean.getProcessStatus());
         if(list == null) return false;
-        if(list.contains(chartRoomSendBean.getIndexNext())
+        if(list.contains(chartRoomSendBean.getIndexSelf())
                 ||(mResponseRecievedLastMap.get(chartRoomSendBean.getProcessStatus())!=null
                 &&mResponseRecievedLastMap.get(chartRoomSendBean.getProcessStatus()))) {
             //假如重复的消息则不处理

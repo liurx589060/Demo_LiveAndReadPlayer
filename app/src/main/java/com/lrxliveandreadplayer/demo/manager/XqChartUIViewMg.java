@@ -730,9 +730,9 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL://结束
                     if(bean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL) {
-                        mBtnExit.setVisibility(View.INVISIBLE);
-                    }else {
                         mBtnExit.setVisibility(View.VISIBLE);
+                    }else {
+                        mBtnExit.setVisibility(View.INVISIBLE);
                     }
                     if(bean.getProcessStatus() != mProgressStatus) {
                         Tools.toast(mXqActivity,bean.getMsg(),false);
@@ -755,8 +755,10 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男方自我介绍
                 case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
-                case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次选择环节
+                case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
@@ -790,6 +792,8 @@ public class XqChartUIViewMg implements IXqChartView {
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
+                    //重新获取成员列表
+                    getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     if(flags.isLast()) {
                         //发送下一轮，男方自我介绍环节
                         sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_INTRO_MAN);
@@ -799,9 +803,6 @@ public class XqChartUIViewMg implements IXqChartView {
                         sendRoomMessage(sendBean);
                         //隐藏离开按钮
                         mBtnExit.setVisibility(View.INVISIBLE);
-                    }else {
-                        //重新获取成员列表
-                        getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     }
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择环节
@@ -1123,7 +1124,7 @@ public class XqChartUIViewMg implements IXqChartView {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN:
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST;
                 startIndex = mStartOrderIndex_intro_lady;
-                msg = "进入第一环节，女生自我介绍";
+                msg = "进入第一环节，女生第一次选择";
                 if(flags.isLast()) {
                     mAngelDisturbNum = 0;
                 }
@@ -1315,6 +1316,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST:
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST:
+            case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND:
                 //特殊情况，置为-1，屏蔽位置的限制
                 selfIndex = -1;

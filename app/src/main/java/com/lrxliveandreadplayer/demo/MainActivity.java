@@ -480,6 +480,6 @@ public class MainActivity extends Activity {
 
     private String getSpIpAddress() {
         SharedPreferences sp = getSharedPreferences("mySp",Activity.MODE_PRIVATE);
-        return sp.getString("ipAddress","192.168.1.103");
+        return sp.getString("ipAddress","192.168.30.117");
     }
 }

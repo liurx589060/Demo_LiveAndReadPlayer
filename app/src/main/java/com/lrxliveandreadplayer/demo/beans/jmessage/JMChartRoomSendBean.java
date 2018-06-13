@@ -46,6 +46,7 @@ public class JMChartRoomSendBean {
     private JMSendFlags.MessageType messageType;
     private boolean isLadySelected;
     private String manSelects = "";
+    private boolean isResetQuestionStatus;
 
     public int getProcessStatus() {
         return processStatus;
@@ -165,5 +166,13 @@ public class JMChartRoomSendBean {
 
     public void setLadySelected(boolean ladySelected) {
         isLadySelected = ladySelected;
+    }
+
+    public boolean isResetQuestionStatus() {
+        return isResetQuestionStatus;
+    }
+
+    public void setResetQuestionStatus(boolean resetQuestionStatus) {
+        isResetQuestionStatus = resetQuestionStatus;
     }
 }

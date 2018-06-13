@@ -52,6 +52,8 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN:
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY:
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
@@ -139,6 +141,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍环节
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
+                if(chartRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN
+                        && chartRoomSendBean.isResetQuestionStatus()) {
+                    resetQuestionCheckStatus(chartRoomSendBean);
+                }
                 //重复消息，不处理
                 if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
@@ -153,6 +159,10 @@ public class JMChartRoomController extends AbsRoomController{
                 listener.onMessageHandler(chartRoomSendBean,flags);
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
+                //重复消息，不处理
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
+                addCompleteCount(chartRoomSendBean);
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -163,6 +173,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY://女生自我介绍
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二轮谈话
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
+                if(chartRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY
+                        && chartRoomSendBean.isResetQuestionStatus()) {
+                    resetQuestionCheckStatus(chartRoomSendBean);
+                }
                 //重复消息，不处理
                 if(checkIsSendRepeat(chartRoomSendBean)) return;
                 addCompleteCount(chartRoomSendBean);
@@ -179,6 +193,10 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
+                //重复消息，不处理
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
+                addCompleteCount(chartRoomSendBean);
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -188,6 +206,10 @@ public class JMChartRoomController extends AbsRoomController{
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
+                //重复消息，不处理
+                if(checkIsSendRepeat(chartRoomSendBean)) return;
+                addCompleteCount(chartRoomSendBean);
+                addIndexCount(chartRoomSendBean);
                 mCurrentStatus = chartRoomSendBean.getProcessStatus();
 
                 flags.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -306,6 +328,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND:
             case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL:
             case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE:
+            case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN:
                 allCount = data.getLimitMan();
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
@@ -313,6 +336,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
             case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND:
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
+            case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL:
                 allCount = data.getLimitLady();
                 isLast = mCompleteCount>=allCount?true:false;
                 break;
@@ -320,6 +344,7 @@ public class JMChartRoomController extends AbsRoomController{
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING:
                 allCount = data.getLimitAngel();
                 isLast = mCompleteCount>=allCount?true:false;
+                break;
             case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
                 allCount = 2;//最后剩下两位被选中的女生
                 isLast = mCompleteCount>=allCount?true:false;
@@ -357,5 +382,15 @@ public class JMChartRoomController extends AbsRoomController{
         bean.setTime(Tools.getCurrentDateTime());
         bean.setUserName(selfInfo.getUser_name());
         return bean;
+    }
+
+    /**
+     * 重置问答环节检查是否为重复的参数
+     */
+    @Override
+    public void resetQuestionCheckStatus(JMChartRoomSendBean sendBean) {
+        mSendCompleteCountMap.remove(sendBean.getProcessStatus());
+        mSendRecievedIndexMap.remove(sendBean.getProcessStatus());
+        mSendRecievedLastMap.remove(sendBean.getProcessStatus());
     }
 }

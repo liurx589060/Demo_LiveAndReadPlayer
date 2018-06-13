@@ -12,4 +12,5 @@ public abstract class AbsRoomController {
     public abstract void handleRoomMessage(JMChartRoomSendBean chartRoomSendBean);
     public abstract ArrayList<String> chatOrderRule();
     public abstract JMChartRoomSendBean createBaseSendbeanForExtent();
+    public abstract void resetQuestionCheckStatus(JMChartRoomSendBean sendBean);
 }

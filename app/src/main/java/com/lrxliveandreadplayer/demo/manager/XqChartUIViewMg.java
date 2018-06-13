@@ -1023,20 +1023,17 @@ public class XqChartUIViewMg implements IXqChartView {
      * @param flags
      */
     private void operate_SelectMan_Final_Response(JMChartRoomSendBean bean,JMSendFlags flags) {
+        //解析男生的女生选择
+        String[] texts = bean.getManSelects().split(",");
+        List<String> manSelectList = Arrays.asList(texts);
+        mManSelectedResultList.clear();
+        mManSelectedResultList.addAll(manSelectList);
         //已经最后一个有回复了
         if(flags.isLast()) {
-            String selectStr = "";
-            for(int i = 0 ; i < mManSelectedResultList.size() ; i++) {
-                selectStr += mManSelectedResultList.get(i);
-                if(i < mManSelectedResultList.size() - 1) {
-                    selectStr += ",";
-                }
-            }
             //进入下一个环节,流程完结
             JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
             sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL);
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
-            sendBean.setManSelects(selectStr);//男生的选择
             sendBean.setMsg("流程结束，即将退出");
             sendRoomMessage(sendBean);
         }
@@ -1103,11 +1100,12 @@ public class XqChartUIViewMg implements IXqChartView {
      * @param flags
      */
     private void operate_Final(JMChartRoomSendBean bean,JMSendFlags flags) {
-        //解析男生的女生选择
-        String[] texts = bean.getManSelects().split(",");
-        List<String> manSelectList = Arrays.asList(texts);
-        mManSelectedResultList.clear();
-        mManSelectedResultList.addAll(manSelectList);
+        String finalSelectLady = mManSelectedResultList.get(0);
+        if(mLadySelectedResultList.contains(finalSelectLady)) {
+            Tools.toast(mXqActivity,"恭喜匹配成功，两人可进入下一环节",true);
+        }else {
+            Tools.toast(mXqActivity,"非常遗憾，匹配失败",true);
+        }
         //更新
         mMemberAdapter.changeSelectStatus();
         //显示离开按钮
@@ -1282,6 +1280,15 @@ public class XqChartUIViewMg implements IXqChartView {
                     mManSelectedResultList.remove(1);
                 }
                 mMemberAdapter.changeNormalStatus();
+                //传输男生的选择女生
+                String selectStr2 = "";
+                for(int i = 0 ; i < mManSelectedResultList.size() ; i++) {
+                    selectStr2 += mManSelectedResultList.get(i);
+                    if(i < mManSelectedResultList.size() - 1) {
+                        selectStr2 += ",";
+                    }
+                }
+                sendBean.setManSelects(selectStr2);
                 break;
         }
         //发送回应

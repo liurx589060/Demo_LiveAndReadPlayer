@@ -2,6 +2,8 @@ package com.lrxliveandreadplayer.demo;
 
 import android.app.Application;
 
+import com.tencent.bugly.crashreport.CrashReport;
+
 import cn.jpush.im.android.api.JMessageClient;
 
 /**
@@ -14,5 +16,7 @@ public class MyApplication extends Application {
         super.onCreate();
         JMessageClient.setDebugMode(true);
         JMessageClient.init(this);
+        //bugly
+        CrashReport.initCrashReport(getApplicationContext(), "4c34f4883b", true);
     }
 }

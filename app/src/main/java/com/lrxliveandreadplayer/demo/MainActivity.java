@@ -32,6 +32,7 @@ import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 

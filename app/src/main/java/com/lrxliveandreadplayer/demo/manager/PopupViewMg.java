@@ -1,7 +1,9 @@
 package com.lrxliveandreadplayer.demo.manager;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +34,7 @@ public class PopupViewMg {
         LIVE_NONE
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void showAngelPopupView(Activity activity, View showView, final IPopupAngelListener listener) {
         if(mAngelPopupWindow == null) {
             View contentView = getView(activity,POPUP_ANGEL);
@@ -40,8 +43,10 @@ public class PopupViewMg {
             int heightSpec = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
             contentView.measure(widthSpec,heightSpec);
             mAngelPopupWindow = new PopupWindow(contentView);
-            mAngelPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-            mAngelPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+            int width = contentView.getMeasuredWidth();
+            int height = contentView.getMeasuredHeight();
+            mAngelPopupWindow.setWidth(width);
+            mAngelPopupWindow.setHeight(height);
             Button btnDisturb = contentView.findViewById(R.id.btn_disturb);
             btnDisturb.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -52,15 +57,18 @@ public class PopupViewMg {
                     mAngelPopupWindow.dismiss();
                 }
             });
-            ColorDrawable dw = new ColorDrawable(0xb0000000);
+            ColorDrawable dw = new ColorDrawable(0x00000000);
             mAngelPopupWindow.setBackgroundDrawable(dw);
             mAngelPopupWindow.setFocusable(true);
             mAngelPopupWindow.setOutsideTouchable(true);
         }
-        mAngelPopupWindow.showAtLocation(showView, Gravity.RIGHT, Tools.dip2px(activity,10),0);
+        int popWidth = mAngelPopupWindow.getWidth();
+        int oXff = Tools.dip2px(activity,10) + popWidth;
+        mAngelPopupWindow.showAsDropDown(showView, oXff,0,Gravity.RIGHT);
     }
 
-    public void showGuestPopupView(Activity activity, View showView, Position position,final IPopupGuestListener listener) {
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public void showGuestPopupView(Activity activity, View showView, Position position, final IPopupGuestListener listener) {
         if(mGuestPopupWindow == null) {
             View contentView = getView(activity,POPUP_GUEST);
             if(contentView == null) return;
@@ -68,8 +76,10 @@ public class PopupViewMg {
             int heightSpec = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
             contentView.measure(widthSpec,heightSpec);
             mGuestPopupWindow = new PopupWindow(contentView);
-            mGuestPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-            mGuestPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+            int width = contentView.getMeasuredWidth();
+            int height = contentView.getMeasuredHeight();
+            mGuestPopupWindow.setWidth(width);
+            mGuestPopupWindow.setHeight(height);
             final Button btnVideo = contentView.findViewById(R.id.btn_video);
             final Button btnMic = contentView.findViewById(R.id.btn_mic);
             btnVideo.setOnClickListener(new View.OnClickListener() {
@@ -91,13 +101,14 @@ public class PopupViewMg {
                     mGuestPopupWindow.dismiss();
                 }
             });
-            ColorDrawable dw = new ColorDrawable(0xb0000000);
+            ColorDrawable dw = new ColorDrawable(0x00000000);
             mGuestPopupWindow.setBackgroundDrawable(dw);
             mGuestPopupWindow.setFocusable(true);
             mGuestPopupWindow.setOutsideTouchable(true);
         }
-        mGuestPopupWindow.showAtLocation(showView,position==Position.LEFT?Gravity.LEFT:Gravity.RIGHT
-                ,Tools.dip2px(activity,10),0);
+        int popWidth = mGuestPopupWindow.getWidth();
+        int xOff = position==Position.LEFT?(-Tools.dip2px(activity,10) - popWidth):(popWidth + Tools.dip2px(activity,10));
+        mGuestPopupWindow.showAsDropDown(showView,xOff,0,position==Position.LEFT?Gravity.LEFT:Gravity.RIGHT);
     }
 
     private View getView(Activity activity,int viewType) {

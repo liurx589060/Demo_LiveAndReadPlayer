@@ -62,9 +62,9 @@ public class IjkLivePlayer extends Activity {
                     }
                 });
 
-        String sourceUrl = "rtmp://10.10.15.19/live/stream";
+        String sourceUrl = "rtmp://192.168.30.117/live/stream";
         if(getIntent() != null) {
-            sourceUrl = getIntent().getStringExtra("livePath")==null?"rtmp://192.168.1.102/live/stream"
+            sourceUrl = getIntent().getStringExtra("livePath")==null?"rtmp://192.168.30.117/live/stream"
                     :getIntent().getStringExtra("livePath");
         }
         player.setPlaySource(sourceUrl)

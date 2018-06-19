@@ -7,7 +7,7 @@ import android.view.View;
  */
 
 public interface IXqChartView {
-    View createView();
+    View getView();
     void onResume();
     void onDestroy();
 }

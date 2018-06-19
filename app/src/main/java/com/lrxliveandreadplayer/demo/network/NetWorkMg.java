@@ -16,10 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetWorkMg {
     public static String IP_ADDRESS = "192.168.30.117";
-    public static final String BASEURL = "http://" + IP_ADDRESS + "/thinkphp/Sample_Mjmz/";
     public static String GENDER = "男";
 
     public static Retrofit newRetrofit() {
+        String BASEURL = "http://" + IP_ADDRESS + "/thinkphp/Sample_Mjmz/";
         OkHttpClient okHttpClient=new OkHttpClient.Builder()
                 .readTimeout(20, TimeUnit.SECONDS)
                 .connectTimeout(20,TimeUnit.SECONDS)
@@ -30,8 +30,12 @@ public class NetWorkMg {
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .baseUrl(NetWorkMg.BASEURL)
+                .baseUrl(BASEURL)
                 .build();
         return retrofit;
+    }
+
+    public static String getCameraUrl() {
+        return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream1";
     }
 }

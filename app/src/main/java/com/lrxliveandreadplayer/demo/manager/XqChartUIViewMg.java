@@ -1,6 +1,7 @@
 package com.lrxliveandreadplayer.demo.manager;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -64,6 +65,8 @@ import static com.lrxliveandreadplayer.demo.manager.PopupViewMg.LiveType.LIVE_VI
  */
 
 public class XqChartUIViewMg implements IXqChartView {
+    private XqCameraViewMg mXqCameraViewMg;
+
     private View mRootView;
     private int SPACE_TOP = 0;
     private int ANGEL_DISTURB_COUNT = 3;
@@ -121,11 +124,12 @@ public class XqChartUIViewMg implements IXqChartView {
     private JMSendFlags mStartTimeSendFlags;
     private boolean mIsSelfSelected = false;
 
+    public void setContentView() {
+        initAndSetContentView();
+    }
+
     @Override
-    public View createView() {
-        if(mRootView == null) {
-            mRootView = LayoutInflater.from(mXqActivity).inflate(R.layout.layout_chart_ui,null);
-        }
+    public View getView() {
         return mRootView;
     }
 
@@ -137,6 +141,9 @@ public class XqChartUIViewMg implements IXqChartView {
     @Override
     public void onDestroy() {
         JMessageClient.unRegisterEventReceiver(this);
+        if(mXqCameraViewMg != null) {
+            mXqCameraViewMg.onDestroy();
+        }
     }
 
     private void initMemberRecyclerView() {
@@ -190,6 +197,7 @@ public class XqChartUIViewMg implements IXqChartView {
         mBtnGift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mXqCameraViewMg.startRecord();
             }
         });
 
@@ -210,6 +218,14 @@ public class XqChartUIViewMg implements IXqChartView {
 
         upDataMembers();
         JMessageClient.registerEventReceiver(this);
+    }
+
+    /**
+     * 初始化
+     */
+    private void initAndSetContentView() {
+        mXqCameraViewMg = new XqCameraViewMg(mXqActivity);
+        mXqCameraViewMg.getmCameraUIHelper().setContentView(mRootView);
     }
 
     private void initAngelManViewInstance() {
@@ -456,8 +472,8 @@ public class XqChartUIViewMg implements IXqChartView {
         @Override
         public void onBindViewHolder(MemberViewHolder holder, int position) {
             setData(holder.mLeft,position,0);
-            if(position >= (DataManager.getInstance().getChartData().getLimitLady() + 1)/2) {
-                setData(holder.mRight,position,5);
+            if(DataManager.getInstance().getChartData().getLimitLady() >= (Constant.MAX_LADY_COUNT + 1)/2) {
+                setData(holder.mRight,position,Constant.MAX_LADY_COUNT/2);
             }else {
                 setData(holder.mRight,position,1);
             }

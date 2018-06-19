@@ -17,11 +17,7 @@ public class XqChartActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mXqChartUIViewMg = new XqChartUIViewMg(this);
-        setContentView(mXqChartUIViewMg.createView());
-    }
-
-    public XqChartUIViewMg getmXqChartUIViewMg() {
-        return mXqChartUIViewMg;
+        mXqChartUIViewMg.setContentView(this);
     }
 
     @Override

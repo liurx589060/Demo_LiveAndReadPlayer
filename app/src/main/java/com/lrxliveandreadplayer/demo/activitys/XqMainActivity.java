@@ -80,7 +80,9 @@ public class XqMainActivity extends Activity {
         mBtnGuest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                joinChartRoom();
+//                joinChartRoom();
+                Intent intent = new Intent(XqMainActivity.this,XqChartActivity.class);
+                startActivity(intent);
             }
         });
     }

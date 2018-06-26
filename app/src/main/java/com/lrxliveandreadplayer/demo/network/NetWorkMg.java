@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class NetWorkMg {
-    public static String IP_ADDRESS = "192.168.30.117";
+    public static String IP_ADDRESS = "192.168.30.107";
     public static String GENDER = "男";
 
     public static Retrofit newRetrofit() {
@@ -37,5 +37,13 @@ public class NetWorkMg {
 
     public static String getCameraUrl() {
         return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream1";
+    }
+
+    public static String getAudioUrl_1() {
+        return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream2";
+    }
+
+    public static String getAudioUrl_2() {
+        return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream3";
     }
 }

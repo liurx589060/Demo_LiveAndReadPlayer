@@ -55,6 +55,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme_Light.Default"
             />
+
+        <service android:name="cn.jpush.android.service.DaemonService"></service>
     </application>
 
 </manifest>

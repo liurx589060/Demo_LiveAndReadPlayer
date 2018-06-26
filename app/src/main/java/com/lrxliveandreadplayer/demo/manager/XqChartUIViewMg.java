@@ -3,6 +3,7 @@ package com.lrxliveandreadplayer.demo.manager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -66,6 +67,10 @@ import static com.lrxliveandreadplayer.demo.manager.PopupViewMg.LiveType.LIVE_VI
 
 public class XqChartUIViewMg implements IXqChartView {
     private XqCameraViewMg mXqCameraViewMg;
+    private XqPlayerViewMg mXqPlayerViewMg;
+    private XqPlayerViewMg mXqMutilPlayerViewMg;
+    private XqAudioViewMg mXqAudioViewMg;
+    private XqAudioViewMg mXqMutilAudioViewMg;
 
     private View mRootView;
     private int SPACE_TOP = 0;
@@ -135,7 +140,30 @@ public class XqChartUIViewMg implements IXqChartView {
 
     @Override
     public void onResume() {
+        if(mXqCameraViewMg != null) {
+            mXqCameraViewMg.onResume();
+        }
 
+        if(mXqPlayerViewMg != null) {
+            mXqPlayerViewMg.onResume();
+        }
+        mXqMutilPlayerViewMg.onResume();
+        mXqMutilAudioViewMg.onResume();
+        mXqAudioViewMg.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        if(mXqCameraViewMg != null) {
+            mXqCameraViewMg.onPause();
+        }
+
+        if(mXqPlayerViewMg != null) {
+            mXqPlayerViewMg.onPause();
+        }
+        mXqMutilPlayerViewMg.onPause();
+        mXqMutilAudioViewMg.onPause();
+        mXqAudioViewMg.onPause();
     }
 
     @Override
@@ -144,6 +172,27 @@ public class XqChartUIViewMg implements IXqChartView {
         if(mXqCameraViewMg != null) {
             mXqCameraViewMg.onDestroy();
         }
+
+        if(mXqPlayerViewMg != null) {
+            mXqPlayerViewMg.onDestroy();
+        }
+        mXqMutilAudioViewMg.onDestroy();
+        mXqMutilPlayerViewMg.onDestroy();
+        mXqAudioViewMg.onDestroy();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if(mXqCameraViewMg != null) {
+            mXqCameraViewMg.onConfigurationChanged(newConfig);
+        }
+
+        if(mXqPlayerViewMg != null) {
+            mXqPlayerViewMg.onConfigurationChanged(newConfig);
+        }
+        mXqMutilPlayerViewMg.onConfigurationChanged(newConfig);
+        mXqMutilAudioViewMg.onConfigurationChanged(newConfig);
+        mXqAudioViewMg.onConfigurationChanged(newConfig);
     }
 
     private void initMemberRecyclerView() {
@@ -197,7 +246,13 @@ public class XqChartUIViewMg implements IXqChartView {
         mBtnGift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mXqCameraViewMg.startRecord();
+                mXqCameraViewMg.setVisible(true);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mXqCameraViewMg.startRecord();
+                    }
+                },100);
             }
         });
 
@@ -225,7 +280,23 @@ public class XqChartUIViewMg implements IXqChartView {
      */
     private void initAndSetContentView() {
         mXqCameraViewMg = new XqCameraViewMg(mXqActivity);
-        mXqCameraViewMg.getmCameraUIHelper().setContentView(mRootView);
+        mXqPlayerViewMg = new XqPlayerViewMg(mXqActivity,NetWorkMg.getCameraUrl());
+        mXqMutilPlayerViewMg = new XqPlayerViewMg(mXqActivity,NetWorkMg.getAudioUrl_2());
+        mXqAudioViewMg = new XqAudioViewMg(mXqActivity,NetWorkMg.getAudioUrl_1());
+        mXqMutilAudioViewMg = new XqAudioViewMg(mXqActivity,NetWorkMg.getAudioUrl_2());
+
+        mXqCameraViewMg.getmCameraUIHelper().addContentViewWithSelf(new View[] {mXqPlayerViewMg.getView(),mXqMutilPlayerViewMg.getView(),mRootView});
+        mXqCameraViewMg.setVisible(false);
+
+        mXqPlayerViewMg.init(mXqActivity);
+        mXqPlayerViewMg.start();
+        mXqPlayerViewMg.setVisible(false);
+
+        mXqMutilPlayerViewMg.init(mXqActivity);
+        mXqMutilPlayerViewMg.start();
+        mXqMutilPlayerViewMg.setVisible(false);
+
+
     }
 
     private void initAngelManViewInstance() {
@@ -839,6 +910,8 @@ public class XqChartUIViewMg implements IXqChartView {
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
+                    //先回复直播方式为none
+                    resetLiveStatus();
                     //重新获取成员列表
                     getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     if(flags.isLast()) {
@@ -879,7 +952,7 @@ public class XqChartUIViewMg implements IXqChartView {
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
                     mAngelIsDistub = true;
                     break;
-                case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://爱心大使插话
+                case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://更改直播方式
                     operate_LiveType(bean,flags);
                     break;
             }
@@ -914,6 +987,7 @@ public class XqChartUIViewMg implements IXqChartView {
         mTextCountDown.setVisibility(View.INVISIBLE);
         mTextCountDown.setText("");
         mBtnEnd.setVisibility(View.INVISIBLE);
+        resetLiveStatus();
 
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍
@@ -999,9 +1073,6 @@ public class XqChartUIViewMg implements IXqChartView {
                 if(bean.isLadySelected()) {//收集其他女人的答案
                     mLadySelectedResultList.add(String.valueOf(bean.getIndexSelf()));
                 }
-//                if(mLadySelecteResult) {//收集自己的答案
-//                    mLadySelectedResultList.add(String.valueOf(bean.getIndexSelf()));
-//                }
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN;
                 msg = "问答环节，男生";
                 break;
@@ -1119,13 +1190,16 @@ public class XqChartUIViewMg implements IXqChartView {
             //发送回应
             sendBean.setProcessStatus(bean.getProcessStatus());
             sendBean.setMessageType(JMSendFlags.MessageType.TYPE_RESPONSE);
-            sendBean.setLiveType(JMChartRoomSendBean.LIVE_MIC);//默认语音
+            sendBean.setLiveType(JMChartRoomSendBean.LIVE_CAMERA);//默认语音
             sendBean.setMsg(msg);
             sendRoomMessage(sendBean);
             //倒计时
             startTiming(bean,flags);
             //进行自我介绍
             Tools.toast(mXqActivity,msg,true);
+            setLiveStatus(bean,true);
+        }else {
+            setLiveStatus(bean,false);
         }
     }
 
@@ -1504,6 +1578,57 @@ public class XqChartUIViewMg implements IXqChartView {
     private void sendRoomMessage(JMChartRoomSendBean chartRoomSendBean) {
         JMsgSender.sendRoomMessage(chartRoomSendBean);
         mChartRoomController.handleRoomMessage(chartRoomSendBean);
+    }
+
+    /**
+     * 更改直播方式的处理
+     * @param chartRoomSendBean
+     * @param isSelf
+     */
+    private void setLiveStatus(JMChartRoomSendBean chartRoomSendBean,boolean isSelf) {
+        switch (chartRoomSendBean.getLiveType()) {
+            case JMChartRoomSendBean.LIVE_MIC:
+                if(isSelf) {
+                    mXqAudioViewMg.start();
+                }else {
+//                    mXqPlayerViewMg.start();
+                    mXqPlayerViewMg.setVisible(true);
+                }
+                break;
+            case JMChartRoomSendBean.LIVE_CAMERA:
+                if(isSelf) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mXqCameraViewMg.startRecord();
+                        }
+                    },100);
+                }else {
+//                    mXqPlayerViewMg.setAddress(NetWorkMg.getCameraUrl());
+//                    mXqPlayerViewMg.start();
+                    mXqPlayerViewMg.setVisible(true);
+                }
+                break;
+            case JMChartRoomSendBean.LIVE_NONE:
+                mXqCameraViewMg.setVisible(false);
+                mXqPlayerViewMg.setVisible(false);
+                mXqMutilPlayerViewMg.setVisible(false);
+                break;
+        }
+    }
+
+    /**
+     * 重置直播方式，以备下次直播
+     */
+    private void resetLiveStatus() {
+        mXqCameraViewMg.stopRecord();
+        mXqCameraViewMg.setVisible(false);
+//        mXqMutilPlayerViewMg.stop();
+        mXqMutilPlayerViewMg.setVisible(false);
+//        mXqPlayerViewMg.stop();
+        mXqPlayerViewMg.setVisible(false);
+        mXqAudioViewMg.stop();
+        mXqMutilAudioViewMg.stop();
     }
 
     /**

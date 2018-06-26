@@ -1,6 +1,7 @@
 package com.lrxliveandreadplayer.demo.activitys;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
@@ -17,12 +18,30 @@ public class XqChartActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mXqChartUIViewMg = new XqChartUIViewMg(this);
-        mXqChartUIViewMg.setContentView(this);
+        mXqChartUIViewMg.setContentView();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mXqChartUIViewMg.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mXqChartUIViewMg.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mXqChartUIViewMg.onPause();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mXqChartUIViewMg.onConfigurationChanged(newConfig);
     }
 }

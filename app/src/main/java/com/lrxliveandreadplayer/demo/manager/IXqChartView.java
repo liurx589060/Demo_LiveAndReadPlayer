@@ -1,5 +1,6 @@
 package com.lrxliveandreadplayer.demo.manager;
 
+import android.content.res.Configuration;
 import android.view.View;
 
 /**
@@ -9,5 +10,7 @@ import android.view.View;
 public interface IXqChartView {
     View getView();
     void onResume();
+    void onPause();
     void onDestroy();
+    void onConfigurationChanged(Configuration newConfig);
 }

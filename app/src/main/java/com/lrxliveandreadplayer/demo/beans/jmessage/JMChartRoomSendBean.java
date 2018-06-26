@@ -42,7 +42,7 @@ public class JMChartRoomSendBean {
     private String time = "";
     private int limitCount;
     private boolean isUpdateMembers = false;
-    private int liveType = LIVE_NONE;
+    private int liveType = LIVE_CAMERA;
     private JMSendFlags.MessageType messageType;
     private boolean isLadySelected;
     private String manSelects = "";

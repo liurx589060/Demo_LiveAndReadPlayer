@@ -1,6 +1,7 @@
 package com.lrxliveandreadplayer.demo.manager;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
@@ -29,8 +30,17 @@ public class XqCameraViewMg implements IXqChartView {
     }
 
     @Override
+    public void onPause() {
+    }
+
+    @Override
     public void onDestroy() {
         mCameraUIHelper.onDestroy();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
     }
 
     public XqCameraViewMg(Activity activity) {

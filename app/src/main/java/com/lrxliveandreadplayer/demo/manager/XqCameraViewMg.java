@@ -14,7 +14,7 @@ import net.yrom.screenrecorder.operate.ICameraCallBack;
 import net.yrom.screenrecorder.operate.RecorderBean;
 import net.yrom.screenrecorder.ui.CameraUIHelper;
 
-public class XqCameraViewMg implements IXqChartView {
+public class XqCameraViewMg extends AbsChartView {
     private Activity mActivity;
     private CameraUIHelper mCameraUIHelper;
     private RecorderBean mRecorderBean;
@@ -84,14 +84,17 @@ public class XqCameraViewMg implements IXqChartView {
         });
     }
 
-    public void startRecord() {
+    @Override
+    public void start() {
         mCameraUIHelper.startRecord();
     }
 
-    public void stopRecord() {
+    @Override
+    public void stop() {
         mCameraUIHelper.stopRecord();
     }
 
+    @Override
     public void setVisible(boolean isVisible) {
         mCameraUIHelper.getCameraLivingView().setVisibility(isVisible?View.VISIBLE:View.INVISIBLE);
     }

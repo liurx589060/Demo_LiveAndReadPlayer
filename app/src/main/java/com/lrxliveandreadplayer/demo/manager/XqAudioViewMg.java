@@ -10,7 +10,7 @@ import net.yrom.screenrecorder.operate.AudioRecordOpt;
 import net.yrom.screenrecorder.operate.RecorderBean;
 import net.yrom.screenrecorder.task.RtmpStreamingSender;
 
-public class XqAudioViewMg implements IXqChartView {
+public class XqAudioViewMg extends AbsChartView {
     private Activity mActivity;
     private String mAddress;
 

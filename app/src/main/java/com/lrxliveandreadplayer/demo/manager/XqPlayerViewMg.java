@@ -10,7 +10,7 @@ import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
 import com.lrx.live.player.R;
 
-public class XqPlayerViewMg implements IXqChartView {
+public class XqPlayerViewMg extends AbsChartView {
     private PowerManager.WakeLock wakeLock;
     private PlayerView player;
     private View rootView;

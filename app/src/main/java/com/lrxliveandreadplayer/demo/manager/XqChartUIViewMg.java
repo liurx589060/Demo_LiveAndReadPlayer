@@ -895,10 +895,10 @@ public class XqChartUIViewMg extends AbsChartView {
         JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
 
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
+            //先回复直播方式为none
+            resetLiveStatus();
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
-                    //先回复直播方式为none
-                    resetLiveStatus();
                     //重新获取成员列表
                     getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     if(flags.isLast()) {
@@ -1584,6 +1584,7 @@ public class XqChartUIViewMg extends AbsChartView {
                 break;
             case JMChartRoomSendBean.LIVE_CAMERA:
                 if(isSelf) {
+                    mXqCameraViewMg.setVisible(true);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {

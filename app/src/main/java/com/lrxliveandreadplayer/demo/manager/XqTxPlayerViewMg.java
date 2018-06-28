@@ -2,10 +2,13 @@ package com.lrxliveandreadplayer.demo.manager;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.tencent.rtmp.TXLiveConstants;
 import com.tencent.rtmp.TXLivePlayConfig;
 import com.tencent.rtmp.TXLivePlayer;
@@ -58,13 +61,17 @@ public class XqTxPlayerViewMg extends AbsChartView {
         if(mAddress == null || mAddress.isEmpty()) {
             throw new IllegalArgumentException("the mAddress is not valid,can not null or empty");
         }
-        mLivePlayer.startPlay(mAddress, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
+        if(mLivePlayer != null) {
+            mLivePlayer.startPlay(mAddress, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
+        }
     }
 
     @Override
     public void stop() {
         super.stop();
-        mLivePlayer.stopPlay(true);
+        if(mLivePlayer != null) {
+            mLivePlayer.stopPlay(true);
+        }
     }
 
     @Override
@@ -80,17 +87,23 @@ public class XqTxPlayerViewMg extends AbsChartView {
         mAddress = address;
         mRootView = LayoutInflater.from(activity).inflate(R.layout.layout_viewmg_xqtxplayer,null);
         mVideoView = mRootView.findViewById(R.id.video_view);
-        mLivePlayer = new TXLivePlayer(activity);
-        mLivePlayer.setPlayerView(mVideoView);
-        // 设置填充模式
-        mLivePlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
-        // 设置画面渲染方向
-        mLivePlayer.setRenderRotation(TXLiveConstants.RENDER_ROTATION_PORTRAIT);
+        try {
+            mLivePlayer = new TXLivePlayer(activity);
+            mLivePlayer.setPlayerView(mVideoView);
+            // 设置填充模式
+            mLivePlayer.setRenderMode(TXLiveConstants.RENDER_MODE_FULL_FILL_SCREEN);
+            // 设置画面渲染方向
+            mLivePlayer.setRenderRotation(TXLiveConstants.RENDER_ROTATION_PORTRAIT);
 
-        TXLivePlayConfig mPlayConfig = new TXLivePlayConfig();
-        mPlayConfig.setAutoAdjustCacheTime(true);
-        mPlayConfig.setMaxAutoAdjustCacheTime(CACHE_TIME_SMOOTH);
-        mPlayConfig.setMinAutoAdjustCacheTime(CACHE_TIME_FAST);
-        mLivePlayer.setConfig(mPlayConfig);
+            TXLivePlayConfig mPlayConfig = new TXLivePlayConfig();
+            mPlayConfig.setAutoAdjustCacheTime(true);
+            mPlayConfig.setMaxAutoAdjustCacheTime(CACHE_TIME_SMOOTH);
+            mPlayConfig.setMinAutoAdjustCacheTime(CACHE_TIME_FAST);
+            mLivePlayer.setConfig(mPlayConfig);
+        }catch (Exception e) {
+            e.printStackTrace();
+            Log.e("yy",e.toString());
+            Tools.toast(activity,"启动TXLivePlayer失败", true);
+        }
     }
 }

@@ -124,7 +124,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private boolean mIsSelfSelected = false;
 
     public void setContentView() {
-        initAndSetContentView();
+//        initAndSetContentView();
+        mXqActivity.setContentView(mRootView);
     }
 
     @Override
@@ -895,10 +896,11 @@ public class XqChartUIViewMg extends AbsChartView {
         JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
 
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
+            //先回复直播方式为none
+//            resetLiveStatus();
+            stopTiming();
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
-                    //先回复直播方式为none
-                    resetLiveStatus();
                     //重新获取成员列表
                     getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
                     if(flags.isLast()) {
@@ -974,7 +976,7 @@ public class XqChartUIViewMg extends AbsChartView {
         mTextCountDown.setVisibility(View.INVISIBLE);
         mTextCountDown.setText("");
         mBtnEnd.setVisibility(View.INVISIBLE);
-        resetLiveStatus();
+//        resetLiveStatus();
 
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍
@@ -1180,14 +1182,14 @@ public class XqChartUIViewMg extends AbsChartView {
             sendBean.setLiveType(JMChartRoomSendBean.LIVE_CAMERA);//默认语音
             sendBean.setMsg(msg);
             sendRoomMessage(sendBean);
-            //倒计时
-            startTiming(bean,flags);
             //进行自我介绍
             Tools.toast(mXqActivity,msg,true);
-            setLiveStatus(bean,true);
+//            setLiveStatus(bean,true);
         }else {
-            setLiveStatus(bean,false);
+//            setLiveStatus(bean,false);
         }
+        //倒计时
+        startTiming(bean,flags);
     }
 
     /**
@@ -1488,16 +1490,18 @@ public class XqChartUIViewMg extends AbsChartView {
 
     //开始计时
     private void startTiming(final JMChartRoomSendBean bean, final JMSendFlags flags) {
+        mTextCountDown.setVisibility(View.VISIBLE);
         mStartTimeRoomSendBean = bean;
         mStartTimeSendFlags = flags;
-        mTextCountDown.setVisibility(View.VISIBLE);
         if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST
                 && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND
                 && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL
                 && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST
                 && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND
                 && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL) {
-            mBtnEnd.setVisibility(View.VISIBLE);
+            if(checkIsSelf(bean,flags)) {
+                mBtnEnd.setVisibility(View.VISIBLE);
+            }
         }
         mTimeRunnable = new Runnable() {
             @Override
@@ -1540,12 +1544,14 @@ public class XqChartUIViewMg extends AbsChartView {
                 }
 
                 if(time > 0) {
-                    mTextCountDown.setText(String.valueOf(time));
+                    mTextCountDown.setText(String.valueOf(time) + "s");
                     mTextCountDown.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(this,1000);//下一次循环
                 }else {
                     //自行操作结束
-                    onOperateEnd(bean,flags);
+                    if(checkIsSelf(bean,flags)) {
+                        onOperateEnd(bean,flags);
+                    }
                     mTextCountDown.setVisibility(View.INVISIBLE);
                     stopTiming();//停止循环
                 }
@@ -1560,6 +1566,7 @@ public class XqChartUIViewMg extends AbsChartView {
             mHandler.removeCallbacks(mTimeRunnable);
         }
         timeCount = 0;
+        mTextCountDown.setVisibility(View.INVISIBLE);
     }
 
     private void sendRoomMessage(JMChartRoomSendBean chartRoomSendBean) {
@@ -1584,6 +1591,7 @@ public class XqChartUIViewMg extends AbsChartView {
                 break;
             case JMChartRoomSendBean.LIVE_CAMERA:
                 if(isSelf) {
+                    mXqCameraViewMg.setVisible(true);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {

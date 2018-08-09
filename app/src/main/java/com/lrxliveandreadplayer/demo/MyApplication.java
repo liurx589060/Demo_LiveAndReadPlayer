@@ -23,6 +23,9 @@ public class MyApplication extends Application {
         CrashReport.initCrashReport(getApplicationContext(), "4c34f4883b", true);
 
         TXLiveBase.setAppID("1252463788");
+
+        //需要传入ui设计给的大小
+//        new ScreenAdaptation(this, 1080,1920).register();
     }
 
     @Override

@@ -25,24 +25,24 @@
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:textStyle="bold"
-                android:textSize="@dimen/sy_p_60"
+                android:textSize="@dimen/dp_20"
                 android:textColor="#a84561"
-                android:layout_marginLeft="@dimen/sy_p_10"/>
+                android:layout_marginLeft="@dimen/dp_4"/>
 
             <TextView
                 android:id="@+id/text_nickName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textSize="@dimen/sy_p_50"
+                android:textSize="@dimen/dp_16"
                 android:textColor="#a84561"
-                android:layout_marginLeft="@dimen/sy_p_8"/>
+                android:layout_marginLeft="@dimen/dp_3"/>
         </LinearLayout>
 
         <ImageView
             android:id="@+id/img_head"
-            android:layout_width="@dimen/sy_p_200"
-            android:layout_height="@dimen/sy_p_200"
+            android:layout_width="@dimen/dp_66"
+            android:layout_height="@dimen/dp_66"
             android:src="@drawable/ic_launcher"
             android:scaleType="centerCrop"
             android:layout_below="@+id/line1"
@@ -63,8 +63,8 @@
 
             <ImageView
                 android:id="@+id/image_select"
-                android:layout_width="@dimen/sy_p_80"
-                android:layout_height="@dimen/sy_p_80"
+                android:layout_width="@dimen/dp_26"
+                android:layout_height="@dimen/dp_26"
                 android:layout_centerInParent="true"
                 android:src="@drawable/head_select"/>
         </RelativeLayout>
@@ -91,24 +91,24 @@
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:textStyle="bold"
-                android:textSize="@dimen/sy_p_60"
+                android:textSize="@dimen/dp_20"
                 android:textColor="#a84561"
-                android:layout_marginRight="@dimen/sy_p_10"/>
+                android:layout_marginRight="@dimen/dp_3"/>
 
             <TextView
                 android:id="@+id/text_nickName_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textSize="@dimen/sy_p_50"
+                android:textSize="@dimen/dp_16"
                 android:textColor="#a84561"
-                android:layout_marginRight="@dimen/sy_p_8"/>
+                android:layout_marginRight="@dimen/dp_3"/>
         </LinearLayout>
 
         <ImageView
             android:id="@+id/img_head_2"
-            android:layout_width="@dimen/sy_p_200"
-            android:layout_height="@dimen/sy_p_200"
+            android:layout_width="@dimen/dp_66"
+            android:layout_height="@dimen/dp_66"
             android:src="@drawable/ic_launcher"
             android:scaleType="centerCrop"
             android:layout_below="@+id/line2"
@@ -129,8 +129,8 @@
 
             <ImageView
                 android:id="@+id/image_select_2"
-                android:layout_width="@dimen/sy_p_80"
-                android:layout_height="@dimen/sy_p_80"
+                android:layout_width="@dimen/dp_26"
+                android:layout_height="@dimen/dp_26"
                 android:layout_centerInParent="true"
                 android:src="@drawable/head_select"/>
         </RelativeLayout>

@@ -1587,6 +1587,7 @@ public class XqChartUIViewMg extends AbsChartView {
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            mXqCameraViewMg.setVisible(true);
                             mXqCameraViewMg.start();
                         }
                     },100);

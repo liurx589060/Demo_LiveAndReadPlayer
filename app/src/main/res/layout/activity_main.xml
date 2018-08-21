@@ -104,11 +104,12 @@
         android:id="@+id/btn_ipAdress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/edit_ipAddress"
-        android:layout_marginLeft="21dp"
-        android:layout_marginStart="21dp"
-        android:layout_toEndOf="@+id/edit_ipAddress"
-        android:layout_toRightOf="@+id/edit_ipAddress"
+        android:layout_alignTop="@+id/radio_group"
+        android:layout_marginLeft="23dp"
+        android:layout_marginStart="23dp"
+        android:layout_marginTop="17dp"
+        android:layout_toEndOf="@+id/btn_ijkPlayer"
+        android:layout_toRightOf="@+id/btn_ijkPlayer"
         android:text="保存" />
 
     <Button

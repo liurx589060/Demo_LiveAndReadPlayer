@@ -124,8 +124,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private boolean mIsSelfSelected = false;
 
     public void setContentView() {
-//        initAndSetContentView();
-        mXqActivity.setContentView(mRootView);
+        initAndSetContentView();
+        //mXqActivity.setContentView(mRootView);
     }
 
     @Override
@@ -228,13 +228,15 @@ public class XqChartUIViewMg extends AbsChartView {
         mBtnGift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mXqCameraViewMg.setVisible(true);
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mXqCameraViewMg.start();
-                    }
-                },100);
+//                mXqCameraViewMg.setVisible(true);
+//                mHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mXqCameraViewMg.start();
+//                    }
+//                },100);
+
+                mXqPlayerViewMg.setVisible(true);
             }
         });
 
@@ -897,7 +899,7 @@ public class XqChartUIViewMg extends AbsChartView {
 
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
             //先回复直播方式为none
-//            resetLiveStatus();
+            resetLiveStatus();
             stopTiming();
             switch (bean.getProcessStatus()) {
                 case JMChartRoomSendBean.CHART_STATUS_MATCHING://匹配
@@ -1184,9 +1186,9 @@ public class XqChartUIViewMg extends AbsChartView {
             sendRoomMessage(sendBean);
             //进行自我介绍
             Tools.toast(mXqActivity,msg,true);
-//            setLiveStatus(bean,true);
+            setLiveStatus(bean,true);
         }else {
-//            setLiveStatus(bean,false);
+            setLiveStatus(bean,false);
         }
         //倒计时
         startTiming(bean,flags);

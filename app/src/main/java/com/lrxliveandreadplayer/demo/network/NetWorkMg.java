@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class NetWorkMg {
-    public static String IP_ADDRESS = "192.168.1.100";
+    public static String IP_ADDRESS = "192.168.1.101";
     public static String GENDER = "男";
 
     public static Retrofit newRetrofit() {

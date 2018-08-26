@@ -123,6 +123,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private JMSendFlags mStartTimeSendFlags;
     private boolean mIsSelfSelected = false;
 
+    private boolean mIsVisible = false;
+
     public void setContentView() {
         initAndSetContentView();
         //mXqActivity.setContentView(mRootView);
@@ -237,6 +239,8 @@ public class XqChartUIViewMg extends AbsChartView {
 //                },100);
 
                 mXqPlayerViewMg.setVisible(true);
+//                mIsVisible = !mIsVisible;
+//                mXqPlayerViewMg.setVisible(mIsVisible);
             }
         });
 
@@ -282,11 +286,11 @@ public class XqChartUIViewMg extends AbsChartView {
 
         mXqPlayerViewMg.init(mXqActivity);
         mXqPlayerViewMg.start();
-        mXqPlayerViewMg.setVisible(false);
+        //mXqPlayerViewMg.setVisible(false);
 
-        mXqMutilPlayerViewMg.init(mXqActivity);
-        mXqMutilPlayerViewMg.start();
-        mXqMutilPlayerViewMg.setVisible(false);
+//        mXqMutilPlayerViewMg.init(mXqActivity);
+//        mXqMutilPlayerViewMg.start();
+//        mXqMutilPlayerViewMg.setVisible(false);
     }
 
     private void initAngelManViewInstance() {
@@ -492,12 +496,14 @@ public class XqChartUIViewMg extends AbsChartView {
                         mXqActivity.finish();
                         //通知聊天室的其他人,是创建者
                         if(DataManager.getInstance().getSelfMember().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
-                            norifyRoomExit();
+                            norifyRoomExit(JMNormalSendBean.NORMAL_EXIT);
                         }else {
-                            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-                            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
-                            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
-                            sendRoomMessage(sendBean);
+//                            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+//                            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
+//                            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
+//                            sendRoomMessage(sendBean);
+
+                            norifyRoomExit(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
                         }
                     }
                 }, new Consumer<Throwable>() {
@@ -509,11 +515,11 @@ public class XqChartUIViewMg extends AbsChartView {
                 });
     }
 
-    private void norifyRoomExit() {
+    private void norifyRoomExit(int code) {
         for (Member member:DataManager.getInstance().getChartData().getMembers()) {
             if(!member.getUserInfo().getUser_name().equals(DataManager.getInstance().getUserInfo().getUser_name())) {
                 JMNormalSendBean normalSendBean = new JMNormalSendBean();
-                normalSendBean.setCode(JMNormalSendBean.NORMAL_EXIT);
+                normalSendBean.setCode(code);
                 normalSendBean.setTargetUserName(member.getUserInfo().getUser_name());
                 JMsgSender.sendNomalMessage(normalSendBean);
             }
@@ -877,6 +883,8 @@ public class XqChartUIViewMg extends AbsChartView {
                     //收到爱心大使插话的回复后，插话标识置位false
                     mAngelIsDistub = false;
                     break;
+                default:
+                    break;
             }
         }
 
@@ -945,6 +953,11 @@ public class XqChartUIViewMg extends AbsChartView {
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://更改直播方式
                     operate_LiveType(bean,flags);
+                    break;
+                case JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM:
+                    getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
+                    break;
+                default:
                     break;
             }
 
@@ -1650,7 +1663,9 @@ public class XqChartUIViewMg extends AbsChartView {
             //不接收流程前的消息
             if(mCurrentRoomSendBean != null && (mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN
                     && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY)) {
-                if(chartRoomSendBean.getProcessStatus() < mCurrentRoomSendBean.getProcessStatus()) return;
+                if(chartRoomSendBean.getProcessStatus() < mCurrentRoomSendBean.getProcessStatus()){
+                    return;
+                }
             }
             mChartRoomController.handleRoomMessage(chartRoomSendBean);
         }
@@ -1675,6 +1690,13 @@ public class XqChartUIViewMg extends AbsChartView {
         if(normalSendBean.getCode() == JMNormalSendBean.NORMAL_EXIT) {//离开
             mXqActivity.finish();
             Tools.toast(mXqActivity,"房间被解散",true);
+        }else if (normalSendBean.getCode() == JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM) {
+            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
+            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
+            if(mChartRoomController != null) {
+                mChartRoomController.handleRoomMessage(sendBean);
+            }
         }
     }
 }

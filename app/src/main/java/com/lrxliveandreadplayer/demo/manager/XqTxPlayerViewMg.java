@@ -2,6 +2,7 @@ package com.lrxliveandreadplayer.demo.manager;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 
 import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.utils.Tools;
+import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.TXLiveConstants;
 import com.tencent.rtmp.TXLivePlayConfig;
 import com.tencent.rtmp.TXLivePlayer;
@@ -62,6 +64,17 @@ public class XqTxPlayerViewMg extends AbsChartView {
             throw new IllegalArgumentException("the mAddress is not valid,can not null or empty");
         }
         if(mLivePlayer != null) {
+            mLivePlayer.setPlayListener(new ITXLivePlayListener() {
+                @Override
+                public void onPlayEvent(int i, Bundle bundle) {
+                    Log.e("yy","TxPlayer--onPlayEvent--" + i);
+                }
+
+                @Override
+                public void onNetStatus(Bundle bundle) {
+                    Log.e("yy","TxPlayer--onNetStatus--" + bundle);
+                }
+            });
             mLivePlayer.startPlay(mAddress, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
         }
     }

@@ -286,11 +286,11 @@ public class XqChartUIViewMg extends AbsChartView {
 
         mXqPlayerViewMg.init(mXqActivity);
         mXqPlayerViewMg.start();
-        //mXqPlayerViewMg.setVisible(false);
+        mXqPlayerViewMg.setVisible(false);
 
-//        mXqMutilPlayerViewMg.init(mXqActivity);
-//        mXqMutilPlayerViewMg.start();
-//        mXqMutilPlayerViewMg.setVisible(false);
+        mXqMutilPlayerViewMg.init(mXqActivity);
+        mXqMutilPlayerViewMg.start();
+        mXqMutilPlayerViewMg.setVisible(false);
     }
 
     private void initAngelManViewInstance() {
@@ -503,7 +503,16 @@ public class XqChartUIViewMg extends AbsChartView {
 //                            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
 //                            sendRoomMessage(sendBean);
 
-                            norifyRoomExit(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
+                            for (Member member:DataManager.getInstance().getChartData().getMembers()) {
+                                if(!member.getUserInfo().getUser_name().equals(DataManager.getInstance().getUserInfo().getUser_name())) {
+                                    JMNormalSendBean normalSendBean = new JMNormalSendBean();
+                                    normalSendBean.setCode(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
+                                    normalSendBean.setTargetUserName(member.getUserInfo().getUser_name());
+                                    normalSendBean.setTime(Tools.getCurrentDateTime());
+                                    normalSendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
+                                    JMsgSender.sendNomalMessage(normalSendBean);
+                                }
+                            }
                         }
                     }
                 }, new Consumer<Throwable>() {
@@ -554,6 +563,8 @@ public class XqChartUIViewMg extends AbsChartView {
             UserInfoBean bean = mLadyMembersMap.get(index);
             viewInstance.mTxvNum.setText(String.valueOf(index + 1));
             if(bean == null) {
+                viewInstance.mTxvNickName.setText("");
+                viewInstance.mImgHead.setImageResource(R.drawable.ic_launcher);
                 return;
             }
 
@@ -854,7 +865,8 @@ public class XqChartUIViewMg extends AbsChartView {
 
             if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
                     && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING
-                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE) {
+                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE
+                    && bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM) {
                 mCurrentRoomSendBean = bean;
                 mCurrentRoomFlags = flags;
             }
@@ -1658,6 +1670,7 @@ public class XqChartUIViewMg extends AbsChartView {
                 text = object.getString("text");
             }catch (Exception e) {
                 Log.e("yy",e.toString());
+                return;
             }
             JMChartRoomSendBean chartRoomSendBean = new Gson().fromJson(text,JMChartRoomSendBean.class);
             //不接收流程前的消息
@@ -1685,15 +1698,18 @@ public class XqChartUIViewMg extends AbsChartView {
             text = object.getString("text");
         }catch (Exception e) {
             Log.e("yy",e.toString());
+            return;
         }
         JMNormalSendBean normalSendBean = new Gson().fromJson(text,JMNormalSendBean.class);
         if(normalSendBean.getCode() == JMNormalSendBean.NORMAL_EXIT) {//离开
             mXqActivity.finish();
             Tools.toast(mXqActivity,"房间被解散",true);
         }else if (normalSendBean.getCode() == JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM) {
-            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
+            JMChartRoomSendBean sendBean = new JMChartRoomSendBean();
             sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
-            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
+            sendBean.setMsg(normalSendBean.getMsg());
+            sendBean.setTime(normalSendBean.getTime());
+            sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
             if(mChartRoomController != null) {
                 mChartRoomController.handleRoomMessage(sendBean);
             }

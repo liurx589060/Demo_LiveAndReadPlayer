@@ -10,6 +10,7 @@ public class JMNormalSendBean {
     private int code;
     private String msg = "";
     private String targetUserName = "";
+    private String time = "";
 
     public int getCode() {
         return code;
@@ -33,5 +34,13 @@ public class JMNormalSendBean {
 
     public void setTargetUserName(String targetUserName) {
         this.targetUserName = targetUserName;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

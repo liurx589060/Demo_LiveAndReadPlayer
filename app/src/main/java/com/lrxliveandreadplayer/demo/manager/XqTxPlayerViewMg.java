@@ -88,16 +88,9 @@ public class XqTxPlayerViewMg extends AbsChartView {
     }
 
     @Override
-    public void init(Activity activity) {
-        super.init(activity);
-    }
+    public void init(Activity activity,String address) {
+        super.init(activity,address);
 
-    public void setAddress(String address) {
-        mAddress = address;
-    }
-
-    public XqTxPlayerViewMg(Activity activity,String address) {
-        mAddress = address;
         mRootView = LayoutInflater.from(activity).inflate(R.layout.layout_viewmg_xqtxplayer,null);
         mVideoView = mRootView.findViewById(R.id.video_view);
         try {
@@ -118,5 +111,11 @@ public class XqTxPlayerViewMg extends AbsChartView {
             Log.e("yy",e.toString());
             Tools.toast(activity,"启动TXLivePlayer失败", true);
         }
+    }
+
+    public void setAddress(String address) {
+        mAddress = address;
+        stop();
+        start();
     }
 }

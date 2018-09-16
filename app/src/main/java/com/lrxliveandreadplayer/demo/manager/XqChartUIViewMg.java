@@ -61,9 +61,6 @@ import io.reactivex.schedulers.Schedulers;
 public class XqChartUIViewMg extends AbsChartView {
     private AbsChartView mXqCameraViewMg;
     private AbsChartView mXqPlayerViewMg;
-    private AbsChartView mXqMutilPlayerViewMg;
-    private AbsChartView mXqAudioViewMg;
-    private AbsChartView mXqMutilAudioViewMg;
     private ArrayList<AbsChartView> viewMgList = new ArrayList<>();
 
     private View mRootView;
@@ -267,30 +264,24 @@ public class XqChartUIViewMg extends AbsChartView {
      * 初始化
      */
     private void initAndSetContentView() {
-        mXqCameraViewMg = new XqCameraViewMg(mXqActivity);
-//        mXqPlayerViewMg = new XqPlayerViewMg(mXqActivity,NetWorkMg.getCameraUrl());
-//        mXqMutilPlayerViewMg = new XqPlayerViewMg(mXqActivity,NetWorkMg.getAudioUrl_2());
-        mXqPlayerViewMg = new XqTxPlayerViewMg(mXqActivity,NetWorkMg.getCameraUrl());
-        mXqMutilPlayerViewMg = new XqTxPlayerViewMg(mXqActivity,NetWorkMg.getAudioUrl_2());
-        mXqAudioViewMg = new XqAudioViewMg(mXqActivity,NetWorkMg.getAudioUrl_1());
-        mXqMutilAudioViewMg = new XqAudioViewMg(mXqActivity,NetWorkMg.getAudioUrl_2());
-
-        viewMgList.add(mXqCameraViewMg);
-        viewMgList.add(mXqPlayerViewMg);
-        viewMgList.add(mXqMutilPlayerViewMg);
-        viewMgList.add(mXqAudioViewMg);
-        viewMgList.add(mXqMutilAudioViewMg);
-
-        ((XqCameraViewMg)mXqCameraViewMg).getmCameraUIHelper().addContentViewWithSelf(new View[] {mXqPlayerViewMg.getView(),mXqMutilPlayerViewMg.getView(),mRootView});
+        mXqCameraViewMg = new XqTxPushViewMg();
+        mXqCameraViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
+        mXqCameraViewMg.start();
         mXqCameraViewMg.setVisible(false);
 
-        mXqPlayerViewMg.init(mXqActivity);
+        mXqPlayerViewMg = new XqTxPlayerViewMg();
+        mXqPlayerViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
         mXqPlayerViewMg.start();
         mXqPlayerViewMg.setVisible(false);
 
-        mXqMutilPlayerViewMg.init(mXqActivity);
-        mXqMutilPlayerViewMg.start();
-        mXqMutilPlayerViewMg.setVisible(false);
+        viewMgList.add(mXqCameraViewMg);
+        viewMgList.add(mXqPlayerViewMg);
+
+        mXqActivity.setContentView(mXqCameraViewMg.getView());
+        mXqActivity.addContentView(mXqPlayerViewMg.getView(),new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        mXqActivity.addContentView(mRootView,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     private void initAngelManViewInstance() {
@@ -1610,9 +1601,8 @@ public class XqChartUIViewMg extends AbsChartView {
         switch (chartRoomSendBean.getLiveType()) {
             case JMChartRoomSendBean.LIVE_MIC:
                 if(isSelf) {
-                    mXqAudioViewMg.start();
+//                    mXqAudioViewMg.start();
                 }else {
-//                    mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(true);
                 }
                 break;
@@ -1627,15 +1617,12 @@ public class XqChartUIViewMg extends AbsChartView {
                         }
                     },100);
                 }else {
-//                    mXqPlayerViewMg.setAddress(NetWorkMg.getCameraUrl());
-//                    mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(true);
                 }
                 break;
             case JMChartRoomSendBean.LIVE_NONE:
                 mXqCameraViewMg.setVisible(false);
                 mXqPlayerViewMg.setVisible(false);
-                mXqMutilPlayerViewMg.setVisible(false);
                 break;
         }
     }
@@ -1646,12 +1633,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private void resetLiveStatus() {
         mXqCameraViewMg.stop();
         mXqCameraViewMg.setVisible(false);
-//        mXqMutilPlayerViewMg.stop();
-        mXqMutilPlayerViewMg.setVisible(false);
-//        mXqPlayerViewMg.stop();
+        mXqPlayerViewMg.stop();
         mXqPlayerViewMg.setVisible(false);
-        mXqAudioViewMg.stop();
-        mXqMutilAudioViewMg.stop();
     }
 
     /**

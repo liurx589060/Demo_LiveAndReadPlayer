@@ -9,14 +9,21 @@ import android.view.View;
  */
 
 public abstract class AbsChartView {
+    protected Activity mActivity;
+    protected String mAddress;
+
     public abstract View getView();
     public abstract void onResume();
     public abstract void onPause();
     public abstract void onDestroy();
     public abstract void onConfigurationChanged(Configuration newConfig);
 
+    public void init(Activity activity,String address){
+        mActivity = activity;
+        mAddress = address;
+    }
+
     public void setVisible(boolean isVisible){}
     public void start(){}
     public void stop(){}
-    public void init(Activity activity){}
 }

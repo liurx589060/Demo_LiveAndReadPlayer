@@ -25,7 +25,6 @@ import java.lang.ref.WeakReference;
  */
 
 public class XqTxPushViewMg extends AbsChartView {
-    private View mRootView;
     private TXLivePusher mLivePusher;
     private TXCloudVideoView mVideoView;
 

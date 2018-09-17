@@ -11,6 +11,7 @@ import android.view.View;
 public abstract class AbsChartView {
     protected Activity mActivity;
     protected String mAddress;
+    protected View mRootView;
 
     public abstract View getView();
     public abstract void onResume();
@@ -23,7 +24,11 @@ public abstract class AbsChartView {
         mAddress = address;
     }
 
-    public void setVisible(boolean isVisible){}
+    public void setVisible(boolean isVisible){
+        if(mRootView != null) {
+            mRootView.setVisibility(isVisible?View.VISIBLE:View.INVISIBLE);
+        }
+    }
     public void start(){}
     public void stop(){}
 }

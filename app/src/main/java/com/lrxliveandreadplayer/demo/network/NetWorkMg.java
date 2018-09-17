@@ -39,11 +39,11 @@ public class NetWorkMg {
         return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream1";
     }
 
-    public static String getAudioUrl_1() {
+    public static String getAudioUrl_Guest() {
         return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream2";
     }
 
-    public static String getAudioUrl_2() {
+    public static String getAudioUrl_Angel() {
         return "rtmp://" + NetWorkMg.IP_ADDRESS + "/live/stream3";
     }
 }

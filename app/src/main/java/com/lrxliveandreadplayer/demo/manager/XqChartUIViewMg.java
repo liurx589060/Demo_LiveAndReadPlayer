@@ -61,6 +61,8 @@ import io.reactivex.schedulers.Schedulers;
 public class XqChartUIViewMg extends AbsChartView {
     private AbsChartView mXqCameraViewMg;
     private AbsChartView mXqPlayerViewMg;
+    private AbsChartView mXqAudioPusherMg;
+    private AbsChartView mXqAudioPlayerMg;
     private ArrayList<AbsChartView> viewMgList = new ArrayList<>();
 
     private View mRootView;
@@ -264,15 +266,29 @@ public class XqChartUIViewMg extends AbsChartView {
      * 初始化
      */
     private void initAndSetContentView() {
+        //摄像头推送
         mXqCameraViewMg = new XqTxPushViewMg();
         mXqCameraViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
-        mXqCameraViewMg.start();
+        //mXqCameraViewMg.start();
         mXqCameraViewMg.setVisible(false);
 
+        //摄像头播放
         mXqPlayerViewMg = new XqTxPlayerViewMg();
         mXqPlayerViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
-        mXqPlayerViewMg.start();
+        //mXqPlayerViewMg.start();
         mXqPlayerViewMg.setVisible(false);
+
+        //音频推送
+        mXqAudioPusherMg = new XqTxPushViewMg();
+        mXqAudioPusherMg.init(mXqActivity,NetWorkMg.getAudioUrl_Angel());
+        //mXqAudioPusherMg.start();
+        mXqAudioPusherMg.setVisible(false);
+
+        //音频播放
+        mXqAudioPlayerMg = new XqTxPlayerViewMg();
+        mXqAudioPlayerMg.init(mXqActivity,NetWorkMg.getAudioUrl_Angel());
+
+
 
         viewMgList.add(mXqCameraViewMg);
         viewMgList.add(mXqPlayerViewMg);

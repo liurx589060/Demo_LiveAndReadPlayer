@@ -20,10 +20,8 @@ public class XqTxPlayerViewMg extends AbsChartView {
     private static final float  CACHE_TIME_FAST = 1.0f;
     private static final float  CACHE_TIME_SMOOTH = 5.0f;
 
-    private View mRootView;
     private TXLivePlayer mLivePlayer;
     private TXCloudVideoView mVideoView;
-    private String mAddress;
 
     @Override
     public View getView() {
@@ -54,7 +52,6 @@ public class XqTxPlayerViewMg extends AbsChartView {
     @Override
     public void setVisible(boolean isVisible) {
         super.setVisible(isVisible);
-        mRootView.setVisibility(isVisible?View.VISIBLE:View.INVISIBLE);
     }
 
     @Override

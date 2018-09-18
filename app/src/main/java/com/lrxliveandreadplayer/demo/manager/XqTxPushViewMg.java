@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 public class XqTxPushViewMg extends AbsChartView {
     private TXLivePusher mLivePusher;
     private TXCloudVideoView mVideoView;
+    private TXLivePushConfig mLivePushConfig;
 
     @Override
     public View getView() {
@@ -76,13 +77,19 @@ public class XqTxPushViewMg extends AbsChartView {
 
     }
 
+    public void start(boolean isPureAudio) {
+        start();
+        if(mLivePusher != null && mLivePushConfig != null) {
+            mLivePushConfig.enablePureAudioPush(isPureAudio);   // true 为启动纯音频推流，而默认值是 false；
+            mLivePusher.setConfig(mLivePushConfig);
+
+            mLivePusher.startPusher(mAddress);
+        }
+    }
+
     @Override
     public void start() {
         super.start();
-
-        if(mLivePusher != null) {
-            mLivePusher.startPusher(mAddress);
-        }
     }
 
     @Override
@@ -101,8 +108,7 @@ public class XqTxPushViewMg extends AbsChartView {
         mRootView = LayoutInflater.from(activity).inflate(R.layout.layout_viewmg_xqtxpush,null);
 
         mLivePusher = new TXLivePusher(mActivity);
-        TXLivePushConfig mLivePushConfig = new TXLivePushConfig();
-        mLivePusher.setConfig(mLivePushConfig);
+        mLivePushConfig = new TXLivePushConfig();
 
         mVideoView = (TXCloudVideoView) mRootView.findViewById(R.id.tx_push_videoview);
         mLivePusher.startCameraPreview(mVideoView);

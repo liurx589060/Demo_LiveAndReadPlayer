@@ -1719,9 +1719,11 @@ public class XqChartUIViewMg extends AbsChartView {
         calendar.set(Calendar.SECOND,59);
         long txTime = calendar.getTimeInMillis()/1000;
         String input = new StringBuilder().
-                append("txrtmp").
-                append("07353944").
+                append(Constant.TX_LIVE_PUSH_KEY).
+                append(Constant.TX_LIVE_BIZID + "_"
+                        + String.valueOf(DataManager.getInstance().getChartData().getRoomId())).
                 append(Long.toHexString(txTime).toUpperCase()).toString();
+        Log.e("yy",input);
 
         String txSecret = null;
         try {

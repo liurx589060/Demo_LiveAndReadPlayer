@@ -14,4 +14,7 @@ public class Constant {
 
     public static String GENDER_MAN = "男";
     public static String GENDER_LADY = "女";
+
+    public static String TX_LIVE_APPID = "1255894097";
+    public static String TX_LIVE_BIZID = "26685";
 }

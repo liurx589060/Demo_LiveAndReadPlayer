@@ -143,7 +143,10 @@ public class XqTxPushViewMg extends AbsChartView {
     public void setAddress(String newAddress) {
         mAddress = newAddress;
         stop();
-        start();
+    }
+
+    public String getAddress() {
+        return mAddress;
     }
 
     public class TXPhoneStateListener extends PhoneStateListener {

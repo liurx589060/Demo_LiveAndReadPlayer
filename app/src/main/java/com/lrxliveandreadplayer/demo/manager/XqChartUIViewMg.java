@@ -40,8 +40,12 @@ import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,10 +63,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 public class XqChartUIViewMg extends AbsChartView {
-    private AbsChartView mXqCameraViewMg;
-    private AbsChartView mXqPlayerViewMg;
-    private AbsChartView mXqAudioPusherMg;
-    private AbsChartView mXqAudioPlayerMg;
+    private XqTxPushViewMg mXqCameraViewMg;
+    private XqTxPlayerViewMg mXqPlayerViewMg;
     private ArrayList<AbsChartView> viewMgList = new ArrayList<>();
 
     private View mRootView;
@@ -123,6 +125,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private boolean mIsSelfSelected = false;
 
     private boolean mIsVisible = false;
+    private String mTXPushAddress = "";
+    private String mTXPlayerAddress = "";
 
     public void setContentView() {
         initAndSetContentView();
@@ -266,29 +270,21 @@ public class XqChartUIViewMg extends AbsChartView {
      * 初始化
      */
     private void initAndSetContentView() {
+        //设置直播地址
+        setTXLiveAddress();
         //摄像头推送
         mXqCameraViewMg = new XqTxPushViewMg();
-        mXqCameraViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
+//        mXqCameraViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
+        mXqCameraViewMg.init(mXqActivity,mTXPushAddress);
         //mXqCameraViewMg.start();
         mXqCameraViewMg.setVisible(false);
 
         //摄像头播放
         mXqPlayerViewMg = new XqTxPlayerViewMg();
-        mXqPlayerViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
+//        mXqPlayerViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
+        mXqPlayerViewMg.init(mXqActivity,mTXPlayerAddress);
         //mXqPlayerViewMg.start();
         mXqPlayerViewMg.setVisible(false);
-
-        //音频推送
-        mXqAudioPusherMg = new XqTxPushViewMg();
-        mXqAudioPusherMg.init(mXqActivity,NetWorkMg.getAudioUrl_Angel());
-        //mXqAudioPusherMg.start();
-        mXqAudioPusherMg.setVisible(false);
-
-        //音频播放
-        mXqAudioPlayerMg = new XqTxPlayerViewMg();
-        mXqAudioPlayerMg.init(mXqActivity,NetWorkMg.getAudioUrl_Angel());
-
-
 
         viewMgList.add(mXqCameraViewMg);
         viewMgList.add(mXqPlayerViewMg);
@@ -925,7 +921,7 @@ public class XqChartUIViewMg extends AbsChartView {
         JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
 
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
-            //先回复直播方式为none
+            //先恢复直播方式为none
             resetLiveStatus();
             stopTiming();
             switch (bean.getProcessStatus()) {
@@ -1617,22 +1613,18 @@ public class XqChartUIViewMg extends AbsChartView {
         switch (chartRoomSendBean.getLiveType()) {
             case JMChartRoomSendBean.LIVE_MIC:
                 if(isSelf) {
-//                    mXqAudioViewMg.start();
+                    mXqCameraViewMg.start(true);
                 }else {
-                    mXqPlayerViewMg.setVisible(true);
+                    mXqPlayerViewMg.start();
+                    mXqPlayerViewMg.setVisible(false);
                 }
                 break;
             case JMChartRoomSendBean.LIVE_CAMERA:
                 if(isSelf) {
                     mXqCameraViewMg.setVisible(true);
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mXqCameraViewMg.setVisible(true);
-                            mXqCameraViewMg.start();
-                        }
-                    },100);
+                    mXqCameraViewMg.start(false);
                 }else {
+                    mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(true);
                 }
                 break;
@@ -1713,5 +1705,64 @@ public class XqChartUIViewMg extends AbsChartView {
                 mChartRoomController.handleRoomMessage(sendBean);
             }
         }
+    }
+
+
+    /*
+	 * KEY+ stream_id + txTime
+	 */
+    private String setTXLiveAddress() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR,1);
+        calendar.set(Calendar.HOUR_OF_DAY,23);
+        calendar.set(Calendar.MINUTE,59);
+        calendar.set(Calendar.SECOND,59);
+        long txTime = calendar.getTimeInMillis()/1000;
+        String input = new StringBuilder().
+                append("txrtmp").
+                append("07353944").
+                append(Long.toHexString(txTime).toUpperCase()).toString();
+
+        String txSecret = null;
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            txSecret  = byteArrayToHexString(
+                    messageDigest.digest(input.getBytes("UTF-8")));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            Log.e("yy",e.toString());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            Log.e("yy",e.toString());
+        }
+
+        mTXPlayerAddress = "rtmp://" + Constant.TX_LIVE_BIZID + ".liveplay.myqcloud.com/live/"
+                + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId();
+        Log.e("yy","TXPlayerAddress=" + mTXPlayerAddress);
+        String ip = "rtmp://" + Constant.TX_LIVE_BIZID + ".livepush.myqcloud.com/live/"
+                + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId()
+                + "?bizid=" + Constant.TX_LIVE_BIZID;
+        mTXPushAddress = new StringBuilder().
+                        append(ip).
+                        append("&").
+                        append("txSecret=").
+                        append(txSecret).
+                        append("&").
+                        append("txTime=").
+                        append(Long.toHexString(txTime).toUpperCase()).
+                        toString();
+        Log.e("yy","TXPushAddress=" + mTXPushAddress);
+        return mTXPushAddress;
+    }
+
+    private String byteArrayToHexString(byte[] data) {
+        char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] out = new char[data.length << 1];
+
+        for (int i = 0, j = 0; i < data.length; i++) {
+            out[j++] = DIGITS_LOWER[(0xF0 & data[i]) >>> 4];
+            out[j++] = DIGITS_LOWER[0x0F & data[i]];
+        }
+        return new String(out);
     }
 }

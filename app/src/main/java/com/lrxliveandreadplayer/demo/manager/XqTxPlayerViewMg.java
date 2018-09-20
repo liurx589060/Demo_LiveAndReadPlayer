@@ -113,6 +113,9 @@ public class XqTxPlayerViewMg extends AbsChartView {
     public void setAddress(String address) {
         mAddress = address;
         stop();
-        start();
+    }
+
+    public String getAddress() {
+        return mAddress;
     }
 }

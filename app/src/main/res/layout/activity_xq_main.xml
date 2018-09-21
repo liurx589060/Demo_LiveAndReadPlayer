@@ -20,4 +20,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="参与的女嘉宾总数"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroup_1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+
+        <RadioButton
+            android:id="@+id/radio_local"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="本地"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_tx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="腾讯云" />
+    </RadioGroup>
 </LinearLayout>

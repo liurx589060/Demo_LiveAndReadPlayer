@@ -46,7 +46,8 @@ public class JMChartRoomSendBean {
     private JMSendFlags.MessageType messageType;
     private boolean isLadySelected;
     private String manSelects = "";
-    private String mLiveAddress = "";
+    private String pushAddress = "";
+    private String playAddress = "";
     private boolean isResetQuestionStatus;
 
     public int getProcessStatus() {
@@ -177,11 +178,19 @@ public class JMChartRoomSendBean {
         isResetQuestionStatus = resetQuestionStatus;
     }
 
-    public String getmLiveAddress() {
-        return mLiveAddress;
+    public String getPushAddress() {
+        return pushAddress;
     }
 
-    public void setmLiveAddress(String mLiveAddress) {
-        this.mLiveAddress = mLiveAddress;
+    public void setPushAddress(String pushAddress) {
+        this.pushAddress = pushAddress;
+    }
+
+    public String getPlayAddress() {
+        return playAddress;
+    }
+
+    public void setPlayAddress(String playAddress) {
+        this.playAddress = playAddress;
     }
 }

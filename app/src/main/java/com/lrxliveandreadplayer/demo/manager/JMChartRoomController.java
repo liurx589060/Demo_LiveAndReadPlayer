@@ -1,15 +1,22 @@
 package com.lrxliveandreadplayer.demo.manager;
 
+import android.util.Log;
+
 import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMSendFlags;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Member;
 import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
 import com.lrxliveandreadplayer.demo.interfaces.IHanderRoomMessage;
+import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,8 +34,12 @@ public class JMChartRoomController extends AbsRoomController{
     private Map<Integer,Integer> mSendCompleteCountMap = new HashMap<>();
     private Map<Integer,Integer> mResponseCompleteCountMap = new HashMap<>();
 
+    private String mTXPushAddress = "";
+    private String mTXPlayerAddress = "";
+
     public JMChartRoomController(IHanderRoomMessage iHanderRoomMessage) {
         this.listener = iHanderRoomMessage;
+        setTXLiveAddress();
     }
 
     /**
@@ -381,7 +392,74 @@ public class JMChartRoomController extends AbsRoomController{
         bean.setRoomId(data.getRoomId());
         bean.setTime(Tools.getCurrentDateTime());
         bean.setUserName(selfInfo.getUser_name());
+        bean.setPushAddress(mTXPushAddress);
+        bean.setPlayAddress(mTXPlayerAddress);
         return bean;
+    }
+
+    /*
+	 * KEY+ stream_id + txTime
+	 */
+    private void setTXLiveAddress() {
+        if(DataManager.getInstance().getPushAddressType() == 0) {
+            //本地
+            mTXPushAddress = NetWorkMg.getCameraUrl();
+            mTXPlayerAddress = mTXPushAddress;
+        }else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR,1);
+            calendar.set(Calendar.HOUR_OF_DAY,23);
+            calendar.set(Calendar.MINUTE,59);
+            calendar.set(Calendar.SECOND,59);
+            long txTime = calendar.getTimeInMillis()/1000;
+            String input = new StringBuilder().
+                    append(Constant.TX_LIVE_PUSH_KEY).
+                    append(Constant.TX_LIVE_BIZID + "_"
+                            + String.valueOf(DataManager.getInstance().getChartData().getRoomId())).
+                    append(Long.toHexString(txTime).toUpperCase()).toString();
+            Log.e("yy",input);
+
+            String txSecret = null;
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                txSecret  = byteArrayToHexString(
+                        messageDigest.digest(input.getBytes("UTF-8")));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                Log.e("yy",e.toString());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                Log.e("yy",e.toString());
+            }
+
+            mTXPlayerAddress = "rtmp://" + Constant.TX_LIVE_BIZID + ".liveplay.myqcloud.com/live/"
+                    + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId();
+            Log.e("yy","TXPlayerAddress=" + mTXPlayerAddress);
+            String ip = "rtmp://" + Constant.TX_LIVE_BIZID + ".livepush.myqcloud.com/live/"
+                    + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId()
+                    + "?bizid=" + Constant.TX_LIVE_BIZID;
+            mTXPushAddress = new StringBuilder().
+                    append(ip).
+                    append("&").
+                    append("txSecret=").
+                    append(txSecret).
+                    append("&").
+                    append("txTime=").
+                    append(Long.toHexString(txTime).toUpperCase()).
+                    toString();
+            Log.e("yy","TXPushAddress=" + mTXPushAddress);
+        }
+    }
+
+    private String byteArrayToHexString(byte[] data) {
+        char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] out = new char[data.length << 1];
+
+        for (int i = 0, j = 0; i < data.length; i++) {
+            out[j++] = DIGITS_LOWER[(0xF0 & data[i]) >>> 4];
+            out[j++] = DIGITS_LOWER[0x0F & data[i]];
+        }
+        return new String(out);
     }
 
     /**
@@ -392,5 +470,21 @@ public class JMChartRoomController extends AbsRoomController{
         mSendCompleteCountMap.remove(sendBean.getProcessStatus());
         mSendRecievedIndexMap.remove(sendBean.getProcessStatus());
         mSendRecievedLastMap.remove(sendBean.getProcessStatus());
+    }
+
+    public String getPushAddress() {
+        return mTXPushAddress;
+    }
+
+    public void setPushAddress(String pushAddress) {
+        mTXPushAddress = pushAddress;
+    }
+
+    public String getPlayAddress() {
+        return mTXPlayerAddress;
+    }
+
+    public void setPlayAddress(String playAddress) {
+        mTXPlayerAddress = playAddress;
     }
 }

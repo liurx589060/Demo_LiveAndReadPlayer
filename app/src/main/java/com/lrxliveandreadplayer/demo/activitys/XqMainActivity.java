@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
@@ -44,6 +45,8 @@ public class XqMainActivity extends Activity {
     @BindView(R.id.btn_guest) Button mBtnGuest;
     @BindView(R.id.edit_limitLady)
     EditText mEditLimitLady;
+    @BindView(R.id.radioGroup_1)
+    RadioGroup mRadioGroup;
 
     private RequestApi mApi;
 
@@ -83,6 +86,19 @@ public class XqMainActivity extends Activity {
                 joinChartRoom();
 //                Intent intent = new Intent(XqMainActivity.this,XqChartActivity.class);
 //                startActivity(intent);
+            }
+        });
+
+        mRadioGroup = findViewById(R.id.radioGroup_1);
+        mRadioGroup.check(R.id.radio_local);
+        mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId == R.id.radio_local) {
+                    DataManager.getInstance().setPushAddressType(0);
+                }else if(checkedId == R.id.radio_tx) {
+                    DataManager.getInstance().setPushAddressType(1);
+                }
             }
         });
     }

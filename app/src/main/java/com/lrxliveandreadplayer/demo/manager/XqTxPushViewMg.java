@@ -8,9 +8,11 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
+import android.view.View;;
 
 import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.utils.Constant;
+import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.tencent.rtmp.ITXLivePushListener;
 import com.tencent.rtmp.TXLiveConstants;
 import com.tencent.rtmp.TXLivePushConfig;
@@ -25,9 +27,13 @@ import java.lang.ref.WeakReference;
  */
 
 public class XqTxPushViewMg extends AbsChartView {
+    private final String prefixStr = this.getClass().getName() + "--";
+
     private TXLivePusher mLivePusher;
     private TXCloudVideoView mVideoView;
     private TXLivePushConfig mLivePushConfig;
+
+    private int mNetBusyCount = 0;
 
     @Override
     public View getView() {
@@ -78,7 +84,7 @@ public class XqTxPushViewMg extends AbsChartView {
     }
 
     public void start(boolean isPureAudio) {
-        start();
+        super.start();
         if(mLivePusher != null && mLivePushConfig != null) {
             mLivePushConfig.enablePureAudioPush(isPureAudio);   // true 为启动纯音频推流，而默认值是 false；
             mLivePusher.setConfig(mLivePushConfig);
@@ -89,7 +95,7 @@ public class XqTxPushViewMg extends AbsChartView {
 
     @Override
     public void start() {
-        super.start();
+        start(false);
     }
 
     @Override
@@ -100,6 +106,8 @@ public class XqTxPushViewMg extends AbsChartView {
             mLivePusher.stopPusher();
             mLivePusher.stopBGM();
         }
+
+        setVisible(false);
     }
 
     @Override
@@ -115,13 +123,34 @@ public class XqTxPushViewMg extends AbsChartView {
 
         mLivePusher.setPushListener(new ITXLivePushListener() {
             @Override
-            public void onPushEvent(int i, Bundle bundle) {
-                Log.e("yy","onPushEvent=" + i);
+            public void onPushEvent(int event, Bundle param) {
+                String msg = param.getString(TXLiveConstants.EVT_DESCRIPTION);
+                String pushEventLog = "receive event: " + event + ", " + msg;
+                Log.i("yy", pushEventLog);
+
+                //错误还是要明确的报一下
+                if (event < 0) {
+                    Tools.toast(mActivity.getApplication(), param.getString(TXLiveConstants.EVT_DESCRIPTION), true);
+                    Log.e("yy", param.getString(TXLiveConstants.EVT_DESCRIPTION));
+                    if(event == TXLiveConstants.PUSH_ERR_OPEN_CAMERA_FAIL || event == TXLiveConstants.PUSH_ERR_OPEN_MIC_FAIL){
+                        stop();
+                    }
+                }
+
+                if (event == TXLiveConstants.PUSH_ERR_NET_DISCONNECT) {
+                    stop();
+                    Tools.toast(mActivity.getApplication(), "网络连接失败", true);
+                    Log.e("yy", prefixStr + "网络连接失败");
+                }else if (event == TXLiveConstants.PUSH_WARNING_NET_BUSY) {
+                    ++mNetBusyCount;
+                    Log.e("yy", prefixStr + "net busy. count=" + mNetBusyCount);
+                    Tools.toast(mActivity.getApplication(), param.getString(TXLiveConstants.EVT_DESCRIPTION), true);
+                }
             }
 
             @Override
             public void onNetStatus(Bundle status) {
-                Log.d("yy", "Current status, CPU:"+status.getString(TXLiveConstants.NET_STATUS_CPU_USAGE)+
+                Log.i(Constant.TAG, "Current status, CPU:"+status.getString(TXLiveConstants.NET_STATUS_CPU_USAGE)+
                         ", RES:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_WIDTH)+"*"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_HEIGHT)+
                         ", SPD:"+status.getInt(TXLiveConstants.NET_STATUS_NET_SPEED)+"Kbps"+
                         ", FPS:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_FPS)+

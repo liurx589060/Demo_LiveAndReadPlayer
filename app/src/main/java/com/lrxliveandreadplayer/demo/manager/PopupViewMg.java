@@ -64,7 +64,12 @@ public class PopupViewMg {
         }
         int popWidth = mAngelPopupWindow.getWidth();
         int oXff = Tools.dip2px(activity,10) + popWidth;
-        mAngelPopupWindow.showAsDropDown(showView, oXff,0,Gravity.RIGHT);
+        if(Build.VERSION.SDK_INT > 18) {
+            mAngelPopupWindow.showAsDropDown(showView, oXff,0,Gravity.RIGHT);
+        }else {
+            mAngelPopupWindow.showAsDropDown(showView, oXff,0);
+        }
+
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -227,22 +228,8 @@ public class XqChartUIViewMg extends AbsChartView {
         mBtnGift.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mXqCameraViewMg.setVisible(true);
-//                mHandler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mXqCameraViewMg.start();
-//                    }
-//                },100);
-
-                //mXqPlayerViewMg.setVisible(true);
-
                 mXqCameraViewMg.setVisible(true);
                 mXqCameraViewMg.start();
-                //mXqPlayerViewMg.setVisible(true);
-                //mXqPlayerViewMg.start();
-//                mIsVisible = !mIsVisible;
-//                mXqPlayerViewMg.setVisible(mIsVisible);
             }
         });
 
@@ -271,16 +258,16 @@ public class XqChartUIViewMg extends AbsChartView {
     private void initAndSetContentView() {
         //摄像头推送
         mXqCameraViewMg = new XqTxPushViewMg();
-//        mXqCameraViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
-        mXqCameraViewMg.init(mXqActivity,mChartRoomController.getPushAddress());
-        //mXqCameraViewMg.start();
+        String pushAddress = new String(Base64.decode(DataManager.getInstance().getChartData().getPushAddress().getBytes(),Base64.DEFAULT));
+        mXqCameraViewMg.init(mXqActivity,pushAddress);
+        Log.i("yy","pushAddress=" + pushAddress);
         mXqCameraViewMg.setVisible(false);
 
         //摄像头播放
         mXqPlayerViewMg = new XqTxPlayerViewMg();
-//        mXqPlayerViewMg.init(mXqActivity,NetWorkMg.getCameraUrl());
-        mXqPlayerViewMg.init(mXqActivity,mChartRoomController.getPlayAddress());
-        //mXqPlayerViewMg.start();
+        String playAddress = new String(Base64.decode(DataManager.getInstance().getChartData().getPlayAddress().getBytes(),Base64.DEFAULT));
+        mXqPlayerViewMg.init(mXqActivity,playAddress);
+        Log.i("yy","playAddress=" + playAddress);
         mXqPlayerViewMg.setVisible(false);
 
         viewMgList.add(mXqCameraViewMg);
@@ -834,6 +821,9 @@ public class XqChartUIViewMg extends AbsChartView {
                 case JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM://离开房间
                     //更新系统事件
                     addSystemEventAndRefresh(bean);
+                    if(bean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB) {
+                        mAngelIsDistub = true;
+                    }
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男方自我介绍
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FIRST://女生第一次选择
@@ -881,13 +871,13 @@ public class XqChartUIViewMg extends AbsChartView {
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND://女生第二次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST://男生第一次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND://女生第二次谈话
-                case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND://男生第二次选择环节
                 case JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_FINAL://女生最终选择
                 case JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL://男生最终选择
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_MAN_PERFORMANCE://男生才艺表演
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN://问答环节，男生
                 case JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY://问答环节，女生
+                case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT://爱心大使有话说
                     addSystemEventAndRefresh(bean);
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING://爱心大使插话
@@ -919,7 +909,8 @@ public class XqChartUIViewMg extends AbsChartView {
 
         if(flags.getMessageType() == JMSendFlags.MessageType.TYPE_SEND) {//发送形式
             //先恢复直播方式为none
-            if(bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING) {
+            if( bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB &&
+                    bean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE) {
                 resetLiveStatus();
                 stopTiming();
             }
@@ -963,7 +954,6 @@ public class XqChartUIViewMg extends AbsChartView {
                     operate_Final(bean,flags);
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB://爱心大使插话
-                    mAngelIsDistub = true;
                     break;
                 case JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE://更改直播方式
                     operate_LiveType(bean,flags);
@@ -1005,7 +995,10 @@ public class XqChartUIViewMg extends AbsChartView {
         mTextCountDown.setVisibility(View.INVISIBLE);
         mTextCountDown.setText("");
         mBtnEnd.setVisibility(View.INVISIBLE);
-//        resetLiveStatus();
+
+        //恢复初始化
+        resetLiveStatus();
+        stopTiming();
 
         switch (bean.getProcessStatus()) {
             case JMChartRoomSendBean.CHART_STATUS_INTRO_MAN://男生自我介绍
@@ -1274,6 +1267,7 @@ public class XqChartUIViewMg extends AbsChartView {
                 }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_INTRO_LADY:
+                Log.e("yy","第一次---" + mAngelIsDistub);
                 if(mAngelIsDistub) {
                     sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING);
                     sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
@@ -1299,8 +1293,18 @@ public class XqChartUIViewMg extends AbsChartView {
                 }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND:
-                nextProgress = JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
-                msg = "进入第六轮，爱心大使有话说";
+                Log.e("yy","第二次---" + mAngelIsDistub);
+                if(mAngelIsDistub) {
+                    sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING);
+                    sendBean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+                    sendBean.setIndexNext(0);
+                    sendBean.setMsg("爱心大使插话");
+                    sendRoomMessage(sendBean);
+                    return;
+                }else {
+                    nextProgress = JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
+                    msg = "进入第六轮，爱心大使有话说";
+                }
                 break;
             case JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT:
                 nextProgress = JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND;
@@ -1609,8 +1613,6 @@ public class XqChartUIViewMg extends AbsChartView {
      * @param isSelf
      */
     private void setLiveStatus(JMChartRoomSendBean chartRoomSendBean,boolean isSelf) {
-        mXqCameraViewMg.setAddress(chartRoomSendBean.getPushAddress());
-        mXqPlayerViewMg.setAddress(chartRoomSendBean.getPlayAddress());
         switch (chartRoomSendBean.getLiveType()) {
             case JMChartRoomSendBean.LIVE_MIC:
                 if(isSelf) {
@@ -1667,9 +1669,13 @@ public class XqChartUIViewMg extends AbsChartView {
             JMChartRoomSendBean chartRoomSendBean = new Gson().fromJson(text,JMChartRoomSendBean.class);
             //不接收流程前的消息
             if(mCurrentRoomSendBean != null && (mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN
-                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY)) {
+                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY
+                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
+                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING
+                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE)) {
                 if(chartRoomSendBean.getProcessStatus() < mCurrentRoomSendBean.getProcessStatus()){
-                    return;
+//                    Log.e("yy","不接收消息");
+//                    return;
                 }
             }
             mChartRoomController.handleRoomMessage(chartRoomSendBean);

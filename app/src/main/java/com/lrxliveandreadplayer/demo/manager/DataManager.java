@@ -12,7 +12,6 @@ public class DataManager {
     private static DataManager instance = new DataManager();
     private UserInfoBean userInfo;
     private Data chartData;
-    private int pushAddressType;
 
     private DataManager(){}
 
@@ -49,13 +48,5 @@ public class DataManager {
             }
         }
         return new Member();
-    }
-
-    public int getPushAddressType() {
-        return pushAddressType;
-    }
-
-    public void setPushAddressType(int pushAddressType) {
-        this.pushAddressType = pushAddressType;
     }
 }

@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.lrx.live.player.R;
+import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.TXLiveConstants;
@@ -17,6 +18,7 @@ import com.tencent.rtmp.TXLivePlayer;
 import com.tencent.rtmp.ui.TXCloudVideoView;
 
 public class XqTxPlayerViewMg extends AbsChartView {
+    private final String prefixStr = this.getClass().getName() + "--";
     private static final float  CACHE_TIME_FAST = 1.0f;
     private static final float  CACHE_TIME_SMOOTH = 5.0f;
 
@@ -40,7 +42,7 @@ public class XqTxPlayerViewMg extends AbsChartView {
 
     @Override
     public void onDestroy() {
-        mLivePlayer.stopPlay(true);
+        stop();
         mVideoView.onDestroy();
     }
 
@@ -63,17 +65,57 @@ public class XqTxPlayerViewMg extends AbsChartView {
         if(mLivePlayer != null) {
             mLivePlayer.setPlayListener(new ITXLivePlayListener() {
                 @Override
-                public void onPlayEvent(int i, Bundle bundle) {
-                    Log.e("yy","TxPlayer--onPlayEvent--" + i);
+                public void onPlayEvent(int event, Bundle param) {
+                    String playEventLog = "receive event: " + event + ", " + param.getString(TXLiveConstants.EVT_DESCRIPTION);
+                    Log.i(Constant.TAG, prefixStr + playEventLog);
+
+                    if (event == TXLiveConstants.PLAY_ERR_NET_DISCONNECT || event == TXLiveConstants.PLAY_EVT_PLAY_END) {
+                        Tools.toast(mActivity.getApplication(),"网络连接失败或者已停止",true);
+                        stop();
+                    }
+
+                    if (event < 0) {
+                        Tools.toast(mActivity.getApplication(),param.getString(TXLiveConstants.EVT_DESCRIPTION),false);
+                        Log.e(Constant.TAG,prefixStr + param.getString(TXLiveConstants.EVT_DESCRIPTION));
+                    }
                 }
 
                 @Override
-                public void onNetStatus(Bundle bundle) {
-                    Log.e("yy","TxPlayer--onNetStatus--" + bundle);
+                public void onNetStatus(Bundle status) {
+                    String str = getNetStatusString(status);
+                    Log.i(Constant.TAG, "Current status, CPU:"+status.getString(TXLiveConstants.NET_STATUS_CPU_USAGE)+
+                            ", RES:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_WIDTH)+"*"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_HEIGHT)+
+                            ", SPD:"+status.getInt(TXLiveConstants.NET_STATUS_NET_SPEED)+"Kbps"+
+                            ", FPS:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_FPS)+
+                            ", ARA:"+status.getInt(TXLiveConstants.NET_STATUS_AUDIO_BITRATE)+"Kbps"+
+                            ", VRA:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_BITRATE)+"Kbps");
                 }
             });
             mLivePlayer.startPlay(mAddress, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
         }
+    }
+
+    //公用打印辅助函数
+    protected String getNetStatusString(Bundle status) {
+        String str = String.format("%-14s %-14s %-12s\n%-8s %-8s %-8s %-8s\n%-14s %-14s\n%-14s %-14s",
+                "CPU:"+status.getString(TXLiveConstants.NET_STATUS_CPU_USAGE),
+                "RES:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_WIDTH)+"*"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_HEIGHT),
+                "SPD:"+status.getInt(TXLiveConstants.NET_STATUS_NET_SPEED)+"Kbps",
+                "JIT:"+status.getInt(TXLiveConstants.NET_STATUS_NET_JITTER),
+                "FPS:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_FPS),
+                "GOP:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_GOP)+"s",
+                "ARA:"+status.getInt(TXLiveConstants.NET_STATUS_AUDIO_BITRATE)+"Kbps",
+                "QUE:"+status.getInt(TXLiveConstants.NET_STATUS_CODEC_CACHE)
+                        +"|"+status.getInt(TXLiveConstants.NET_STATUS_CACHE_SIZE)
+                        +","+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_CACHE_SIZE)
+                        +","+status.getInt(TXLiveConstants.NET_STATUS_V_DEC_CACHE_SIZE)
+                        +"|"+status.getInt(TXLiveConstants.NET_STATUS_AV_RECV_INTERVAL)
+                        +","+status.getInt(TXLiveConstants.NET_STATUS_AV_PLAY_INTERVAL)
+                        +","+String.format("%.1f", status.getFloat(TXLiveConstants.NET_STATUS_AUDIO_PLAY_SPEED)).toString(),
+                "VRA:"+status.getInt(TXLiveConstants.NET_STATUS_VIDEO_BITRATE)+"Kbps",
+                "SVR:"+status.getString(TXLiveConstants.NET_STATUS_SERVER_IP),
+                "AUDIO:"+status.getString(TXLiveConstants.NET_STATUS_AUDIO_INFO));
+        return str;
     }
 
     @Override
@@ -82,6 +124,7 @@ public class XqTxPlayerViewMg extends AbsChartView {
         if(mLivePlayer != null) {
             mLivePlayer.stopPlay(true);
         }
+        setVisible(false);
     }
 
     @Override

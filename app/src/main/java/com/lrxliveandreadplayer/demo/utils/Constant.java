@@ -18,4 +18,6 @@ public class Constant {
     public static String TX_LIVE_APPID = "1255894097";
     public static String TX_LIVE_BIZID = "26685";
     public static String TX_LIVE_PUSH_KEY = "68c94d5f84aff8991f15cd1929d3b1d3";
+
+    public static String TAG = "XQApp";
 }

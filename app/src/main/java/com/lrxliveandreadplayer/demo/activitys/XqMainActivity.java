@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,10 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +54,10 @@ public class XqMainActivity extends Activity {
     RadioGroup mRadioGroup;
 
     private RequestApi mApi;
+
+    private String mTXPushAddress = "";
+    private String mTXPlayerAddress = "";
+    private int mPushAddressType= 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,12 +104,16 @@ public class XqMainActivity extends Activity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if(checkedId == R.id.radio_local) {
-                    DataManager.getInstance().setPushAddressType(0);
+                    mPushAddressType = 0;
                 }else if(checkedId == R.id.radio_tx) {
-                    DataManager.getInstance().setPushAddressType(1);
+                    mPushAddressType = 1;
                 }
             }
         });
+
+        if(DataManager.getInstance().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
+            mRadioGroup.setVisibility(View.VISIBLE);
+        }
     }
 
     private void createChartRoom(UserInfoBean userInfo) {
@@ -113,6 +126,8 @@ public class XqMainActivity extends Activity {
             return;
         }
 
+        setLiveAddress();
+
         Map<String,Object> params = new HashMap<>();
         params.put("userName",userInfo.getUser_name());
         params.put("gender",userInfo.getGender());
@@ -121,6 +136,8 @@ public class XqMainActivity extends Activity {
         params.put("limitLady",userInfo.getLimitLady());
         params.put("limitMan",userInfo.getLimitMan());
         params.put("limitAngel",userInfo.getLimitAngel());
+        params.put("pushAddress", Base64.encodeToString(mTXPushAddress.getBytes(),Base64.DEFAULT));
+        params.put("playAddress",Base64.encodeToString(mTXPlayerAddress.getBytes(),Base64.DEFAULT));
 
         mApi.createChartRoom(params)
                 .subscribeOn(Schedulers.io())
@@ -210,5 +227,67 @@ public class XqMainActivity extends Activity {
         bean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
 
         JMsgSender.sendRoomMessage(bean);
+    }
+
+    /*
+	 * KEY+ stream_id + txTime
+	 */
+    private void setLiveAddress() {
+        if(mPushAddressType == 0) {
+            //本地
+            mTXPushAddress = NetWorkMg.getCameraUrl();
+            mTXPlayerAddress = mTXPushAddress;
+        }else if(mPushAddressType == 1){
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR,24);
+            long txTime = calendar.getTimeInMillis()/1000;
+            String input = new StringBuilder().
+                    append(Constant.TX_LIVE_PUSH_KEY).
+                    append(Constant.TX_LIVE_BIZID + "_"
+                            + String.valueOf(DataManager.getInstance().getChartData().getRoomId())).
+                    append(Long.toHexString(txTime).toUpperCase()).toString();
+            Log.e("yy",input);
+
+            String txSecret = null;
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                txSecret  = byteArrayToHexString(
+                        messageDigest.digest(input.getBytes("UTF-8")));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                Log.e("yy",e.toString());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                Log.e("yy",e.toString());
+            }
+
+            mTXPlayerAddress = "rtmp://" + Constant.TX_LIVE_BIZID + ".liveplay.myqcloud.com/live/"
+                    + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId();
+            Log.e("yy","TXPlayerAddress=" + mTXPlayerAddress);
+            String ip = "rtmp://" + Constant.TX_LIVE_BIZID + ".livepush.myqcloud.com/live/"
+                    + Constant.TX_LIVE_BIZID + "_" + DataManager.getInstance().getChartData().getRoomId()
+                    + "?bizid=" + Constant.TX_LIVE_BIZID;
+            mTXPushAddress = new StringBuilder().
+                    append(ip).
+                    append("&").
+                    append("txSecret=").
+                    append(txSecret).
+                    append("&").
+                    append("txTime=").
+                    append(Long.toHexString(txTime).toUpperCase()).
+                    toString();
+            Log.e("yy","TXPushAddress=" + mTXPushAddress);
+        }
+    }
+
+    private String byteArrayToHexString(byte[] data) {
+        char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] out = new char[data.length << 1];
+
+        for (int i = 0, j = 0; i < data.length; i++) {
+            out[j++] = DIGITS_LOWER[(0xF0 & data[i]) >>> 4];
+            out[j++] = DIGITS_LOWER[0x0F & data[i]];
+        }
+        return new String(out);
     }
 }

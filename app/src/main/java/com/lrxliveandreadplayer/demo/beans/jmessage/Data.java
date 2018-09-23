@@ -13,6 +13,8 @@ public class Data {
     private int limitLady;
     private int limitMan;
     private int limitAngel;
+    private String pushAddress = "";
+    private String playAddress = "";
     private List<Member> members;
     public void setRoomId(long roomId) {
          this.roomId = roomId;
@@ -61,5 +63,21 @@ public class Data {
 
     public void setLimitAngel(int limitAngel) {
         this.limitAngel = limitAngel;
+    }
+
+    public String getPushAddress() {
+        return pushAddress;
+    }
+
+    public void setPushAddress(String pushAddress) {
+        this.pushAddress = pushAddress;
+    }
+
+    public String getPlayAddress() {
+        return playAddress;
+    }
+
+    public void setPlayAddress(String playAddress) {
+        this.playAddress = playAddress;
     }
 }

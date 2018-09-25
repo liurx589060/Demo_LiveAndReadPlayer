@@ -1,15 +1,17 @@
 package com.lrxliveandreadplayer.demo.beans.jmessage;
 
+import com.lrxliveandreadplayer.demo.status.BaseStatus;
+
 /**
  * Created by Administrator on 2018/6/1.
  */
 
 public class JMSendFlags {
-    public MessageType getMessageType() {
+    public BaseStatus.MessageType getMessageType() {
         return messageType;
     }
 
-    public void setMessageType(MessageType messageType) {
+    public void setMessageType(BaseStatus.MessageType messageType) {
         this.messageType = messageType;
     }
 
@@ -50,7 +52,7 @@ public class JMSendFlags {
         TYPE_RESPONSE
     }
 
-    private MessageType messageType;
+    private BaseStatus.MessageType messageType;
     private String roleType = "";
     private String gender = "";
     private boolean isLast;

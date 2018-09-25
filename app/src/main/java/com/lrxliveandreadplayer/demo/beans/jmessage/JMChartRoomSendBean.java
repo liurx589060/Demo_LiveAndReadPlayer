@@ -1,5 +1,7 @@
 package com.lrxliveandreadplayer.demo.beans.jmessage;
 
+import com.lrxliveandreadplayer.demo.status.BaseStatus;
+
 /**
  * Created by Administrator on 2018/5/30.
  */
@@ -43,7 +45,7 @@ public class JMChartRoomSendBean {
     private int limitCount;
     private boolean isUpdateMembers = false;
     private int liveType = LIVE_CAMERA;
-    private JMSendFlags.MessageType messageType;
+    private BaseStatus.MessageType messageType;
     private boolean isLadySelected;
     private String manSelects = "";
     private boolean isResetQuestionStatus;
@@ -144,11 +146,11 @@ public class JMChartRoomSendBean {
         this.liveType = liveType;
     }
 
-    public JMSendFlags.MessageType getMessageType() {
+    public BaseStatus.MessageType getMessageType() {
         return messageType;
     }
 
-    public void setMessageType(JMSendFlags.MessageType messageType) {
+    public void setMessageType(BaseStatus.MessageType messageType) {
         this.messageType = messageType;
     }
 

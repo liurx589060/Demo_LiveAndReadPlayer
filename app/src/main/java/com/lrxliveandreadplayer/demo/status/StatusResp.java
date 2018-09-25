@@ -1,5 +1,7 @@
 package com.lrxliveandreadplayer.demo.status;
 
+import com.lrxliveandreadplayer.demo.beans.BaseResp;
+
 /**
  * Created by Administrator on 2018/9/23.
  */
@@ -8,6 +10,8 @@ public class StatusResp {
     private boolean isLast = false;
     private int timeDownCount = 0;
     private boolean isEndButtonVisible = false;
+    private BaseStatus.MessageType messageType = BaseStatus.MessageType.TYPE_SEND;
+    private boolean isSelf = false;
 
     public boolean isLast() {
         return isLast;
@@ -31,5 +35,21 @@ public class StatusResp {
 
     public void setEndButtonVisible(boolean endButtonVisible) {
         isEndButtonVisible = endButtonVisible;
+    }
+
+    public BaseStatus.MessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(BaseStatus.MessageType messageType) {
+        this.messageType = messageType;
+    }
+
+    public boolean isSelf() {
+        return isSelf;
+    }
+
+    public void setSelf(boolean self) {
+        isSelf = self;
     }
 }

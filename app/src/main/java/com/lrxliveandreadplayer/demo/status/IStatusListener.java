@@ -7,5 +7,5 @@ import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
  */
 
 public interface IStatusListener {
-    void onHandleResp(StatusResp statusResp, JMChartRoomSendBean sendBean);
+    void onHandleResp(BaseStatus statusInstance,StatusResp statusResp, JMChartRoomSendBean sendBean);
 }

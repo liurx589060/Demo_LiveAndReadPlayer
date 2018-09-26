@@ -36,6 +36,9 @@ import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
+import com.lrxliveandreadplayer.demo.status.IStatusListener;
+import com.lrxliveandreadplayer.demo.status.StatusResp;
+import com.lrxliveandreadplayer.demo.status.statusBeans.MatchBean;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
@@ -45,6 +48,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +64,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Administrator on 2018/5/26.
  */
 
-public class XqChartUIViewMg extends AbsChartView {
+public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListener{
     private XqTxPushViewMg mXqCameraViewMg;
     private XqTxPlayerViewMg mXqPlayerViewMg;
     private ArrayList<AbsChartView> viewMgList = new ArrayList<>();
@@ -79,6 +83,8 @@ public class XqChartUIViewMg extends AbsChartView {
     private final int mCountDownTime_Question_lady = 120;
     private final int mCountDownTime_Angel_Disturb = 120;
     private RequestApi mApi;
+    private Map<Integer,BaseStatus> mOrderStatusMap = null;
+    private int mStautsOrder = 0;  //流程序列
 
     private ViewInstance mAngelViewInstance = new ViewInstance();
     private ViewInstance mManViewInstance = new ViewInstance();
@@ -196,7 +202,20 @@ public class XqChartUIViewMg extends AbsChartView {
         mRecyclerSystem.setAdapter(mSystemAdapter);
     }
 
-    public XqChartUIViewMg(XqChartActivity xqActivity) {
+    private void initOrderStatus() {
+        mOrderStatusMap = new HashMap<>();
+        mOrderStatusMap.put(0,new MatchBean());
+
+        //设置流程序列
+        Iterator entry = mOrderStatusMap.entrySet().iterator();
+        while (entry.hasNext()) {
+            Map.Entry en = (Map.Entry) entry.next();
+            int key = (int) en.getKey();
+            ((BaseStatus)en.getValue()).setmOrder(key);
+        }
+    }
+
+    public XqStatusChartUIViewMg(XqChartActivity xqActivity) {
         this.mXqActivity = xqActivity;
         mApi = NetWorkMg.newRetrofit().create(RequestApi.class);
         mAngelMembersMap = new HashMap<>();
@@ -248,6 +267,7 @@ public class XqChartUIViewMg extends AbsChartView {
         initAngelManViewInstance();
         initMemberRecyclerView();
         initSystemRecyclerView();
+        initOrderStatus();
 
         upDataMembers();
         JMessageClient.registerEventReceiver(this);
@@ -521,6 +541,16 @@ public class XqChartUIViewMg extends AbsChartView {
                 JMsgSender.sendNomalMessage(normalSendBean);
             }
         }
+    }
+
+    /**
+     * 信息处理回调
+     * @param statusResp
+     * @param sendBean
+     */
+    @Override
+    public void onHandleResp(BaseStatus statusInstance,StatusResp statusResp, JMChartRoomSendBean sendBean) {
+
     }
 
     private class MemberRecyclerdapter extends RecyclerView.Adapter<MemberViewHolder> {

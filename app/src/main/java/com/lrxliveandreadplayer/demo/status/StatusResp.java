@@ -12,6 +12,8 @@ public class StatusResp {
     private boolean isEndButtonVisible = false;
     private BaseStatus.MessageType messageType = BaseStatus.MessageType.TYPE_SEND;
     private boolean isSelf = false;
+    private BaseStatus.HandleType handleType = BaseStatus.HandleType.HANDLE_NONE;
+    private String publicString = "";
 
     public boolean isLast() {
         return isLast;
@@ -51,5 +53,21 @@ public class StatusResp {
 
     public void setSelf(boolean self) {
         isSelf = self;
+    }
+
+    public BaseStatus.HandleType getHandleType() {
+        return handleType;
+    }
+
+    public void setHandleType(BaseStatus.HandleType handleType) {
+        this.handleType = handleType;
+    }
+
+    public String getPublicString() {
+        return publicString;
+    }
+
+    public void setPublicString(String publicString) {
+        this.publicString = publicString;
     }
 }

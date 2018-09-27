@@ -23,6 +23,7 @@ import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
+import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
@@ -224,7 +225,7 @@ public class XqMainActivity extends Activity {
         bean.setMsg(selfInfo.getNick_name() + "进入房间");
         bean.setUserName(selfInfo.getUser_name());
         bean.setUpdateMembers(isUpdateMembers);
-        bean.setMessageType(JMSendFlags.MessageType.TYPE_SEND);
+        bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
 
         JMsgSender.sendRoomMessage(bean);
     }

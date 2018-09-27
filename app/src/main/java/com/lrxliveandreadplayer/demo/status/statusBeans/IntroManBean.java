@@ -5,64 +5,67 @@ import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
-import static com.lrxliveandreadplayer.demo.status.BaseStatus.HandleType.HANDLE_MATCH;
-
 /**
- * 匹配状态
- * Created by Administrator on 2018/9/26.
+ * Created by Administrator on 2018/9/27.
  */
 
-public class MatchBean extends BaseStatus {
+public class IntroManBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Match_Status";
+        return "Intro_Man_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "匹配阶段";
+        return "男生自我介紹阶段";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 0;
+        return 180;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_MATCHING;
+        return JMChartRoomSendBean.CHART_STATUS_INTRO_MAN;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        return 0;
+        return receiveBean.getIndexNext()%mData.getLimitMan();
     }
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_ALL;
+        return Constant.GENDER_MAN;
     }
 
     @Override
     public String getRequestRoleType() {
-        return Constant.ROLETYPE_ALL;
+        return Constant.ROLETYPE_GUEST;
     }
 
     @Override
     public HandleType getHandleType() {
-        return HANDLE_MATCH;
+        return HandleType.HANDLE_TIME;
     }
 
     @Override
-    public boolean isLast(int completeCount,JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitAngel() + mData.getLimitMan() + mData.getLimitLady();
-        boolean isLast = receiveBean.getCurrentCount()>=allCount?true:false;
+    public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
+        int allCount = mData.getLimitMan();
+        boolean isLast = completeCount>=allCount?true:false;
         return isLast;
     }
 
     @Override
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean) {
-        return null;
+        JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
+        if(mMessageType == MessageType.TYPE_SEND) {
+            sendBean.setMsg("请" + getNextIndex(receiveBean) + "玩家自我介绍");
+        }else if (mMessageType == MessageType.TYPE_RESPONSE) {
+            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
+        }
+        return sendBean;
     }
 
     @Override

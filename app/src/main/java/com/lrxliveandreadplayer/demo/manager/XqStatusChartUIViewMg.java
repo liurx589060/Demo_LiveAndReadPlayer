@@ -36,8 +36,9 @@ import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
-import com.lrxliveandreadplayer.demo.status.IStatusListener;
+import com.lrxliveandreadplayer.demo.status.IHandleListener;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
+import com.lrxliveandreadplayer.demo.status.statusBeans.IntroManBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.MatchBean;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
@@ -64,7 +65,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Administrator on 2018/5/26.
  */
 
-public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListener{
+public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListener {
     private XqTxPushViewMg mXqCameraViewMg;
     private XqTxPlayerViewMg mXqPlayerViewMg;
     private ArrayList<AbsChartView> viewMgList = new ArrayList<>();
@@ -205,6 +206,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListen
     private void initOrderStatus() {
         mOrderStatusMap = new HashMap<>();
         mOrderStatusMap.put(0,new MatchBean());
+        mOrderStatusMap.put(1,new IntroManBean());
 
         //设置流程序列
         Iterator entry = mOrderStatusMap.entrySet().iterator();
@@ -212,6 +214,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListen
             Map.Entry en = (Map.Entry) entry.next();
             int key = (int) en.getKey();
             ((BaseStatus)en.getValue()).setmOrder(key);
+            ((BaseStatus)en.getValue()).setHandleListener(this);
         }
     }
 
@@ -550,7 +553,43 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListen
      */
     @Override
     public void onHandleResp(BaseStatus statusInstance,StatusResp statusResp, JMChartRoomSendBean sendBean) {
+        switch (statusResp.getMessageType()) {
+            case TYPE_SEND:
+                if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_MATCH) {
+                    getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
+                }
 
+                JMChartRoomSendBean bean = mOrderStatusMap.get(statusInstance.getmOrder()).getChartSendBeanWillSend(sendBean);
+                BaseStatus nextStatus;
+                if(statusResp.isLast()) {
+                    nextStatus = mOrderStatusMap.get(statusInstance.getmOrder() + 1);
+                }else {
+                    nextStatus = mOrderStatusMap.get(statusInstance.getmOrder());
+                }
+                if(bean != null && nextStatus != null) {
+                    if(statusResp.isSelf()) {
+                        bean.setMessageType(BaseStatus.MessageType.TYPE_RESPONSE);
+                    }else {
+                        bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+                    }
+
+                    if(statusResp.isLast()) {
+                        bean.setIndexNext(nextStatus.getmStartIndex());
+                    }else {
+                        bean.setIndexNext(nextStatus.getNextIndex(sendBean));
+                    }
+                    bean.setProcessStatus(nextStatus.getStatus());
+                    sendRoomMessage(bean);
+                }
+
+                addSystemEventAndRefresh(sendBean);
+                break;
+            case TYPE_RESPONSE:
+                addSystemEventAndRefresh(sendBean);
+                break;
+            default:
+                break;
+        }
     }
 
     private class MemberRecyclerdapter extends RecyclerView.Adapter<MemberViewHolder> {
@@ -1699,17 +1738,26 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IStatusListen
             }
             JMChartRoomSendBean chartRoomSendBean = new Gson().fromJson(text,JMChartRoomSendBean.class);
             //不接收流程前的消息
-            if(mCurrentRoomSendBean != null && (mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN
-                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY
-                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
-                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING
-                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE)) {
-                if(chartRoomSendBean.getProcessStatus() < mCurrentRoomSendBean.getProcessStatus()){
-//                    Log.e("yy","不接收消息");
-//                    return;
+//            if(mCurrentRoomSendBean != null && (mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN
+//                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY
+//                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB
+//                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING
+//                    && mCurrentRoomSendBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE)) {
+//                if(chartRoomSendBean.getProcessStatus() < mCurrentRoomSendBean.getProcessStatus()){
+////                    Log.e("yy","不接收消息");
+////                    return;
+//                }
+//            }
+//            mChartRoomController.handleRoomMessage(chartRoomSendBean);
+
+            Iterator iterator = mOrderStatusMap.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer,BaseStatus> entry = (Map.Entry<Integer, BaseStatus>) iterator.next();
+                if(entry.getValue() != null) {
+                    entry.getValue().handlerRoomChart(chartRoomSendBean);
                 }
             }
-            mChartRoomController.handleRoomMessage(chartRoomSendBean);
+
         }
     }
 

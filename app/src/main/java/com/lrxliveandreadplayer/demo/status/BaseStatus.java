@@ -19,6 +19,14 @@ public abstract class BaseStatus {
         this.mOrder = mOrder;
     }
 
+    public int getmStartIndex() {
+        return mStartIndex;
+    }
+
+    public void setmStartIndex(int mStartIndex) {
+        this.mStartIndex = mStartIndex;
+    }
+
     public enum MessageType {
         TYPE_SEND,
         TYPE_RESPONSE
@@ -34,11 +42,12 @@ public abstract class BaseStatus {
 
     private int mCompleteCount = 0;
     protected MessageType mMessageType = MessageType.TYPE_SEND;
-    private IStatusListener mListener = null;
+    private IHandleListener mListener = null;
     protected Data mData = DataManager.getInstance().getChartData();
     protected UserInfoBean mUserInfo = DataManager.getInstance().getUserInfo();
     protected Member mSelfMember = DataManager.getInstance().getSelfMember();
     private int mOrder = -1;//流程序号
+    private int mStartIndex = 0;//轮转的开始索引
 
     /**
      * 字符的类型标识
@@ -63,6 +72,12 @@ public abstract class BaseStatus {
      */
     public abstract int getStatus();
 
+    /**
+     *下一个的算法
+     * @param receiveBean
+     * @return
+     */
+    public abstract int getNextIndex(JMChartRoomSendBean receiveBean);
     /**
      * 必须的性别
      * @return
@@ -93,7 +108,7 @@ public abstract class BaseStatus {
      * 获取要发送的JMChartRoomSendBean
      * @return
      */
-    public abstract JMChartRoomSendBean getChartSendBeanWillSend();
+    public abstract JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean);
 
     /**
      * 状态自己解析，然后把内容传入resp和sendBean中
@@ -106,7 +121,7 @@ public abstract class BaseStatus {
      * 设置处理后的监听
      * @param listener
      */
-    public void setStatusListener(IStatusListener listener) {
+    public void setHandleListener(IHandleListener listener) {
         mListener = listener;
     }
 
@@ -173,13 +188,12 @@ public abstract class BaseStatus {
      * @return
      */
     protected boolean checkIsSelf(JMChartRoomSendBean bean) {
-        int nextIndex = -1;
         int selfIndex = DataManager.getInstance().getSelfMember().getIndex();
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
 
         if(getRequestGender().equals(userInfoBean.getGender())
                 &&getRequestRoleType().equals(userInfoBean.getRole_type())
-                &&selfIndex == nextIndex) {
+                &&selfIndex == getNextIndex(bean)) {
             return true;
         }
         return false;

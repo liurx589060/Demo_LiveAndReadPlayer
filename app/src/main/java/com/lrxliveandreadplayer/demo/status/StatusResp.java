@@ -1,7 +1,5 @@
 package com.lrxliveandreadplayer.demo.status;
 
-import com.lrxliveandreadplayer.demo.beans.BaseResp;
-
 /**
  * Created by Administrator on 2018/9/23.
  */

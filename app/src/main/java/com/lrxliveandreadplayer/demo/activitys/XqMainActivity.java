@@ -15,16 +15,13 @@ import com.lrx.live.player.R;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartResp;
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
-import com.lrxliveandreadplayer.demo.beans.jmessage.JMSendFlags;
-import com.lrxliveandreadplayer.demo.beans.jmessage.Member;
-import com.lrxliveandreadplayer.demo.beans.jmessage.UserInfo;
 import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
 import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
-import com.lrxliveandreadplayer.demo.status.statusBeans.MatchBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusMatchBean;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
@@ -41,7 +38,6 @@ import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Retrofit;
 
 /**
  * Created by Administrator on 2018/5/22.
@@ -60,7 +56,7 @@ public class XqMainActivity extends Activity {
     private String mTXPushAddress = "";
     private String mTXPlayerAddress = "";
     private int mPushAddressType= 0;
-    private MatchBean mMatch = null;
+    private StatusMatchBean mMatch = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,7 +69,7 @@ public class XqMainActivity extends Activity {
 
     private void init() {
         mApi = NetWorkMg.newRetrofit().create(RequestApi.class);
-        mMatch = new MatchBean();
+        mMatch = new StatusMatchBean();
 
         mBtnAngel.setOnClickListener(new View.OnClickListener() {
             @Override

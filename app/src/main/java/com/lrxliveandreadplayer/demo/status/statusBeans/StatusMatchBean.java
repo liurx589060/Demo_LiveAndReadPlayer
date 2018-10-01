@@ -12,7 +12,7 @@ import static com.lrxliveandreadplayer.demo.status.BaseStatus.HandleType.HANDLE_
  * Created by Administrator on 2018/9/26.
  */
 
-public class MatchBean extends BaseStatus {
+public class StatusMatchBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
         return "Match_Status";

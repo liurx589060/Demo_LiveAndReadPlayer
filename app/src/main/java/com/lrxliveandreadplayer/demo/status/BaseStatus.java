@@ -35,8 +35,8 @@ public abstract class BaseStatus {
     public enum HandleType {
         HANDLE_NONE,
         HANDLE_TIME,
-        HANDLE_SELECT_MAN,
-        HANDLE_SELECT_LAD,
+        HANDLE_SELECT_MAN_FIRST,
+        HANDLE_SELECT_LADY_FIRST,
         HANDLE_MATCH
     }
 
@@ -140,7 +140,6 @@ public abstract class BaseStatus {
 
 
         StatusResp resp = new StatusResp();
-        onHandler(resp,receiveBean);
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setMessageType(MessageType.TYPE_SEND);
             mCompleteCount ++;
@@ -148,15 +147,16 @@ public abstract class BaseStatus {
             resp.setMessageType(MessageType.TYPE_RESPONSE);
         }
 
-        boolean last = isLast(mCompleteCount,receiveBean);
-        if(last) {
-            mCompleteCount = 0;
-        }
-        resp.setLast(last);
         resp.setSelf(checkIsSelf(receiveBean));
         resp.setHandleType(getHandleType());
         resp.setTimeDownCount(getLiveTimeCount());
         resp.setPublicString(getPublicString());
+        boolean last = isLast(mCompleteCount,receiveBean);
+        resp.setLast(last);
+        if(last) {
+            mCompleteCount = 0;
+        }
+        onHandler(resp,receiveBean);
         if(mListener != null) {
             mListener.onHandleResp(this,resp,receiveBean);
         }

@@ -17,7 +17,7 @@ public class IntroManBean extends BaseStatus {
 
     @Override
     public String getPublicString() {
-        return "男生自我介紹阶段";
+        return "男生自我介绍阶段";
     }
 
     @Override
@@ -58,18 +58,26 @@ public class IntroManBean extends BaseStatus {
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean) {
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
-        if(mMessageType == MessageType.TYPE_SEND) {
+        if(messageType == MessageType.TYPE_SEND) {
             sendBean.setMsg("请" + getNextIndex(receiveBean) + "玩家自我介绍");
-        }else if (mMessageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
+        }else if (messageType == MessageType.TYPE_RESPONSE) {
+            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
+            sendBean.setProcessStatus(getStatus());
+            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
         }
         return sendBean;
     }
 
     @Override
     public void onHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
-
+        if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
+            resp.setResetLive(true);
+            resp.setStopTiming(true);
+        }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
+            resp.setResetLive(false);
+            resp.setStopTiming(false);
+        }
     }
 }

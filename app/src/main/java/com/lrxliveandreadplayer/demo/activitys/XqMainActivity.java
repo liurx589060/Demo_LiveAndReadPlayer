@@ -24,6 +24,7 @@ import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
 import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
+import com.lrxliveandreadplayer.demo.status.statusBeans.MatchBean;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
 import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
@@ -59,6 +60,7 @@ public class XqMainActivity extends Activity {
     private String mTXPushAddress = "";
     private String mTXPlayerAddress = "";
     private int mPushAddressType= 0;
+    private MatchBean mMatch = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +73,7 @@ public class XqMainActivity extends Activity {
 
     private void init() {
         mApi = NetWorkMg.newRetrofit().create(RequestApi.class);
+        mMatch = new MatchBean();
 
         mBtnAngel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,20 +215,29 @@ public class XqMainActivity extends Activity {
 
     private void sendChartRoomMessage(boolean isUpdateMembers) {
         //发送聊天室信息
-        JMChartRoomSendBean bean = new JMChartRoomSendBean();
+//        JMChartRoomSendBean bean = new JMChartRoomSendBean();
+//        Data data = DataManager.getInstance().getChartData();
+//        UserInfoBean selfInfo = DataManager.getInstance().getUserInfo();
+//        bean.setGender(selfInfo.getGender());
+//        bean.setCurrentCount(data.getMembers().size());
+//        bean.setLimitCount(data.getLimitAngel() + data.getLimitMan() + data.getLimitLady());
+//        bean.setIndexSelf(DataManager.getInstance().getSelfMember().getIndex());
+//        bean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_MATCHING);
+//        bean.setRoomId(data.getRoomId());
+//        bean.setTime(Tools.getCurrentDateTime());
+//        bean.setMsg(selfInfo.getNick_name() + "进入房间");
+//        bean.setUserName(selfInfo.getUser_name());
+//        bean.setUpdateMembers(isUpdateMembers);
+//        bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+
         Data data = DataManager.getInstance().getChartData();
         UserInfoBean selfInfo = DataManager.getInstance().getUserInfo();
-        bean.setGender(selfInfo.getGender());
+        JMChartRoomSendBean bean = mMatch.createBaseChartRoomSendBean();
         bean.setCurrentCount(data.getMembers().size());
-        bean.setLimitCount(data.getLimitAngel() + data.getLimitMan() + data.getLimitLady());
-        bean.setIndexSelf(DataManager.getInstance().getSelfMember().getIndex());
-        bean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_MATCHING);
-        bean.setRoomId(data.getRoomId());
-        bean.setTime(Tools.getCurrentDateTime());
-        bean.setMsg(selfInfo.getNick_name() + "进入房间");
-        bean.setUserName(selfInfo.getUser_name());
-        bean.setUpdateMembers(isUpdateMembers);
+        bean.setProcessStatus(mMatch.getStatus());
         bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+        bean.setUpdateMembers(isUpdateMembers);
+        bean.setMsg(selfInfo.getNick_name() + "进入房间");
 
         JMsgSender.sendRoomMessage(bean);
     }

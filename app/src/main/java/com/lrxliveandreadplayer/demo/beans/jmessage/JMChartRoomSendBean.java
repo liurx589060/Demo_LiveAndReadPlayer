@@ -45,7 +45,7 @@ public class JMChartRoomSendBean {
     private int limitCount;
     private boolean isUpdateMembers = false;
     private int liveType = LIVE_CAMERA;
-    private BaseStatus.MessageType messageType;
+    private BaseStatus.MessageType messageType = BaseStatus.MessageType.TYPE_SEND;
     private boolean isLadySelected;
     private String manSelects = "";
     private boolean isResetQuestionStatus;

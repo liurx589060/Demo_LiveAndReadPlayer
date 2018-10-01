@@ -61,8 +61,8 @@ public class MatchBean extends BaseStatus {
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean) {
-        return null;
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
+        return createBaseChartRoomSendBean();
     }
 
     @Override

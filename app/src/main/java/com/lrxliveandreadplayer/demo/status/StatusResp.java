@@ -12,6 +12,8 @@ public class StatusResp {
     private boolean isSelf = false;
     private BaseStatus.HandleType handleType = BaseStatus.HandleType.HANDLE_NONE;
     private String publicString = "";
+    private boolean isResetLive = true;
+    private boolean isStopTiming = true;
 
     public boolean isLast() {
         return isLast;
@@ -67,5 +69,21 @@ public class StatusResp {
 
     public void setPublicString(String publicString) {
         this.publicString = publicString;
+    }
+
+    public boolean isResetLive() {
+        return isResetLive;
+    }
+
+    public void setResetLive(boolean resetLive) {
+        isResetLive = resetLive;
+    }
+
+    public boolean isStopTiming() {
+        return isStopTiming;
+    }
+
+    public void setStopTiming(boolean stopTiming) {
+        isStopTiming = stopTiming;
     }
 }

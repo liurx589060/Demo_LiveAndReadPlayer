@@ -19,11 +19,11 @@ public abstract class BaseStatus {
         this.mOrder = mOrder;
     }
 
-    public int getmStartIndex() {
+    public int getStartIndex() {
         return mStartIndex;
     }
 
-    public void setmStartIndex(int mStartIndex) {
+    public void setStartIndex(int mStartIndex) {
         this.mStartIndex = mStartIndex;
     }
 
@@ -41,7 +41,6 @@ public abstract class BaseStatus {
     }
 
     private int mCompleteCount = 0;
-    protected MessageType mMessageType = MessageType.TYPE_SEND;
     private IHandleListener mListener = null;
     protected Data mData = DataManager.getInstance().getChartData();
     protected UserInfoBean mUserInfo = DataManager.getInstance().getUserInfo();
@@ -108,7 +107,7 @@ public abstract class BaseStatus {
      * 获取要发送的JMChartRoomSendBean
      * @return
      */
-    public abstract JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean);
+    public abstract JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType);
 
     /**
      * 状态自己解析，然后把内容传入resp和sendBean中
@@ -148,7 +147,6 @@ public abstract class BaseStatus {
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE){
             resp.setMessageType(MessageType.TYPE_RESPONSE);
         }
-        mMessageType = receiveBean.getMessageType();
 
         boolean last = isLast(mCompleteCount,receiveBean);
         if(last) {

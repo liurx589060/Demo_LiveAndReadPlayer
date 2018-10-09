@@ -32,7 +32,16 @@ public class StatusIntroManBean extends BaseStatus {
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        return receiveBean.getIndexNext()%mData.getLimitMan();
+        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitMan();
+        return index;
+    }
+
+    @Override
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -61,12 +70,18 @@ public class StatusIntroManBean extends BaseStatus {
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
-            sendBean.setMsg("请男" + getNextIndex(receiveBean) + "玩家自我介绍");
+            int nextIndex;
+            if(receiveBean.getProcessStatus() != getStatus()) {
+                nextIndex = getStartIndex();
+            }else {
+                nextIndex = getNextIndex(receiveBean);
+            }
+            sendBean.setMsg("请男" + nextIndex + "玩家自我介绍");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
-            sendBean.setProcessStatus(getStatus());
-            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
+            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
         }
+        sendBean.setProcessStatus(getStatus());
+        sendBean.setMessageType(messageType);
         return sendBean;
     }
 

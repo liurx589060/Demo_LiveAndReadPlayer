@@ -163,6 +163,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
     @Override
     public void onDestroy() {
         JMessageClient.unRegisterEventReceiver(this);
+        resetLiveStatus();
+        stopTiming();
         for (AbsChartView viewMg:viewMgList) {
             if(viewMg != null) {
                 viewMg.onDestroy();
@@ -233,7 +235,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
 
         JMessageClient.registerEventReceiver(this);
         upDataMembers();
-        checkIfSendIntroStatus();
+        //checkIfSendIntroStatus();
     }
 
     @Override
@@ -529,16 +531,11 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                             Tools.toast(mXqActivity,jmChartResp.getMsg(),true);
                             return;
                         }
-                        mXqActivity.finish();
+
                         //通知聊天室的其他人,是创建者
                         if(DataManager.getInstance().getSelfMember().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
                             norifyRoomExit(JMNormalSendBean.NORMAL_EXIT);
                         }else {
-//                            JMChartRoomSendBean sendBean = mChartRoomController.createBaseSendbeanForExtent();
-//                            sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);
-//                            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "--离开房间");
-//                            sendRoomMessage(sendBean);
-
                             for (Member member:DataManager.getInstance().getChartData().getMembers()) {
                                 if(!member.getUserInfo().getUser_name().equals(DataManager.getInstance().getUserInfo().getUser_name())) {
                                     JMNormalSendBean normalSendBean = new JMNormalSendBean();
@@ -550,6 +547,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                                 }
                             }
                         }
+                        mXqActivity.finish();
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -599,6 +597,12 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
 
                 if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_MATCH) {
                     getChartRoomMembersList(DataManager.getInstance().getChartData().getRoomId());
+                    if(statusResp.isLast()) {
+                        BaseStatus baseStatus = mOrderStatusMap.get(KEY_INTRO_MAN);
+                        JMChartRoomSendBean bean = baseStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_SEND);
+                        bean.setIndexNext(baseStatus.getStartIndex());
+                        sendRoomMessage(bean);
+                    }
                 }else if (statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_TIME) {
                     startTiming(statusInstance,sendBean,statusResp);
                 }else if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_LADY_FIRST) {
@@ -612,8 +616,6 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                         BaseStatus nextStatus = mOrderStatusMap.get(statusInstance.getmOrder() + 1);
                         if(nextStatus == null) return;
                         JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean,BaseStatus.MessageType.TYPE_SEND);
-                        bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
-                        bean.setProcessStatus(nextStatus.getStatus());
                         bean.setIndexNext(nextStatus.getStartIndex());
                         sendRoomMessage(bean);
                     }
@@ -1709,9 +1711,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     mHandler.postDelayed(this,1000);//下一次循环
                 }else {
                     //自行操作结束
-                    if(statusResp.isSelf()) {
-                        onOperateEnd(baseStatus,bean,statusResp);
-                    }
+                    onOperateEnd(baseStatus,bean,statusResp);
                     mTextCountDown.setVisibility(View.INVISIBLE);
                     stopTiming();//停止循环
                 }
@@ -1915,8 +1915,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         }
         JMNormalSendBean normalSendBean = new Gson().fromJson(text,JMNormalSendBean.class);
         if(normalSendBean.getCode() == JMNormalSendBean.NORMAL_EXIT) {//离开
-            mXqActivity.finish();
             Tools.toast(mXqActivity,"房间被解散",true);
+            mXqActivity.finish();
         }else if (normalSendBean.getCode() == JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM) {
             JMChartRoomSendBean sendBean = new JMChartRoomSendBean();
             sendBean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM);

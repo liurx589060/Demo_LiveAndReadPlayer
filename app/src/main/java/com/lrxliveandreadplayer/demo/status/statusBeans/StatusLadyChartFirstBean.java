@@ -1,6 +1,7 @@
 package com.lrxliveandreadplayer.demo.status.statusBeans;
 
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
+import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
@@ -32,7 +33,16 @@ public class StatusLadyChartFirstBean extends BaseStatus {
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        return receiveBean.getIndexNext()%mData.getLimitLady();
+        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitLady();
+        return index;
+    }
+
+    @Override
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -61,12 +71,18 @@ public class StatusLadyChartFirstBean extends BaseStatus {
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
-            sendBean.setMsg("请女" + getNextIndex(receiveBean) + "玩家自我介绍");
+            int nextIndex;
+            if(receiveBean.getProcessStatus() != getStatus()) {
+                nextIndex = getStartIndex();
+            }else {
+                nextIndex = getNextIndex(receiveBean);
+            }
+            sendBean.setMsg("请女" + nextIndex + "玩家自我介绍");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
             sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
-            sendBean.setProcessStatus(getStatus());
-            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
         }
+        sendBean.setProcessStatus(getStatus());
+        sendBean.setMessageType(MessageType.TYPE_RESPONSE);
         return sendBean;
     }
 

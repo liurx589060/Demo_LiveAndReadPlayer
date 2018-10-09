@@ -233,6 +233,7 @@ public class XqMainActivity extends Activity {
         bean.setProcessStatus(mMatch.getStatus());
         bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
         bean.setUpdateMembers(isUpdateMembers);
+        bean.setIndexNext(DataManager.getInstance().getSelfMember().getIndex());
         bean.setMsg(selfInfo.getNick_name() + "进入房间");
 
         JMsgSender.sendRoomMessage(bean);

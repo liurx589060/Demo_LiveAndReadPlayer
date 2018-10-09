@@ -47,6 +47,7 @@ public abstract class BaseStatus {
     protected Member mSelfMember = DataManager.getInstance().getSelfMember();
     private int mOrder = -1;//流程序号
     private int mStartIndex = 0;//轮转的开始索引
+    private int mCurrentIndex = -1;
 
     /**
      * 字符的类型标识
@@ -77,6 +78,12 @@ public abstract class BaseStatus {
      * @return
      */
     public abstract int getNextIndex(JMChartRoomSendBean receiveBean);
+    /**
+     *下一个的算法
+     * @param receiveBean
+     * @return
+     */
+    public abstract boolean checkSelfIndex(JMChartRoomSendBean receiveBean);
     /**
      * 必须的性别
      * @return
@@ -125,6 +132,25 @@ public abstract class BaseStatus {
     }
 
     /**
+     * 检查是否重复
+     * @param receiveBean
+     * @return
+     */
+    protected boolean checkIsRepeatOrReturn(JMChartRoomSendBean receiveBean) {
+        boolean isReturn = false;
+        if(receiveBean.getProcessStatus() == getStatus()
+                && receiveBean.getMessageType() == MessageType.TYPE_SEND
+                && mCurrentIndex == receiveBean.getIndexNext()) {
+            isReturn = true;
+        }
+
+        if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
+            mCurrentIndex = receiveBean.getIndexNext();
+        }
+        return isReturn;
+    }
+
+    /**
      * 处理信息
      * @param receiveBean
      */
@@ -135,6 +161,10 @@ public abstract class BaseStatus {
 
         if(getStatus() != receiveBean.getProcessStatus()) {
             //不处理其他的消息，只处理自己的消息
+            return;
+        }
+
+        if(checkIsRepeatOrReturn(receiveBean)) {
             return;
         }
 
@@ -186,12 +216,11 @@ public abstract class BaseStatus {
      * @return
      */
     protected boolean checkIsSelf(JMChartRoomSendBean bean) {
-        int selfIndex = DataManager.getInstance().getSelfMember().getIndex();
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
 
         if(getRequestGender().equals(userInfoBean.getGender())
                 &&getRequestRoleType().equals(userInfoBean.getRole_type())
-                &&selfIndex == getNextIndex(bean)) {
+                &&checkSelfIndex(bean)) {
             return true;
         }
         return false;

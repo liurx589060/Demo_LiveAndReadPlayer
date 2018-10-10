@@ -38,14 +38,6 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
     }
 
     @Override
-    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
-        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public String getRequestGender() {
         return Constant.GENDER_LADY;
     }
@@ -90,6 +82,7 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
             }
         }
 
+        resp.setLadySelect(true);
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
@@ -100,12 +93,7 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
     }
 
     @Override
-    protected boolean checkIsSelf(JMChartRoomSendBean bean) {
-        if(getRequestGender().equals(mUserInfo.getGender())
-                &&getRequestRoleType().equals(mUserInfo.getRole_type())
-                ) {
-            return true;
-        }
-        return false;
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        return true;
     }
 }

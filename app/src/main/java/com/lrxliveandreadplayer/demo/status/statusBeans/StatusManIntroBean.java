@@ -9,7 +9,7 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  * Created by Administrator on 2018/9/27.
  */
 
-public class StatusIntroManBean extends BaseStatus {
+public class StatusManIntroBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
         return "Intro_Man_Status";
@@ -34,14 +34,6 @@ public class StatusIntroManBean extends BaseStatus {
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
         int index = (receiveBean.getIndexNext() + 1)%mData.getLimitMan();
         return index;
-    }
-
-    @Override
-    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
-        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
-            return true;
-        }
-        return false;
     }
 
     @Override

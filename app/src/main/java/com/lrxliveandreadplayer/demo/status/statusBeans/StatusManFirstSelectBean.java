@@ -1,45 +1,45 @@
 package com.lrxliveandreadplayer.demo.status.statusBeans;
 
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
-import com.lrxliveandreadplayer.demo.manager.DataManager;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
 /**
- * Created by Administrator on 2018/9/27.
+ * Created by Administrator on 2018/10/1.
  */
 
-public class StatusLadyChartFirstBean extends BaseStatus {
+public class StatusManFirstSelectBean extends BaseStatus{
+    private int mCompleteCount = 0;
+
     @Override
     public String getTypesWithString() {
-        return "Lady_Chart_First_Status";
+        return "Man_First_Select_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "女生自我介绍阶段";
+        return "男生第一次选择";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 120;
+        return 10;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_INTRO_LADY;
+        return JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitLady();
-        return index;
+        return 0;
     }
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_LADY;
+        return Constant.GENDER_MAN;
     }
 
     @Override
@@ -49,37 +49,40 @@ public class StatusLadyChartFirstBean extends BaseStatus {
 
     @Override
     public HandleType getHandleType() {
-        return HandleType.HANDLE_TIME;
+        return HandleType.HANDLE_SELECT_MAN_FIRST;
     }
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitLady();
-        boolean isLast = completeCount>=allCount?true:false;
-        return isLast;
+        return false;
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
-            int nextIndex;
-            if(receiveBean.getProcessStatus() != getStatus()) {
-                nextIndex = getStartIndex();
-            }else {
-                nextIndex = getNextIndex(receiveBean);
-            }
-            sendBean.setMsg("请女" + nextIndex + "玩家自我介绍");
+            sendBean.setMsg("请男生做出第一次选择");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
+            sendBean.setMsg(mUserInfo.getUser_name() + "已做出选择");
+            sendBean.setProcessStatus(getStatus());
+            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
         }
-        sendBean.setProcessStatus(getStatus());
-        sendBean.setMessageType(messageType);
         return sendBean;
     }
 
     @Override
     public void onHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
+        if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
+            mCompleteCount ++;
+            int allCount = mData.getLimitMan();
+            boolean isLast = mCompleteCount>=allCount?true:false;
+            resp.setLast(isLast);
+            if(isLast) {
+                mCompleteCount = 0;
+            }
+        }
+
+        resp.setManSelect(true);
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
@@ -87,5 +90,10 @@ public class StatusLadyChartFirstBean extends BaseStatus {
             resp.setResetLive(false);
             resp.setStopTiming(false);
         }
+    }
+
+    @Override
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        return true;
     }
 }

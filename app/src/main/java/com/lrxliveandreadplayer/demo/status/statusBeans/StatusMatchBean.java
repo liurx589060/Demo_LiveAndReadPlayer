@@ -39,14 +39,6 @@ public class StatusMatchBean extends BaseStatus {
     }
 
     @Override
-    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
-        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public String getRequestGender() {
         return Constant.GENDER_ALL;
     }

@@ -1,4 +1,6 @@
 package com.lrxliveandreadplayer.demo.status;
+import android.util.Log;
+
 import com.lrxliveandreadplayer.demo.beans.jmessage.Data;
 import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Member;
@@ -79,11 +81,16 @@ public abstract class BaseStatus {
      */
     public abstract int getNextIndex(JMChartRoomSendBean receiveBean);
     /**
-     *下一个的算法
+     *判断下一个的索引
      * @param receiveBean
      * @return
      */
-    public abstract boolean checkSelfIndex(JMChartRoomSendBean receiveBean);
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        if(mSelfMember.getIndex() == receiveBean.getIndexNext()) {
+            return true;
+        }
+        return false;
+    }
     /**
      * 必须的性别
      * @return
@@ -217,12 +224,12 @@ public abstract class BaseStatus {
      */
     protected boolean checkIsSelf(JMChartRoomSendBean bean) {
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
-
+        boolean isSelf = false;
         if(getRequestGender().equals(userInfoBean.getGender())
                 &&getRequestRoleType().equals(userInfoBean.getRole_type())
                 &&checkSelfIndex(bean)) {
-            return true;
+            isSelf = true;
         }
-        return false;
+        return isSelf;
     }
 }

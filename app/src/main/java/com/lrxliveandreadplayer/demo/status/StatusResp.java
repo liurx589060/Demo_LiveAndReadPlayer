@@ -14,6 +14,8 @@ public class StatusResp {
     private String publicString = "";
     private boolean isResetLive = true;
     private boolean isStopTiming = true;
+    private boolean isLadySelect = false;
+    private boolean isManSelect = false;
 
     public boolean isLast() {
         return isLast;
@@ -85,5 +87,21 @@ public class StatusResp {
 
     public void setStopTiming(boolean stopTiming) {
         isStopTiming = stopTiming;
+    }
+
+    public boolean isLadySelect() {
+        return isLadySelect;
+    }
+
+    public void setLadySelect(boolean ladySelect) {
+        isLadySelect = ladySelect;
+    }
+
+    public boolean isManSelect() {
+        return isManSelect;
+    }
+
+    public void setManSelect(boolean manSelect) {
+        isManSelect = manSelect;
     }
 }

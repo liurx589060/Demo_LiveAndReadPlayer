@@ -6,28 +6,31 @@ import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
 /**
- * Created by Administrator on 2018/9/27.
+ * Created by Administrator on 2018/10/12.
  */
 
-public class StatusManIntroBean extends BaseStatus {
+public class StatusManQuestionBean extends BaseStatus {
+    private final int COUNT = 2;
+    private int mCurrentCount = 0;
+
     @Override
     public String getTypesWithString() {
-        return "Intro_Man_Status";
+        return "Man_Question_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "男生自我介绍阶段";
+        return String.format("第%s次问答环节-男",mCurrentCount+1);
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 180;
+        return 60;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_INTRO_MAN;
+        return JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class StatusManIntroBean extends BaseStatus {
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
             int nextIndex;
@@ -68,9 +71,9 @@ public class StatusManIntroBean extends BaseStatus {
             }else {
                 nextIndex = getNextIndex(receiveBean);
             }
-            sendBean.setMsg("请男" + nextIndex + "玩家发言");
+            sendBean.setMsg("请男" + nextIndex + "提问");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
+            sendBean.setMsg(mUserInfo.getUser_name() + "开始提问");
         }
         sendBean.setProcessStatus(getStatus());
         sendBean.setMessageType(messageType);
@@ -82,9 +85,17 @@ public class StatusManIntroBean extends BaseStatus {
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
+
+            if(resp.isLast()) {
+                mCurrentCount++;
+            }
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);
         }
+    }
+
+    public boolean isRepeat() {
+        return mCurrentCount < COUNT;
     }
 }

@@ -11,6 +11,7 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
 
 public class StatusLadyFirstSelectBean extends BaseStatus{
     private int mCompleteCount = 0;
+    private boolean isAccept = true;
 
     @Override
     public String getTypesWithString() {
@@ -61,7 +62,7 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
-            sendBean.setMsg("请女生做出第一次选择");
+            sendBean.setMsg("请女生做出选择");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
             sendBean.setMsg(mUserInfo.getUser_name() + "已做出选择");
             sendBean.setProcessStatus(getStatus());
@@ -89,11 +90,20 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);
+            isAccept = receiveBean.isLadySelected();
         }
     }
 
     @Override
     public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
         return true;
+    }
+
+    public boolean isIsAccept() {
+        return isAccept;
+    }
+
+    public void setIsAccept(boolean mIsAccept) {
+        this.isAccept = mIsAccept;
     }
 }

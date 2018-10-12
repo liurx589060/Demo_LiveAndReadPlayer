@@ -39,6 +39,10 @@ public abstract class BaseStatus {
         HANDLE_TIME,
         HANDLE_SELECT_MAN_FIRST,
         HANDLE_SELECT_LADY_FIRST,
+        HANDLE_SELECT_LADY_SECOND,
+        HANDLE_SELECT_MAN_SECOND,
+        HANDLE_SELECT_LADY_FINAL,
+        HANDLE_SELECT_MAN_FINAL,
         HANDLE_MATCH
     }
 
@@ -192,6 +196,7 @@ public abstract class BaseStatus {
         resp.setLast(last);
         if(last) {
             mCompleteCount = 0;
+            mCurrentIndex = -1;
         }
         onHandler(resp,receiveBean);
         if(mListener != null) {
@@ -225,8 +230,8 @@ public abstract class BaseStatus {
     protected boolean checkIsSelf(JMChartRoomSendBean bean) {
         UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
         boolean isSelf = false;
-        if(getRequestGender().equals(userInfoBean.getGender())
-                &&getRequestRoleType().equals(userInfoBean.getRole_type())
+        if(getRequestGender().contains(userInfoBean.getGender())
+                &&getRequestRoleType().contains(userInfoBean.getRole_type())
                 &&checkSelfIndex(bean)) {
             isSelf = true;
         }

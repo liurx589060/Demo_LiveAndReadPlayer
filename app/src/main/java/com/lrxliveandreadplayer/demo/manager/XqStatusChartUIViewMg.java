@@ -38,11 +38,19 @@ import com.lrxliveandreadplayer.demo.network.RequestApi;
 import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.IHandleListener;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusAngelChartBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadyChartSecondBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadyFinalSelectBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadyQuestionBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadySecondSelectBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManFinalSelectBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManIntroBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadyChartFirstBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusLadyFirstSelectBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManFirstSelectBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManPerformanceBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManQuestionBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusManSecondSelectBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusMatchBean;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 import com.lrxliveandreadplayer.demo.utils.Tools;
@@ -76,6 +84,14 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
     private final int KEY_LADY_CHART_FIRST = 3;
     private final int KEY_MAN_SELECT_FIRST = 4;
     private final int KEY_MAN_PERFORMANCE = 5;
+    private final int KEY_LADY_SELECT_SECOND = 6;
+    private final int KEY_LADY_CHART_SECOND = 7;
+    private final int KEY_ANGEL_CHART = 8;
+    private final int KEY_MAN_SELECT_SECOND = 9;
+    private final int KEY_LADY_SELECT_FINAL = 10;
+    private final int KEY_MAN_QUESTION = 11;
+    private final int KEY_LADY_QUESTION = 12;
+    private final int KEY_MAN_SELECT_FINAL = 13;
 
     private XqTxPushViewMg mXqCameraViewMg;
     private XqTxPlayerViewMg mXqPlayerViewMg;
@@ -128,6 +144,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
     private int mQuestionNum = 0;
     private AlertDialog mLadySelectDialog;
     private boolean mLadySelecteResult = true; //默认为都接受
+    private int mManSelectedIndex = 0;//默认选择第一个
     private ArrayList<String> mManSelectedResultList = new ArrayList<>();
     private ArrayList<String> mLadySelectedResultList = new ArrayList<>();
     private int mAngelDisturbNum = 0;
@@ -275,6 +292,14 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mOrderStatusMap.put(KEY_LADY_CHART_FIRST,new StatusLadyChartFirstBean());
         mOrderStatusMap.put(KEY_MAN_SELECT_FIRST,new StatusManFirstSelectBean());
         mOrderStatusMap.put(KEY_MAN_PERFORMANCE,new StatusManPerformanceBean());
+        mOrderStatusMap.put(KEY_LADY_SELECT_SECOND,new StatusLadySecondSelectBean());
+        mOrderStatusMap.put(KEY_LADY_CHART_SECOND,new StatusLadyChartSecondBean());
+        mOrderStatusMap.put(KEY_ANGEL_CHART,new StatusAngelChartBean());
+        mOrderStatusMap.put(KEY_MAN_SELECT_SECOND,new StatusManSecondSelectBean());
+        mOrderStatusMap.put(KEY_LADY_SELECT_FINAL,new StatusLadyFinalSelectBean());
+        mOrderStatusMap.put(KEY_MAN_QUESTION,new StatusManQuestionBean());
+        mOrderStatusMap.put(KEY_LADY_QUESTION,new StatusLadyQuestionBean());
+        mOrderStatusMap.put(KEY_MAN_SELECT_FINAL,new StatusManFinalSelectBean());
 
         //设置流程序列
         Iterator entry = mOrderStatusMap.entrySet().iterator();
@@ -619,15 +644,21 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 break;
             case TYPE_RESPONSE:
                 addSystemEventAndRefresh(sendBean);
-                if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_LADY_FIRST
-                        || statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_MAN_FIRST) {
-                    if(statusResp.isLast()) {
-                        BaseStatus nextStatus = mOrderStatusMap.get(statusInstance.getmOrder() + 1);
-                        if(nextStatus == null) return;
-                        JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean,BaseStatus.MessageType.TYPE_SEND);
-                        bean.setIndexNext(nextStatus.getStartIndex());
-                        sendRoomMessage(bean);
-                    }
+                switch (statusResp.getHandleType()) {
+                    case HANDLE_SELECT_LADY_FIRST:
+                    case HANDLE_SELECT_LADY_SECOND:
+                    case HANDLE_SELECT_LADY_FINAL:
+                    case HANDLE_SELECT_MAN_FIRST:
+                    case HANDLE_SELECT_MAN_SECOND:
+                    case HANDLE_SELECT_MAN_FINAL:
+                        if(statusResp.isLast()) {
+                            BaseStatus nextStatus = mOrderStatusMap.get(statusInstance.getmOrder() + 1);
+                            if(nextStatus == null) return;
+                            JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean,BaseStatus.MessageType.TYPE_SEND);
+                            bean.setIndexNext(nextStatus.getStartIndex());
+                            sendRoomMessage(bean);
+                        }
+                        break;
                 }
                 break;
             default:
@@ -686,7 +717,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     if(mManSelectedResultList.contains(String.valueOf(index))) {
                         viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
                     }else {
-                        if(mProgressStatus == JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL) {
+                        if(mStartStatusRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL) {
                             viewInstance.mViewSelect.setVisibility(View.INVISIBLE);
                         }
                         viewInstance.mImgSelect.setImageResource(R.drawable.head_select);
@@ -728,6 +759,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                         }
 
                         mIsSelfSelected = true;
+                        mManSelectedIndex = index;
                         mManSelectedResultList.add(String.valueOf(index));
                         viewInstance.mImgSelect.setImageResource(R.drawable.head_select_p);
                         //停止计时
@@ -1098,29 +1130,52 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         resetLiveStatus();
         stopTiming();
 
-        if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_TIME) {
-            BaseStatus nextStatus;
-            if(statusResp.isLast()) {
-                nextStatus = mOrderStatusMap.get(baseStatus.getmOrder() + 1);
-            }else {
-                nextStatus = mOrderStatusMap.get(baseStatus.getmOrder());
-            }
-            if(nextStatus != null) {
-                JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_SEND);
-                if(bean == null) return;
-                bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+        switch (statusResp.getHandleType()) {
+            case HANDLE_TIME:
+                BaseStatus nextStatus;
                 if(statusResp.isLast()) {
-                    bean.setIndexNext(nextStatus.getStartIndex());
+                    StatusManQuestionBean questionBean = (StatusManQuestionBean) mOrderStatusMap.get(KEY_LADY_QUESTION);
+                    if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY
+                            && questionBean.isRepeat()) {
+                        //当是女生回答阶段并且还能重复提问的时候
+                        nextStatus = mOrderStatusMap.get(KEY_MAN_QUESTION);
+                    }else {
+                        nextStatus = mOrderStatusMap.get(baseStatus.getmOrder() + 1);
+                    }
                 }else {
-                    bean.setIndexNext(nextStatus.getNextIndex(sendBean));
+                    nextStatus = mOrderStatusMap.get(baseStatus.getmOrder());
                 }
-                bean.setProcessStatus(nextStatus.getStatus());
+                if(nextStatus != null) {
+                    JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_SEND);
+                    if(bean == null) return;
+                    bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+                    if(statusResp.isLast()) {
+                        bean.setIndexNext(nextStatus.getStartIndex());
+                    }else {
+                        bean.setIndexNext(nextStatus.getNextIndex(sendBean));
+                    }
+                    bean.setProcessStatus(nextStatus.getStatus());
+                    sendRoomMessage(bean);
+                }
+                break;
+
+            case HANDLE_SELECT_LADY_FIRST:
+            case HANDLE_SELECT_LADY_SECOND:
+            case HANDLE_SELECT_LADY_FINAL:
+            case HANDLE_SELECT_MAN_FIRST:
+            case HANDLE_SELECT_MAN_SECOND:
+            case HANDLE_SELECT_MAN_FINAL:
+                JMChartRoomSendBean bean = baseStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_RESPONSE);
+                if(sendBean.getGender().equals(Constant.GENDER_LADY)) {
+                    bean.setLadySelected(mLadySelecteResult);
+                }else if (sendBean.getGender().equals(Constant.GENDER_MAN)) {
+                    bean.setManSelects(String.valueOf(mManSelectedIndex));
+                }
                 sendRoomMessage(bean);
-            }
-        }else if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_LADY_FIRST
-                || statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_MAN_FIRST) {
-            JMChartRoomSendBean bean = baseStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_RESPONSE);
-            sendRoomMessage(bean);
+                break;
+
+            default:
+                break;
         }
     }
 

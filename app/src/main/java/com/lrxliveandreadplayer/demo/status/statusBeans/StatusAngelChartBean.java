@@ -9,41 +9,41 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  * Created by Administrator on 2018/9/27.
  */
 
-public class StatusManIntroBean extends BaseStatus {
+public class StatusAngelChartBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Intro_Man_Status";
+        return "Angel_Chart_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "男生自我介绍阶段";
+        return "爱心大使有话说";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 180;
+        return 120;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_INTRO_MAN;
+        return JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitMan();
+        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitAngel();
         return index;
     }
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_MAN;
+        return Constant.GENDER_ALL;
     }
 
     @Override
     public String getRequestRoleType() {
-        return Constant.ROLETYPE_GUEST;
+        return Constant.ROLRTYPE_ANGEL;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StatusManIntroBean extends BaseStatus {
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitMan();
+        int allCount = mData.getLimitAngel();
         boolean isLast = completeCount>=allCount?true:false;
         return isLast;
     }
@@ -68,9 +68,9 @@ public class StatusManIntroBean extends BaseStatus {
             }else {
                 nextIndex = getNextIndex(receiveBean);
             }
-            sendBean.setMsg("请男" + nextIndex + "玩家发言");
+            sendBean.setMsg("请爱心大使" + nextIndex + "玩家发言");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
+            sendBean.setMsg(mUserInfo.getUser_name() + "爱心大使开始介绍");
         }
         sendBean.setProcessStatus(getStatus());
         sendBean.setMessageType(messageType);

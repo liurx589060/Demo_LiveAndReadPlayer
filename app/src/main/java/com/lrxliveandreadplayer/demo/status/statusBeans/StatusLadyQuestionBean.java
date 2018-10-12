@@ -9,15 +9,17 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  * Created by Administrator on 2018/9/27.
  */
 
-public class StatusManIntroBean extends BaseStatus {
+public class StatusLadyQuestionBean extends BaseStatus {
+    private int mCurrentCount = 0;
+
     @Override
     public String getTypesWithString() {
-        return "Intro_Man_Status";
+        return "Lady_Question_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "男生自我介绍阶段";
+        return String.format("第%s次问答环节-女",mCurrentCount+1);
     }
 
     @Override
@@ -27,18 +29,18 @@ public class StatusManIntroBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_INTRO_MAN;
+        return JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitMan();
+        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitLady();
         return index;
     }
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_MAN;
+        return Constant.GENDER_LADY;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class StatusManIntroBean extends BaseStatus {
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitMan();
+        int allCount = mData.getLimitLady();
         boolean isLast = completeCount>=allCount?true:false;
         return isLast;
     }
@@ -68,9 +70,9 @@ public class StatusManIntroBean extends BaseStatus {
             }else {
                 nextIndex = getNextIndex(receiveBean);
             }
-            sendBean.setMsg("请男" + nextIndex + "玩家发言");
+            sendBean.setMsg("请女" + nextIndex + "回答");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始介绍");
+            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
         }
         sendBean.setProcessStatus(getStatus());
         sendBean.setMessageType(messageType);
@@ -82,6 +84,10 @@ public class StatusManIntroBean extends BaseStatus {
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
+
+            if(resp.isLast()) {
+                mCurrentCount++;
+            }
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);

@@ -9,31 +9,30 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  * Created by Administrator on 2018/9/27.
  */
 
-public class StatusAngelChartBean extends BaseStatus {
+public class StatusChartFinalBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Angel_Chart_Status";
+        return "Chart_Final_Status";
     }
 
     @Override
     public String getPublicString() {
-        return "爱心大使有话说";
+        return "流程结束";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 120;
+        return 0;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT;
+        return JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitAngel();
-        return index;
+        return 0;
     }
 
     @Override
@@ -43,35 +42,23 @@ public class StatusAngelChartBean extends BaseStatus {
 
     @Override
     public String getRequestRoleType() {
-        return Constant.ROLRTYPE_ANGEL;
+        return Constant.ROLETYPE_ALL;
     }
 
     @Override
     public HandleType getHandleType() {
-        return HandleType.HANDLE_TIME;
+        return HandleType.HANDLE_FINISH;
     }
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitAngel();
-        boolean isLast = completeCount>=allCount?true:false;
-        return isLast;
+        return false;
     }
 
     @Override
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
-        if(messageType == MessageType.TYPE_SEND) {
-            int nextIndex;
-            if(receiveBean.getProcessStatus() != getStatus()) {
-                nextIndex = getStartIndex();
-            }else {
-                nextIndex = getNextIndex(receiveBean);
-            }
-            sendBean.setMsg("请爱心大使" + nextIndex + "玩家发言");
-        }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "爱心大使开始介绍");
-        }
+        sendBean.setMsg("流程结束");
         sendBean.setProcessStatus(getStatus());
         sendBean.setMessageType(messageType);
         return sendBean;
@@ -79,12 +66,12 @@ public class StatusAngelChartBean extends BaseStatus {
 
     @Override
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
-        if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
-            resp.setResetLive(true);
-            resp.setStopTiming(true);
-        }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
-            resp.setResetLive(false);
-            resp.setStopTiming(false);
-        }
+        resp.setResetLive(true);
+        resp.setStopTiming(true);
+    }
+
+    @Override
+    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
+        return true;
     }
 }

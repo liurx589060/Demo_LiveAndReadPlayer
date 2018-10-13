@@ -80,7 +80,7 @@ public class StatusLadyQuestionBean extends BaseStatus {
     }
 
     @Override
-    public void onHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
+    public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);

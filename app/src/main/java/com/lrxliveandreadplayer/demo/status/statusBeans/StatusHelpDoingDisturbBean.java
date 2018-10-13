@@ -6,31 +6,28 @@ import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
 /**
- * Created by Administrator on 2018/10/1.
+ * Created by Administrator on 2018/10/13.
  */
 
-public class StatusManFirstSelectBean extends BaseStatus{
-    private int mCompleteCount = 0;
-    private int mSelectLadyIndex = -1;
-
+public class StatusHelpDoingDisturbBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Man_First_Select_Status";
+        return "Angel_Doing_disturb";
     }
 
     @Override
     public String getPublicString() {
-        return "男生第一次选择";
+        return "爱心大使插话";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 10;
+        return 120;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST;
+        return JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING;
     }
 
     @Override
@@ -40,70 +37,46 @@ public class StatusManFirstSelectBean extends BaseStatus{
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_MAN;
+        return Constant.GENDER_ALL;
     }
 
     @Override
     public String getRequestRoleType() {
-        return Constant.ROLETYPE_GUEST;
+        return Constant.ROLRTYPE_ANGEL;
     }
 
     @Override
     public HandleType getHandleType() {
-        return HandleType.HANDLE_SELECT_MAN_FIRST;
+        return HandleType.HANDLE_HELP_DOING_DISTURB;
     }
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        return false;
+        return true;
     }
 
     @Override
     public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
-            sendBean.setMsg("请男生做出选择");
+            int nextIndex = getNextIndex(receiveBean);
+            sendBean.setMsg("请爱心大使" + nextIndex + "玩家插话");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "已做出选择");
-            sendBean.setProcessStatus(getStatus());
-            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
+            sendBean.setMsg(mUserInfo.getUser_name() + "爱心大使开始插话");
         }
+        sendBean.setProcessStatus(getStatus());
+        sendBean.setMessageType(messageType);
         return sendBean;
     }
 
     @Override
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
-        if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
-            mCompleteCount ++;
-            int allCount = mData.getLimitMan();
-            boolean isLast = mCompleteCount>=allCount?true:false;
-            resp.setLast(isLast);
-            if(isLast) {
-                mCompleteCount = 0;
-            }
-        }
-
-        resp.setManSelect(true);
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);
-            mSelectLadyIndex = Integer.parseInt(receiveBean.getManSelects());
         }
-    }
-
-    @Override
-    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
-        return true;
-    }
-
-    public int getSelectLadyIndex() {
-        return mSelectLadyIndex;
-    }
-
-    public void setSelectLadyIndex(int mSelectLadyIndex) {
-        this.mSelectLadyIndex = mSelectLadyIndex;
     }
 }

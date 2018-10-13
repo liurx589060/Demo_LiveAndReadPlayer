@@ -43,7 +43,13 @@ public abstract class BaseStatus {
         HANDLE_SELECT_MAN_SECOND,
         HANDLE_SELECT_LADY_FINAL,
         HANDLE_SELECT_MAN_FINAL,
-        HANDLE_MATCH
+        HANDLE_MATCH,
+        HANDLE_FINISH,
+
+        HANDLE_HELP_QUEST_DISTURB,
+        HANDLE_HELP_DOING_DISTURB,
+        HANDLE_HELP_CHANGE_LIVETYPE,
+        HANDLE_HELP_EXIT
     }
 
     private int mCompleteCount = 0;
@@ -132,7 +138,7 @@ public abstract class BaseStatus {
      * @param resp
      * @param receiveBean
      */
-    public abstract void onHandler(StatusResp resp,JMChartRoomSendBean receiveBean);
+    public abstract void onPostHandler(StatusResp resp,JMChartRoomSendBean receiveBean);
 
     /**
      * 设置处理后的监听
@@ -162,10 +168,20 @@ public abstract class BaseStatus {
     }
 
     /**
+     * 处理信息前的事件
+     * @param receiveBean
+     */
+    protected void onPreHandle(JMChartRoomSendBean receiveBean) {
+
+    }
+
+    /**
      * 处理信息
      * @param receiveBean
      */
     public void handlerRoomChart(JMChartRoomSendBean receiveBean) {
+
+
         if(receiveBean == null) {
             return;
         }
@@ -198,7 +214,7 @@ public abstract class BaseStatus {
             mCompleteCount = 0;
             mCurrentIndex = -1;
         }
-        onHandler(resp,receiveBean);
+        onPostHandler(resp,receiveBean);
         if(mListener != null) {
             mListener.onHandleResp(this,resp,receiveBean);
         }

@@ -5,22 +5,19 @@ import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
-import static com.lrxliveandreadplayer.demo.status.BaseStatus.HandleType.HANDLE_MATCH;
-
 /**
- * 匹配状态
- * Created by Administrator on 2018/9/26.
+ * Created by Administrator on 2018/10/13.
  */
 
-public class StatusMatchBean extends BaseStatus {
+public class StatusHelpChangeLiveTypeBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Match_Status";
+        return "Change_LiveType";
     }
 
     @Override
     public String getPublicString() {
-        return "匹配阶段";
+        return "更改直播方式";
     }
 
     @Override
@@ -30,7 +27,7 @@ public class StatusMatchBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_MATCHING;
+        return JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE;
     }
 
     @Override
@@ -50,23 +47,25 @@ public class StatusMatchBean extends BaseStatus {
 
     @Override
     public HandleType getHandleType() {
-        return HANDLE_MATCH;
+        return HandleType.HANDLE_HELP_CHANGE_LIVETYPE;
     }
 
     @Override
-    public boolean isLast(int completeCount,JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitAngel() + mData.getLimitMan() + mData.getLimitLady();
-        boolean isLast = receiveBean.getCurrentCount()>=allCount?true:false;
-        return isLast;
+    public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
+        return false;
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
-        return createBaseChartRoomSendBean();
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
+        JMChartRoomSendBean bean = createBaseChartRoomSendBean();
+        bean.setProcessStatus(getStatus());
+        bean.setMessageType(messageType);
+        return bean;
     }
 
     @Override
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
-
+        resp.setResetLive(false);
+        resp.setStopTiming(false);
     }
 }

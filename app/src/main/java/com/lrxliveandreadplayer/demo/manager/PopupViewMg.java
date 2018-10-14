@@ -64,10 +64,11 @@ public class PopupViewMg {
         }
         int popWidth = mAngelPopupWindow.getWidth();
         int oXff = Tools.dip2px(activity,10) + popWidth;
-        if(Build.VERSION.SDK_INT > 18) {
-            mAngelPopupWindow.showAsDropDown(showView, oXff,0,Gravity.RIGHT);
-        }else {
+        if(Build.VERSION.SDK_INT < 19) {
+            Tools.toast(activity,"---" + Build.VERSION.SDK_INT,true);
             mAngelPopupWindow.showAsDropDown(showView, oXff,0);
+        }else {
+            mAngelPopupWindow.showAsDropDown(showView, oXff,0,Gravity.RIGHT);
         }
 
     }

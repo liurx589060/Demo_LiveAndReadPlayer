@@ -66,7 +66,13 @@ public class StatusMatchBean extends BaseStatus {
     }
 
     @Override
+
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
 
+    }
+
+    @Override
+    protected boolean checkIsRepeatOrReturn(JMChartRoomSendBean receiveBean) {
+        return false;
     }
 }

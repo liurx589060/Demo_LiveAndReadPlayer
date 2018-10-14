@@ -68,4 +68,9 @@ public class StatusHelpChangeLiveTypeBean extends BaseStatus {
         resp.setResetLive(false);
         resp.setStopTiming(false);
     }
+
+    @Override
+    protected boolean checkIsRepeatOrReturn(JMChartRoomSendBean receiveBean) {
+        return false;
+    }
 }

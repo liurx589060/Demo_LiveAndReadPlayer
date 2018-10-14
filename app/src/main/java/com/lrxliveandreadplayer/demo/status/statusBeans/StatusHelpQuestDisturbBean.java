@@ -55,7 +55,7 @@ public class StatusHelpQuestDisturbBean extends BaseStatus {
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        return true;
+        return false;
     }
 
     @Override
@@ -89,6 +89,11 @@ public class StatusHelpQuestDisturbBean extends BaseStatus {
                 || receiveBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
             mDisturbCount = 0;
         }
+    }
+
+    @Override
+    protected boolean checkIsSelf(JMChartRoomSendBean bean) {
+        return true;
     }
 
     public boolean isCanDisturb() {

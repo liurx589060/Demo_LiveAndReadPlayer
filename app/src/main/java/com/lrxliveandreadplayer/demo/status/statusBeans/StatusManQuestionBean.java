@@ -20,7 +20,7 @@ public class StatusManQuestionBean extends BaseStatus {
 
     @Override
     public String getPublicString() {
-        return String.format("第%s次问答环节-男",mCurrentCount+1);
+        return String.format("第%s次问答环节-男",mCurrentCount);
     }
 
     @Override

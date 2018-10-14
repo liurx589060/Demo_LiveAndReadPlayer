@@ -65,9 +65,9 @@ public class StatusLadyFirstSelectBean extends BaseStatus{
             sendBean.setMsg("请女生做出选择");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
             sendBean.setMsg(mUserInfo.getUser_name() + "已做出选择");
-            sendBean.setProcessStatus(getStatus());
-            sendBean.setMessageType(MessageType.TYPE_RESPONSE);
         }
+        sendBean.setProcessStatus(getStatus());
+        sendBean.setMessageType(messageType);
         return sendBean;
     }
 

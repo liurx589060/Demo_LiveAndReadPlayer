@@ -71,6 +71,7 @@ public class StatusHelpQuestDisturbBean extends BaseStatus {
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             mDisturbCount++;
+            mCurrentIndex = -1;
         }
 
         resp.setResetLive(false);

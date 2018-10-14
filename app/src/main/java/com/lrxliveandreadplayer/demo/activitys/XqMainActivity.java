@@ -211,21 +211,6 @@ public class XqMainActivity extends Activity {
 
     private void sendChartRoomMessage(boolean isUpdateMembers) {
         //发送聊天室信息
-//        JMChartRoomSendBean bean = new JMChartRoomSendBean();
-//        Data data = DataManager.getInstance().getChartData();
-//        UserInfoBean selfInfo = DataManager.getInstance().getUserInfo();
-//        bean.setGender(selfInfo.getGender());
-//        bean.setCurrentCount(data.getMembers().size());
-//        bean.setLimitCount(data.getLimitAngel() + data.getLimitMan() + data.getLimitLady());
-//        bean.setIndexSelf(DataManager.getInstance().getSelfMember().getIndex());
-//        bean.setProcessStatus(JMChartRoomSendBean.CHART_STATUS_MATCHING);
-//        bean.setRoomId(data.getRoomId());
-//        bean.setTime(Tools.getCurrentDateTime());
-//        bean.setMsg(selfInfo.getNick_name() + "进入房间");
-//        bean.setUserName(selfInfo.getUser_name());
-//        bean.setUpdateMembers(isUpdateMembers);
-//        bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
-
         Data data = DataManager.getInstance().getChartData();
         UserInfoBean selfInfo = DataManager.getInstance().getUserInfo();
         JMChartRoomSendBean bean = mMatch.createBaseChartRoomSendBean();

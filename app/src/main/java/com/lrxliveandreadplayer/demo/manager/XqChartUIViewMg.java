@@ -1617,7 +1617,7 @@ public class XqChartUIViewMg extends AbsChartView {
         switch (chartRoomSendBean.getLiveType()) {
             case JMChartRoomSendBean.LIVE_MIC:
                 if(isSelf) {
-                    mXqCameraViewMg.start(true);
+                    mXqCameraViewMg.start();
                 }else {
                     mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(false);
@@ -1626,7 +1626,7 @@ public class XqChartUIViewMg extends AbsChartView {
             case JMChartRoomSendBean.LIVE_CAMERA:
                 if(isSelf) {
                     mXqCameraViewMg.setVisible(true);
-                    mXqCameraViewMg.start(false);
+                    mXqCameraViewMg.start();
                 }else {
                     mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(true);

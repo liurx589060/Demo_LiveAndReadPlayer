@@ -83,7 +83,7 @@ public class XqTxPushViewMg extends AbsChartView {
 
     }
 
-    public void start(boolean isPureAudio) {
+    private void start(boolean isPureAudio) {
         super.start();
         if(mLivePusher != null && mLivePushConfig != null) {
             mLivePushConfig.enablePureAudioPush(isPureAudio);   // true 为启动纯音频推流，而默认值是 false；
@@ -119,7 +119,9 @@ public class XqTxPushViewMg extends AbsChartView {
         mLivePushConfig = new TXLivePushConfig();
 
         mVideoView = (TXCloudVideoView) mRootView.findViewById(R.id.tx_push_videoview);
+        mVideoView.setMirror(true);
         mLivePusher.startCameraPreview(mVideoView);
+        mLivePusher.setMirror(true);
 
         mLivePusher.setPushListener(new ITXLivePushListener() {
             @Override
@@ -202,5 +204,13 @@ public class XqTxPushViewMg extends AbsChartView {
                     break;
             }
         }
+    }
+
+    /**
+     * 是否静音
+     * @param isMute
+     */
+    public void setMute(boolean isMute) {
+        mLivePusher.setMute(isMute);
     }
 }

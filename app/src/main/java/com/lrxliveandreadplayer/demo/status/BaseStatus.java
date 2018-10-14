@@ -59,7 +59,7 @@ public abstract class BaseStatus {
     protected Member mSelfMember = DataManager.getInstance().getSelfMember();
     private int mOrder = -1;//流程序号
     private int mStartIndex = 0;//轮转的开始索引
-    private int mCurrentIndex = -1;
+    protected int mCurrentIndex = -1;
 
     /**
      * 字符的类型标识
@@ -180,7 +180,12 @@ public abstract class BaseStatus {
      * @param receiveBean
      */
     public void handlerRoomChart(JMChartRoomSendBean receiveBean) {
+        onPreHandle(receiveBean);
 
+        //重置屏蔽消息的index
+        if(receiveBean.isRestCurrentIndex()) {
+            mCurrentIndex = -1;
+        }
 
         if(receiveBean == null) {
             return;
@@ -212,7 +217,7 @@ public abstract class BaseStatus {
         resp.setLast(last);
         if(last) {
             mCompleteCount = 0;
-            mCurrentIndex = -1;
+//            mCurrentIndex = -1;
         }
         onPostHandler(resp,receiveBean);
         if(mListener != null) {

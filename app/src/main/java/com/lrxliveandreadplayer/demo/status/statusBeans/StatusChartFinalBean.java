@@ -66,6 +66,8 @@ public class StatusChartFinalBean extends BaseStatus {
 
     @Override
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
+        resp.setManSelect(true);
+
         resp.setResetLive(true);
         resp.setStopTiming(true);
     }

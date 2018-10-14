@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/sy_p_20"
         android:textSize="@dimen/sy_p_30"
+        android:textColor="#22c4a1"
         android:text="是地方客人看看看的看法空荡荡的"
         />
 

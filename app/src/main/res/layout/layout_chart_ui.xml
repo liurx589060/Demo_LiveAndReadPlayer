@@ -26,7 +26,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/dp_7"
             android:textSize="@dimen/dp_20"
-            android:textColor="#222222"
+            android:textColor="#22c4a1"
             android:text="请男嘉宾自我介绍" />
 
         <TextView
@@ -63,6 +63,44 @@
         android:layout_height="match_parent"
         >
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_100"
+            android:background="#00000000"
+            android:gravity="top|center_horizontal">
+
+            <RadioGroup
+                android:id="@+id/radioGroup_liveType"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <RadioButton
+                    android:id="@+id/radio_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="camera"
+                    android:textColor="#c5a3b5"/>
+
+                <RadioButton
+                    android:id="@+id/radio_mic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:text="mic"
+                    android:textColor="#c5a3b5" />
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/btn_disturb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="插话"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
+
         <Button
             android:id="@+id/btn_chart_gift"
             android:layout_width="wrap_content"
@@ -71,11 +109,20 @@
             android:layout_alignParentTop="true"
             android:text="礼物"/>
 
+        <!--<Button-->
+            <!--android:id="@+id/btn_chart_end"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_alignParentTop="true"-->
+            <!--android:text="结束"-->
+            <!--android:visibility="invisible"/>-->
+
         <Button
             android:id="@+id/btn_chart_end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:text="结束"
             android:visibility="invisible"/>
@@ -86,7 +133,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:text="举报"/>
+            android:text="举报"
+            android:visibility="gone"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycle_chart_system"

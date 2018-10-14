@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -127,6 +128,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
     private Button mBtnEnd;
     private TextView mTextTip;
     private TextView mTextCountDown;
+    private Button mBtnDisturb;
+    private RadioGroup mRadioGroupLiveType;
 
     private MemberRecyclerdapter mMemberAdapter;
     private SystemRecyclerdapter mSystemAdapter;
@@ -212,6 +215,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mBtnEnd = mRootView.findViewById(R.id.btn_chart_end);
         mTextCountDown = mRootView.findViewById(R.id.text_timer);
         mTextTip = mRootView.findViewById(R.id.text_tip);
+        mBtnDisturb = mRootView.findViewById(R.id.btn_disturb);
+        mRadioGroupLiveType = mRootView.findViewById(R.id.radioGroup_liveType);
         mTextTip.setVisibility(View.INVISIBLE);
         mTextCountDown.setVisibility(View.INVISIBLE);
 
@@ -236,6 +241,63 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 //结束语音或视频
                 stopTiming();
                 onOperateEnd(mStartStatusBasebean,mStartStatusRoomSendBean,mStartStatusTimeStatusResp);
+            }
+        });
+
+        mBtnDisturb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+                if(!userInfoBean.getRole_type().equals(Constant.ROLRTYPE_ANGEL)) return;
+                final StatusHelpQuestDisturbBean questDisturbBean = (StatusHelpQuestDisturbBean) mHelpStatusMap.get(KEY_HELP_QUEST_DISTURB);
+                if(!questDisturbBean.isCanDisturb()) {
+                    Tools.toast(mXqActivity,"您已经插话次数已超，不能插话了",true);
+                    return;
+                }
+
+                if(mIsDistub) {
+                    Tools.toast(mXqActivity,"本次已经申请插话了",true);
+                    return;
+                }
+
+                //发送插话请求
+                JMChartRoomSendBean sendBean = questDisturbBean.getChartSendBeanWillSend(null
+                        , BaseStatus.MessageType.TYPE_SEND);
+                sendBean.setIndexNext(DataManager.getInstance().getSelfMember().getIndex());
+                sendRoomMessage(sendBean);
+                Tools.toast(mXqActivity,"您要求插话",false);
+            }
+        });
+
+        mRadioGroupLiveType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                //发送直播方式更改
+                StatusHelpChangeLiveTypeBean changeLiveTypeBean = (StatusHelpChangeLiveTypeBean) mHelpStatusMap.get(KEY_HELP_CHANGE_LIVE_TYPE);
+                JMChartRoomSendBean sendBean = changeLiveTypeBean.getChartSendBeanWillSend(null, BaseStatus.MessageType.TYPE_SEND);
+                String liveStr;
+                int type;
+                if(checkedId == R.id.radio_camera) {
+                    type = JMChartRoomSendBean.LIVE_CAMERA;
+                    liveStr = "相机";
+                }else if(checkedId == R.id.radio_mic) {
+                    type = JMChartRoomSendBean.LIVE_MIC;
+                    liveStr = "音频";
+                }else {
+                    type = JMChartRoomSendBean.LIVE_NONE;
+                    liveStr = "不使用";
+                }
+
+                if(mStartStatusRoomSendBean.getLiveType() == type) {
+                    return;
+                }
+
+                sendBean.setLiveType(type);
+                sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "更改直播方式--" + liveStr);
+                sendRoomMessage(sendBean);
+                Tools.toast(mXqActivity,"您更改直播方式为--" + liveStr,false);
+
+                mStartStatusRoomSendBean.setLiveType(type);
             }
         });
 
@@ -356,43 +418,43 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mAngelViewInstance.mImgHead = view.findViewById(R.id.img_head);
         mAngelViewInstance.mTxvNickName = view.findViewById(R.id.text_nickName);
         mAngelViewInstance.mTxvNum = view.findViewById(R.id.text_num);
-        mAngelViewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mBtnEnd.getVisibility() == View.VISIBLE) {
-                    showGuestPopWindow(view, PopupViewMg.Position.RIGHT);
-                    return;
-                }
-
-                final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
-                if(!userInfoBean.getRole_type().equals(Constant.ROLRTYPE_ANGEL)) return;
-                final StatusHelpQuestDisturbBean questDisturbBean = (StatusHelpQuestDisturbBean) mHelpStatusMap.get(KEY_HELP_QUEST_DISTURB);
-                if(!questDisturbBean.isCanDisturb()) {
-                    Tools.toast(mXqActivity,"您已经插话次数已超，不能插话了",true);
-                    return;
-                }
-
-                if(mIsDistub) {
-                    Tools.toast(mXqActivity,"本次已经申请插话了",true);
-                    return;
-                }
-
-                if(mStartStatusRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
-                        || mStartStatusRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
-                    mPopupViewMg.showAngelPopupView(mXqActivity, mAngelViewInstance.mImgHead, new IPopupAngelListener() {
-                        @Override
-                        public void onDisturb(View view1) {
-                            //发送插话请求
-                            JMChartRoomSendBean sendBean = questDisturbBean.getChartSendBeanWillSend(null
-                                    , BaseStatus.MessageType.TYPE_SEND);
-                            sendBean.setIndexNext(DataManager.getInstance().getSelfMember().getIndex());
-                            sendRoomMessage(sendBean);
-                            Tools.toast(mXqActivity,"您要求插话",false);
-                        }
-                    });
-                }
-            }
-        });
+//        mAngelViewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(mBtnEnd.getVisibility() == View.VISIBLE) {
+//                    showGuestPopWindow(view, PopupViewMg.Position.RIGHT);
+//                    return;
+//                }
+//
+//                final UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+//                if(!userInfoBean.getRole_type().equals(Constant.ROLRTYPE_ANGEL)) return;
+//                final StatusHelpQuestDisturbBean questDisturbBean = (StatusHelpQuestDisturbBean) mHelpStatusMap.get(KEY_HELP_QUEST_DISTURB);
+//                if(!questDisturbBean.isCanDisturb()) {
+//                    Tools.toast(mXqActivity,"您已经插话次数已超，不能插话了",true);
+//                    return;
+//                }
+//
+//                if(mIsDistub) {
+//                    Tools.toast(mXqActivity,"本次已经申请插话了",true);
+//                    return;
+//                }
+//
+//                if(mStartStatusRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
+//                        || mStartStatusRoomSendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
+//                    mPopupViewMg.showAngelPopupView(mXqActivity, mAngelViewInstance.mImgHead, new IPopupAngelListener() {
+//                        @Override
+//                        public void onDisturb(View view1) {
+//                            //发送插话请求
+//                            JMChartRoomSendBean sendBean = questDisturbBean.getChartSendBeanWillSend(null
+//                                    , BaseStatus.MessageType.TYPE_SEND);
+//                            sendBean.setIndexNext(DataManager.getInstance().getSelfMember().getIndex());
+//                            sendRoomMessage(sendBean);
+//                            Tools.toast(mXqActivity,"您要求插话",false);
+//                        }
+//                    });
+//                }
+//            }
+//        });
 
         mManViewInstance.mImgHead = view.findViewById(R.id.img_head_2);
         mManViewInstance.mTxvNickName = view.findViewById(R.id.text_nickName_2);
@@ -619,6 +681,14 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
 //                    mBtnExit.setVisibility(View.GONE);
                 }
 
+                if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
+                        || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
+                    if(DataManager.getInstance().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
+                        //显示插话按钮
+                        mBtnDisturb.setVisibility(View.VISIBLE);
+                    }
+                }
+
                 if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND
                         || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT) {
                     //重置插话标识
@@ -835,23 +905,23 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 }
             });
 
-            viewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
-                    if (userInfoBean.getRole_type().equals(Constant.ROLETYPE_GUEST)
-                            && userInfoBean.getGender().equals(Constant.GENDER_LADY)
-                            && index == DataManager.getInstance().getSelfMember().getIndex()
-                            && mStartStatusTimeStatusResp.isSelf()) {
-                        //女生并且是自己,且在直播中
-                        if(index > (DataManager.getInstance().getChartData().getLimitLady()/2 - 1)) {
-                            showGuestPopWindow(view, PopupViewMg.Position.LEFT);
-                        }else {
-                            showGuestPopWindow(view, PopupViewMg.Position.RIGHT);
-                        }
-                    }
-                }
-            });
+//            viewInstance.mImgHead.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    UserInfoBean userInfoBean = DataManager.getInstance().getUserInfo();
+//                    if (userInfoBean.getRole_type().equals(Constant.ROLETYPE_GUEST)
+//                            && userInfoBean.getGender().equals(Constant.GENDER_LADY)
+//                            && index == DataManager.getInstance().getSelfMember().getIndex()
+//                            && mStartStatusTimeStatusResp.isSelf()) {
+//                        //女生并且是自己,且在直播中
+//                        if(index > (DataManager.getInstance().getChartData().getLimitLady()/2 - 1)) {
+//                            showGuestPopWindow(view, PopupViewMg.Position.LEFT);
+//                        }else {
+//                            showGuestPopWindow(view, PopupViewMg.Position.RIGHT);
+//                        }
+//                    }
+//                }
+//            });
         }
 
         @Override
@@ -1007,12 +1077,19 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mTextCountDown.setText("");
         mBtnEnd.setVisibility(View.INVISIBLE);
         mTextTip.setVisibility(View.INVISIBLE);
+        mRadioGroupLiveType.setVisibility(View.GONE);
+        mRadioGroupLiveType.clearCheck();
+        mBtnDisturb.setVisibility(View.GONE);
 
         //恢复初始化
         resetLiveStatus();
         stopTiming();
         if(mMemberAdapter.isSelectStatus()) {
             mMemberAdapter.changeNormalStatus();
+        }
+
+        if(mLadySelectDialog != null &&mLadySelectDialog.isShowing()) {
+            mLadySelectDialog.dismiss();
         }
 
         switch (statusResp.getHandleType()) {
@@ -1163,8 +1240,10 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         }else if(sendBean.getLiveType() == JMChartRoomSendBean.LIVE_CAMERA) {
             if(mStartStatusTimeStatusResp.isSelf()) {
                 mXqCameraViewMg.setVisible(true);
+                mXqPlayerViewMg.setVisible(false);
             }else {
-                mXqCameraViewMg.setVisible(true);
+                mXqPlayerViewMg.setVisible(true);
+                mXqCameraViewMg.setVisible(false);
             }
         }else if(sendBean.getLiveType() == JMChartRoomSendBean.LIVE_NONE){
             mXqCameraViewMg.setVisible(false);
@@ -1217,6 +1296,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 JMChartRoomSendBean responseBean = baseStatus.getChartSendBeanWillSend(bean, BaseStatus.MessageType.TYPE_RESPONSE);
                 sendRoomMessage(responseBean);
 
+                //显示切换直播方式按钮
+                mRadioGroupLiveType.setVisibility(View.VISIBLE);
             }
         }
         mTimeRunnable = new Runnable() {
@@ -1233,8 +1314,6 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 }else {
                     //自行操作结束
                     onOperateEnd(baseStatus,bean,statusResp);
-                    mTextCountDown.setVisibility(View.INVISIBLE);
-                    stopTiming();//停止循环
                 }
             }
         };
@@ -1298,6 +1377,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(false);
                 }
+                mRadioGroupLiveType.check(R.id.radio_mic);
                 break;
             case JMChartRoomSendBean.LIVE_CAMERA:
                 if(isSelf) {
@@ -1307,12 +1387,14 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     mXqPlayerViewMg.start();
                     mXqPlayerViewMg.setVisible(true);
                 }
+                mRadioGroupLiveType.check(R.id.radio_camera);
                 break;
             case JMChartRoomSendBean.LIVE_NONE:
                 mXqCameraViewMg.setVisible(false);
                 mXqPlayerViewMg.setVisible(false);
                 mXqCameraViewMg.stop();
                 mXqPlayerViewMg.stop();
+                mRadioGroupLiveType.clearCheck();
                 break;
         }
     }

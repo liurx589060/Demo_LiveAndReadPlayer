@@ -29,7 +29,6 @@ import com.lrxliveandreadplayer.demo.beans.jmessage.JMChartRoomSendBean;
 import com.lrxliveandreadplayer.demo.beans.jmessage.Member;
 import com.lrxliveandreadplayer.demo.beans.user.UserInfoBean;
 import com.lrxliveandreadplayer.demo.glide.GlideCircleTransform;
-import com.lrxliveandreadplayer.demo.interfaces.IPopupAngelListener;
 import com.lrxliveandreadplayer.demo.interfaces.IPopupGuestListener;
 import com.lrxliveandreadplayer.demo.jmessage.JMsgSender;
 import com.lrxliveandreadplayer.demo.network.NetWorkMg;
@@ -63,7 +62,6 @@ import com.lrxliveandreadplayer.demo.utils.XqErrorCode;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -133,6 +131,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
 
     private MemberRecyclerdapter mMemberAdapter;
     private SystemRecyclerdapter mSystemAdapter;
+    private LiveTypeRadioChangeListener mCheckChangedListener;
 
     private PopupViewMg mPopupViewMg;
     private Handler mHandler;
@@ -202,6 +201,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mStartStatusBasebean = new StatusMatchBean();
         mStartStatusRoomSendBean = mStartStatusBasebean.createBaseChartRoomSendBean();
         mStartStatusTimeStatusResp = new StatusResp();
+        mCheckChangedListener = new LiveTypeRadioChangeListener();
 
         mHandler = new Handler();
         SPACE_TOP = Tools.dip2px(mXqActivity,10);
@@ -269,37 +269,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
             }
         });
 
-        mRadioGroupLiveType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                //发送直播方式更改
-                StatusHelpChangeLiveTypeBean changeLiveTypeBean = (StatusHelpChangeLiveTypeBean) mHelpStatusMap.get(KEY_HELP_CHANGE_LIVE_TYPE);
-                JMChartRoomSendBean sendBean = changeLiveTypeBean.getChartSendBeanWillSend(null, BaseStatus.MessageType.TYPE_SEND);
-                String liveStr;
-                int type;
-                if(checkedId == R.id.radio_camera) {
-                    type = JMChartRoomSendBean.LIVE_CAMERA;
-                    liveStr = "相机";
-                }else if(checkedId == R.id.radio_mic) {
-                    type = JMChartRoomSendBean.LIVE_MIC;
-                    liveStr = "音频";
-                }else {
-                    type = JMChartRoomSendBean.LIVE_NONE;
-                    liveStr = "不使用";
-                }
-
-                if(mStartStatusRoomSendBean.getLiveType() == type) {
-                    return;
-                }
-
-                sendBean.setLiveType(type);
-                sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "更改直播方式--" + liveStr);
-                sendRoomMessage(sendBean);
-                Tools.toast(mXqActivity,"您更改直播方式为--" + liveStr,false);
-
-                mStartStatusRoomSendBean.setLiveType(type);
-            }
-        });
+        mRadioGroupLiveType.setOnCheckedChangeListener(mCheckChangedListener);
 
         initAndSetContentView();
         initAngelManViewInstance();
@@ -681,14 +651,6 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
 //                    mBtnExit.setVisibility(View.GONE);
                 }
 
-                if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
-                        || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
-                    if(DataManager.getInstance().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
-                        //显示插话按钮
-                        mBtnDisturb.setVisibility(View.VISIBLE);
-                    }
-                }
-
                 if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_SELECT_SECOND
                         || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_ANGEL_CHAT) {
                     //重置插话标识
@@ -762,6 +724,14 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     mStartStatusTimeStatusResp = statusResp;
                     mStartStatusRoomSendBean = sendBean;
                     mStartStatusBasebean = statusInstance;
+                }
+
+                if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
+                        || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
+                    if(DataManager.getInstance().getUserInfo().getRole_type().equals(Constant.ROLRTYPE_ANGEL)) {
+                        //显示插话按钮
+                        mBtnDisturb.setVisibility(View.VISIBLE);
+                    }
                 }
                 break;
             case TYPE_RESPONSE:
@@ -1059,6 +1029,52 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         }
     }
 
+    private class LiveTypeRadioChangeListener implements RadioGroup.OnCheckedChangeListener {
+        private boolean isSendMessage;
+
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            //发送直播方式更改
+            StatusHelpChangeLiveTypeBean changeLiveTypeBean = (StatusHelpChangeLiveTypeBean) mHelpStatusMap.get(KEY_HELP_CHANGE_LIVE_TYPE);
+            JMChartRoomSendBean sendBean = changeLiveTypeBean.getChartSendBeanWillSend(null, BaseStatus.MessageType.TYPE_SEND);
+            String liveStr;
+            int type;
+            if(checkedId == R.id.radio_camera) {
+                type = JMChartRoomSendBean.LIVE_CAMERA;
+                liveStr = "相机";
+            }else if(checkedId == R.id.radio_mic) {
+                type = JMChartRoomSendBean.LIVE_MIC;
+                liveStr = "音频";
+            }else {
+                type = JMChartRoomSendBean.LIVE_NONE;
+                liveStr = "不使用";
+            }
+
+            if(mStartStatusRoomSendBean.getLiveType() == type) {
+                return;
+            }
+
+            if(!isSendMessage) {
+                return;
+            }
+
+            sendBean.setLiveType(type);
+            sendBean.setMsg(DataManager.getInstance().getUserInfo().getNick_name() + "更改直播方式--" + liveStr);
+            sendRoomMessage(sendBean);
+            Tools.toast(mXqActivity,"您更改直播方式为--" + liveStr,false);
+
+            mStartStatusRoomSendBean.setLiveType(type);
+        }
+
+        public boolean isSendMessage() {
+            return isSendMessage;
+        }
+
+        public void setSendMessage(boolean sendMessage) {
+            isSendMessage = sendMessage;
+        }
+    }
+
     /**
      * 添加到系统事件并更新
      * @param bean
@@ -1078,8 +1094,6 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mBtnEnd.setVisibility(View.INVISIBLE);
         mTextTip.setVisibility(View.INVISIBLE);
         mRadioGroupLiveType.setVisibility(View.GONE);
-        mRadioGroupLiveType.clearCheck();
-        mBtnDisturb.setVisibility(View.GONE);
 
         //恢复初始化
         resetLiveStatus();
@@ -1238,7 +1252,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
             mXqCameraViewMg.setVisible(false);
             mXqPlayerViewMg.setVisible(false);
         }else if(sendBean.getLiveType() == JMChartRoomSendBean.LIVE_CAMERA) {
-            if(mStartStatusTimeStatusResp.isSelf()) {
+            if(mBtnEnd.getVisibility() == View.VISIBLE) {
                 mXqCameraViewMg.setVisible(true);
                 mXqPlayerViewMg.setVisible(false);
             }else {
@@ -1292,11 +1306,13 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
             setLiveStatus(bean,statusResp.isSelf());
             if(statusResp.isSelf()) {
                 mBtnEnd.setVisibility(View.VISIBLE);
+                mBtnDisturb.setVisibility(View.GONE);
                 //发送回应
                 JMChartRoomSendBean responseBean = baseStatus.getChartSendBeanWillSend(bean, BaseStatus.MessageType.TYPE_RESPONSE);
                 sendRoomMessage(responseBean);
 
                 //显示切换直播方式按钮
+                mCheckChangedListener.setSendMessage(true);
                 mRadioGroupLiveType.setVisibility(View.VISIBLE);
             }
         }
@@ -1330,6 +1346,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         }
         timeCount = 0;
         mTextCountDown.setVisibility(View.INVISIBLE);
+        mBtnDisturb.setVisibility(View.GONE);
     }
 
     /**
@@ -1368,6 +1385,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
      * @param isSelf
      */
     private void setLiveStatus(JMChartRoomSendBean chartRoomSendBean,boolean isSelf) {
+        mCheckChangedListener.setSendMessage(false);//不发送改变直播方式的消息
         switch (chartRoomSendBean.getLiveType()) {
             case JMChartRoomSendBean.LIVE_MIC:
                 if(isSelf) {

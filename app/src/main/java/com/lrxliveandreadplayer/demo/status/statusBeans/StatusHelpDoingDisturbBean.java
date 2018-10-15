@@ -77,6 +77,7 @@ public class StatusHelpDoingDisturbBean extends BaseStatus {
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);
+            mCurrentIndex = -1;
         }
     }
 }

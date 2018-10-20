@@ -182,11 +182,6 @@ public abstract class BaseStatus {
     public void handlerRoomChart(JMChartRoomSendBean receiveBean) {
         onPreHandle(receiveBean);
 
-        //重置屏蔽消息的index
-        if(receiveBean.isRestCurrentIndex()) {
-            mCurrentIndex = -1;
-        }
-
         if(receiveBean == null) {
             return;
         }
@@ -194,6 +189,11 @@ public abstract class BaseStatus {
         if(getStatus() != receiveBean.getProcessStatus()) {
             //不处理其他的消息，只处理自己的消息
             return;
+        }
+
+        //重置屏蔽消息的index
+        if(receiveBean.isRestCurrentIndex()) {
+            mCurrentIndex = -1;
         }
 
         if(checkIsRepeatOrReturn(receiveBean)) {

@@ -6,41 +6,39 @@ import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.utils.Constant;
 
 /**
- * Created by Administrator on 2018/9/27.
+ * Created by Administrator on 2018/10/12.
  */
 
-public class StatusLadyQuestionBean extends BaseStatus {
-    private int mCurrentCount = 0;
-
+public class StatusManFirstQuestionBean extends BaseStatus {
     @Override
     public String getTypesWithString() {
-        return "Lady_Question_Status";
+        return "Man_First_Question_Status";
     }
 
     @Override
     public String getPublicString() {
-        return String.format("第%s次问答环节-女",mCurrentCount+1);
+        return "第一次问答环节-男";
     }
 
     @Override
     public int getLiveTimeCount() {
-        return 180;
+        return 60;
     }
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY;
+        return JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN_FIRST;
     }
 
     @Override
     public int getNextIndex(JMChartRoomSendBean receiveBean) {
-        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitLady();
+        int index = (receiveBean.getIndexNext() + 1)%mData.getLimitMan();
         return index;
     }
 
     @Override
     public String getRequestGender() {
-        return Constant.GENDER_LADY;
+        return Constant.GENDER_MAN;
     }
 
     @Override
@@ -55,13 +53,13 @@ public class StatusLadyQuestionBean extends BaseStatus {
 
     @Override
     public boolean isLast(int completeCount, JMChartRoomSendBean receiveBean) {
-        int allCount = mData.getLimitLady();
+        int allCount = mData.getLimitMan();
         boolean isLast = completeCount>=allCount?true:false;
         return isLast;
     }
 
     @Override
-    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean,MessageType messageType) {
+    public JMChartRoomSendBean getChartSendBeanWillSend(JMChartRoomSendBean receiveBean, MessageType messageType) {
         JMChartRoomSendBean sendBean = createBaseChartRoomSendBean();
         if(messageType == MessageType.TYPE_SEND) {
             int nextIndex;
@@ -70,9 +68,9 @@ public class StatusLadyQuestionBean extends BaseStatus {
             }else {
                 nextIndex = getNextIndex(receiveBean);
             }
-            sendBean.setMsg("请女" + nextIndex + "回答");
+            sendBean.setMsg("请男" + nextIndex + "提问");
         }else if (messageType == MessageType.TYPE_RESPONSE) {
-            sendBean.setMsg(mUserInfo.getUser_name() + "玩家开始");
+            sendBean.setMsg(mUserInfo.getUser_name() + "开始提问");
         }
         sendBean.setProcessStatus(getStatus());
         sendBean.setMessageType(messageType);
@@ -84,10 +82,6 @@ public class StatusLadyQuestionBean extends BaseStatus {
         if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
             resp.setResetLive(true);
             resp.setStopTiming(true);
-
-            if(resp.isLast()) {
-                mCurrentCount++;
-            }
         }else if(receiveBean.getMessageType() == MessageType.TYPE_RESPONSE) {
             resp.setResetLive(false);
             resp.setStopTiming(false);

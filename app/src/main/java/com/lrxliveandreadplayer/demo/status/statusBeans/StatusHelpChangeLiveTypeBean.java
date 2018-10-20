@@ -27,7 +27,7 @@ public class StatusHelpChangeLiveTypeBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_CHART_CHANGR_LIVETYPE;
+        return JMChartRoomSendBean.CHART_HELP_STATUS_CHART_CHANGR_LIVETYPE;
     }
 
     @Override

@@ -102,8 +102,4 @@ public class StatusManFirstSelectBean extends BaseStatus{
     public int getSelectLadyIndex() {
         return mSelectLadyIndex;
     }
-
-    public void setSelectLadyIndex(int mSelectLadyIndex) {
-        this.mSelectLadyIndex = mSelectLadyIndex;
-    }
 }

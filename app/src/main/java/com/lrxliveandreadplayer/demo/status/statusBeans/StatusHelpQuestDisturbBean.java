@@ -10,7 +10,7 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  */
 
 public class StatusHelpQuestDisturbBean extends BaseStatus {
-    private final int COUNT = 3;
+    private final int COUNT = 1;
     private int mDisturbCount = 0;
 
     @Override
@@ -30,7 +30,7 @@ public class StatusHelpQuestDisturbBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_ANGEL_QUEST_DISTURB;
+        return JMChartRoomSendBean.CHART_HELP_STATUS_ANGEL_QUEST_DISTURB;
     }
 
     @Override

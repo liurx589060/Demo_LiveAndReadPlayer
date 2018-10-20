@@ -27,7 +27,7 @@ public class StatusHelpDoingDisturbBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_ANGEL_DISTURBING;
+        return JMChartRoomSendBean.CHART_HELP_STATUS_ANGEL_DISTURBING;
     }
 
     @Override

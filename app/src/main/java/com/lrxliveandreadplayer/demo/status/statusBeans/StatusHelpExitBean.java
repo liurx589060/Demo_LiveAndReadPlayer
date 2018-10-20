@@ -27,7 +27,7 @@ public class StatusHelpExitBean extends BaseStatus {
 
     @Override
     public int getStatus() {
-        return JMChartRoomSendBean.CHART_STATUS_CHART_EXIT_ROOM;
+        return JMChartRoomSendBean.CHART_HELP_STATUS_CHART_EXIT_ROOM;
     }
 
     @Override

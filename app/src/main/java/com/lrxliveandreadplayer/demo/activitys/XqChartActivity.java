@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import com.lrxliveandreadplayer.demo.manager.XqChartUIViewMg;
 import com.lrxliveandreadplayer.demo.manager.XqStatusChartUIViewMg;
 
 /**

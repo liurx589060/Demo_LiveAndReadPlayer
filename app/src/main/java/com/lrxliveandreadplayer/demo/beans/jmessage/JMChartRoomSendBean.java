@@ -50,7 +50,6 @@ public class JMChartRoomSendBean {
     private BaseStatus.MessageType messageType = BaseStatus.MessageType.TYPE_SEND;
     private boolean isLadySelected;
     private String manSelects = "";
-    private boolean isResetQuestionStatus;
     private boolean isRestCurrentIndex = false;//是否重置拦截的index
 
     public int getProcessStatus() {
@@ -171,14 +170,6 @@ public class JMChartRoomSendBean {
 
     public void setLadySelected(boolean ladySelected) {
         isLadySelected = ladySelected;
-    }
-
-    public boolean isResetQuestionStatus() {
-        return isResetQuestionStatus;
-    }
-
-    public void setResetQuestionStatus(boolean resetQuestionStatus) {
-        isResetQuestionStatus = resetQuestionStatus;
     }
 
     public boolean isRestCurrentIndex() {

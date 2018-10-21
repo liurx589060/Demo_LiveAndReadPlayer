@@ -10,8 +10,6 @@ import com.lrxliveandreadplayer.demo.utils.Constant;
  */
 
 public class StatusHelpQuestDisturbBean extends BaseStatus {
-    private final int COUNT = 1;
-    private int mDisturbCount = 0;
 
     @Override
     public String getTypesWithString() {
@@ -69,34 +67,17 @@ public class StatusHelpQuestDisturbBean extends BaseStatus {
 
     @Override
     public void onPostHandler(StatusResp resp, JMChartRoomSendBean receiveBean) {
-        if(receiveBean.getMessageType() == MessageType.TYPE_SEND) {
-            mDisturbCount++;
-            mCurrentIndex = -1;
-        }
-
         resp.setResetLive(false);
         resp.setStopTiming(false);
     }
 
     @Override
-    public boolean checkSelfIndex(JMChartRoomSendBean receiveBean) {
-        return true;
-    }
-
-    @Override
-    protected void onPreHandle(JMChartRoomSendBean receiveBean) {
-        if(receiveBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_INTRO_LADY
-                || receiveBean.getProcessStatus() != JMChartRoomSendBean.CHART_STATUS_LADY_CHAT_SECOND) {
-            mDisturbCount = 0;
-        }
+    protected boolean checkIsRepeatOrReturn(JMChartRoomSendBean receiveBean) {
+        return false;
     }
 
     @Override
     protected boolean checkIsSelf(JMChartRoomSendBean bean) {
         return true;
-    }
-
-    public boolean isCanDisturb() {
-        return mDisturbCount < COUNT;
     }
 }

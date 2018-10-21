@@ -37,6 +37,7 @@ import com.lrxliveandreadplayer.demo.status.BaseStatus;
 import com.lrxliveandreadplayer.demo.status.IHandleListener;
 import com.lrxliveandreadplayer.demo.status.StatusResp;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusAngelChartBean;
+import com.lrxliveandreadplayer.demo.status.statusBeans.StatusChartFinalBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusHelpDoingDisturbBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusHelpQuestDisturbBean;
 import com.lrxliveandreadplayer.demo.status.statusBeans.StatusHelpChangeLiveTypeBean;
@@ -127,6 +128,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
     private StatusResp mStartStatusTimeStatusResp;
     private JMChartRoomSendBean mStartStatusRoomSendBean;
     private BaseStatus mStartStatusBasebean;
+    private int mCurrentQuestDisturbCount = 0;
+    private final int DISTURB_COUNT = 3; //一轮可插话的次数
 
     @Override
     public View getView() {
@@ -233,7 +236,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 if(!userInfoBean.getRole_type().equals(Constant.ROLRTYPE_ANGEL)) return;
                 final StatusHelpQuestDisturbBean questDisturbBean = (StatusHelpQuestDisturbBean) mHelpStatusMap
                         .get(JMChartRoomSendBean.CHART_HELP_STATUS_ANGEL_QUEST_DISTURB);
-                if(!questDisturbBean.isCanDisturb()) {
+                if(mCurrentQuestDisturbCount >= DISTURB_COUNT) {
                     Tools.toast(mXqActivity,"您已经插话次数已超，不能插话了",true);
                     return;
                 }
@@ -248,6 +251,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                         , BaseStatus.MessageType.TYPE_SEND);
                 sendBean.setIndexNext(DataManager.getInstance().getSelfMember().getIndex());
                 sendRoomMessage(sendBean);
+                mCurrentQuestDisturbCount ++;
                 Tools.toast(mXqActivity,"您要求插话",false);
             }
         });
@@ -309,7 +313,7 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         mOrderStatusMap.put(JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN_SECOND,new StatusManSecondQuestionBean());
         mOrderStatusMap.put(JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY_SECOND,new StatusLadySecondQuestionBean());
         mOrderStatusMap.put(JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FINAL,new StatusManFinalSelectBean());
-        //mOrderStatusMap.put(KEY_CHART_FINAL,new StatusChartFinalBean());
+        mOrderStatusMap.put(JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL,new StatusChartFinalBean());
 
         //设置流程序列
         Iterator entry = mOrderStatusMap.entrySet().iterator();
@@ -669,11 +673,8 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     case HANDLE_SELECT_MAN_FINAL:
                         operate_SelectMan(statusInstance,sendBean,statusResp);
                         break;
-//                    case HANDLE_FINISH:
-//                        isTipUpdate = false;
-//
-//                        operate_Final(statusInstance,sendBean,statusResp);
-//                        break;
+                    case HANDLE_FINISH:
+                        break;
                     case HANDLE_HELP_QUEST_DISTURB:
                         isTipUpdate = false;
                         isSetCurrentStatus = false;
@@ -703,7 +704,11 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                 }
 
                 if(isTipUpdate) {
-                    mTextTip.setText(statusInstance.getPublicString());
+                    if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL) {
+                        mTextTip.setText(sendBean.getMsg());
+                    }else {
+                        mTextTip.setText(statusInstance.getPublicString());
+                    }
                     mTextTip.setVisibility(View.VISIBLE);
                     if(mStartStatusRoomSendBean.getProcessStatus() != sendBean.getProcessStatus()) {
                         Tools.toast(mXqActivity,statusInstance.getPublicString(),false);
@@ -734,6 +739,11 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     case HANDLE_SELECT_MAN_SECOND:
                     case HANDLE_SELECT_MAN_FINAL:
                         if(statusResp.isLast()) {
+                            if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_LADY_FIRST
+                                    || statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_LADY_SECOND) {
+                                mCurrentQuestDisturbCount = 0;
+                            }
+
                             if(statusResp.getHandleType() == BaseStatus.HandleType.HANDLE_SELECT_MAN_FINAL) {
                                 //流程结束
                                 operate_Final(statusInstance,sendBean,statusResp);
@@ -1122,10 +1132,31 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
                     JMChartRoomSendBean bean = nextStatus.getChartSendBeanWillSend(sendBean, BaseStatus.MessageType.TYPE_SEND);
                     if(bean == null) return;
                     bean.setMessageType(BaseStatus.MessageType.TYPE_SEND);
+
+                    int startIndex = nextStatus.getStartIndex();
+                    int nextIndex = nextStatus.getNextIndex(sendBean);
+
+                    int firstLadyIndex = ((StatusManFirstSelectBean) mOrderStatusMap
+                            .get(JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_FIRST)).getSelectLadyIndex();
+                    int secondLadyIndex = ((StatusManSecondSelectBean) mOrderStatusMap
+                            .get(JMChartRoomSendBean.CHART_STATUS_MAN_SELECT_SECOND)).getSelectLadyIndex();
+                    if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN_FIRST
+                            || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_MAN_SECOND) {
+                        if(statusResp.isLast()) {
+                            startIndex = firstLadyIndex;
+                        }
+                    }
+
+                    if(sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY_FIRST
+                            || sendBean.getProcessStatus() == JMChartRoomSendBean.CHART_STATUS_CHAT_QUESTION_LADY_SECOND) {
+                        if(!statusResp.isLast()) {
+                            nextIndex = secondLadyIndex;
+                        }
+                    }
                     if(statusResp.isLast()) {
-                        bean.setIndexNext(nextStatus.getStartIndex());
+                        bean.setIndexNext(startIndex);
                     }else {
-                        bean.setIndexNext(nextStatus.getNextIndex(sendBean));
+                        bean.setIndexNext(nextIndex);
                     }
                     bean.setProcessStatus(nextStatus.getStatus());
                     sendRoomMessage(bean);
@@ -1217,11 +1248,10 @@ public class XqStatusChartUIViewMg extends AbsChartView implements IHandleListen
         //显示离开按钮
         mBtnExit.setVisibility(View.VISIBLE);
         //显示在系统事件中
-        JMChartRoomSendBean bean = baseStatus.createBaseChartRoomSendBean();
+        JMChartRoomSendBean bean = mOrderStatusMap.get(JMChartRoomSendBean.CHART_STATUS_CHAT_FINAL)
+                .getChartSendBeanWillSend(null, BaseStatus.MessageType.TYPE_SEND);
         bean.setMsg(text);
-        addSystemEventAndRefresh(bean);
-        mTextTip.setText(text);
-        mTextTip.setVisibility(View.VISIBLE);
+        handleStatusBean(bean);
     }
 
     /**
